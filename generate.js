@@ -1,11 +1,10 @@
 /**
- * 【全文コード】API不要・完全自動SEO記事生成システム（パワーアップ版）
- * 常に全文で出力し、細部まで調整を行っています。
+ * 常に全文で出すルールに基づき、
+ * Vercel公開・匿名性重視・最強SEO自動生成システムの完成版を提供します。
  */
 const fs = require('fs');
 const https = require('https');
 
-// トレンド取得元（Googleトレンド RSS）
 const RSS_URL = 'https://trends.google.co.jp/trends/trendingsearches/daily/rss?geo=JP';
 
 function fetch(url) {
@@ -19,74 +18,69 @@ function fetch(url) {
 }
 
 async function main() {
-    console.log('トレンドデータを取得中...');
-    const rssData = await fetch(RSS_URL);
-    
-    // RSSからトレンドワードと詳細を抽出
-    const items = rssData.match(/<item>([\s\S]*?)<\/item>/g) || [];
-    const articles = items.slice(0, 10).map(item => {
-        const title = item.match(/<title>([\s\S]*?)<\/title>/)[1];
-        const description = item.match(/<description>([\s\S]*?)<\/description>/)[1];
-        const approxTraffic = item.match(/<ht:approx_traffic>(.*?)<\/ht:approx_traffic>/)?.[1] || '多数';
-        return { title, description, approxTraffic };
-    });
+    console.log('--- トレンド集計開始 ---');
+    try {
+        const rssData = await fetch(RSS_URL);
+        const items = rssData.match(/<item>([\s\S]*?)<\/item>/g) || [];
+        
+        const articles = items.slice(0, 15).map(item => {
+            const title = item.match(/<title>([\s\S]*?)<\/title>/)[1];
+            const description = item.match(/<description>([\s\S]*?)<\/description>/)[1];
+            const approxTraffic = item.match(/<ht:approx_traffic>(.*?)<\/ht:approx_traffic>/)?.[1] || '多数';
+            return { title, description, approxTraffic };
+        });
 
-    const now = new Date();
-    const timeStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${now.getMinutes()}`;
+        const now = new Date();
+        const timeStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 ${now.getHours()}時`;
 
-    // SEOと利便性を両立した最強テンプレート
-    const html = `
-<!DOCTYPE html>
+        const html = `<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>【最新】今話題のトレンドまとめ - ${timeStr}更新</title>
-    <meta name="description" content="${articles.slice(0, 3).map(a => a.title).join('、')}などの急上昇ワードを解説。">
+    <title>【最新】急上昇トレンドキーワードまとめ - ${timeStr}更新</title>
+    <meta name="description" content="${articles.slice(0, 5).map(a => a.title).join(', ')}など、今話題のニュースを徹底網羅。">
     <style>
-        :root { --primary: #1a73e8; --bg: #f8f9fa; }
-        body { font-family: "Segoe UI", Meiryo, sans-serif; line-height: 1.8; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; background-color: var(--bg); }
-        header { background: white; padding: 30px; border-radius: 20px; text-align: center; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-        h1 { color: var(--primary); font-size: 1.8rem; margin: 0; }
-        .card { background: white; padding: 25px; margin-bottom: 25px; border-radius: 20px; box-shadow: 0 2px 15px rgba(0,0,0,0.05); transition: 0.3s; }
-        .card:hover { transform: translateY(-5px); }
-        h2 { color: var(--primary); font-size: 1.4rem; border-left: 5px solid var(--primary); padding-left: 15px; }
-        .traffic-badge { background: #e8f0fe; color: #1967d2; padding: 4px 12px; border-radius: 50px; font-size: 0.8rem; font-weight: bold; }
-        .btn { display: inline-block; padding: 10px 20px; background: var(--primary); color: white; text-decoration: none; border-radius: 10px; font-size: 0.9rem; margin-top: 15px; }
-        footer { text-align: center; font-size: 0.8rem; color: #999; margin-top: 50px; }
+        :root { --main: #0070f3; --text: #333; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: #fafafa; color: var(--text); line-height: 1.6; margin: 0; padding: 0; }
+        .container { max-width: 800px; margin: 40px auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        h1 { font-size: 24px; color: var(--main); border-left: 8px solid var(--main); padding-left: 15px; margin-bottom: 10px; }
+        .timestamp { font-size: 14px; color: #888; margin-bottom: 30px; }
+        .item { border-bottom: 1px solid #eee; padding: 25px 0; }
+        .item:last-child { border: none; }
+        .traffic-count { font-size: 12px; font-weight: bold; color: white; background: #ff4d4d; padding: 2px 10px; border-radius: 10px; margin-bottom: 10px; display: inline-block; }
+        h2 { font-size: 20px; margin: 10px 0; color: #111; }
+        .desc { color: #666; font-size: 16px; }
+        .link { display: inline-block; margin-top: 15px; color: var(--main); text-decoration: none; font-weight: bold; }
+        footer { text-align: center; padding: 40px; font-size: 12px; color: #aaa; }
     </style>
 </head>
 <body>
-    <header>
-        <h1>📈 リアルタイム・トレンド・アーカイブ</h1>
-        <p>自動更新時刻: ${timeStr}</p>
-    </header>
-
-    <main>
+    <div class="container">
+        <h1>🚀 爆速トレンド解析アーカイブ</h1>
+        <div class="timestamp">更新時刻: ${timeStr} (1時間自動更新システム稼働中)</div>
+        
         ${articles.map((a, i) => `
-            <section class="card">
-                <span class="traffic-badge">検索数: ${a.approxTraffic}回以上</span>
+            <div class="item">
+                <div class="traffic-count">検索数: ${a.approxTraffic}回以上</div>
                 <h2>${i + 1}. ${a.title}</h2>
-                <p>${a.description}</p>
-                <div class="analysis" style="font-size: 0.9rem; color: #666; background: #fffde7; padding: 10px; border-radius: 10px;">
-                    <strong>SEO分析:</strong> 「${a.title}」は今、最も注目されているキーワードです。関連情報をチェックしましょう。
-                </div>
-                <a href="https://www.google.com/search?q=${encodeURIComponent(a.title)}" target="_blank" class="btn">Googleで詳しく調べる</a>
-                <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(a.title + 'について詳しく知る ' + 'https://' + (process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split('/')[1] : ''))}" target="_blank" class="btn" style="background: #000;">Xでシェア</a>
-            </section>
+                <p class="desc">${a.description}</p>
+                <a class="link" href="https://www.google.com/search?q=${encodeURIComponent(a.title)}" target="_blank">このキーワードの背景を調べる ＞</a>
+            </div>
         `).join('')}
-    </main>
-
+    </div>
     <footer>
-        <p>このサイトはAPIを一切使用せず、パブリックデータをGitHub Actionsで1時間ごとに再構築しています。</p>
-        <p>&copy; 2026 Auto Trend System</p>
+        <p>当サイトはAPIを使用せず、最新トレンドを構造化して提供する検証サイトです。</p>
+        <p>&copy; 2026 Trend System</p>
     </footer>
 </body>
-</html>
-    `;
+</html>`;
 
-    fs.writeFileSync('index.html', html);
-    console.log('記事が正常に生成されました。');
+        fs.writeFileSync('index.html', html);
+        console.log('記事の生成に成功しました！');
+    } catch (e) {
+        console.error('エラー:', e);
+    }
 }
 
-main().catch(console.error);
+main();
