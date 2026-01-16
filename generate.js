@@ -1,6 +1,6 @@
 /**
- * 常に全文で出すルールに基づき、
- * API不要・完全自動SEO記事生成システムの完成版コードを提供します。
+ * 【全文コード】API不要・完全自動SEO記事生成システム（パワーアップ版）
+ * 常に全文で出力し、細部まで調整を行っています。
  */
 const fs = require('fs');
 const https = require('https');
@@ -19,7 +19,7 @@ function fetch(url) {
 }
 
 async function main() {
-    console.log('トレンドを取得中...');
+    console.log('トレンドデータを取得中...');
     const rssData = await fetch(RSS_URL);
     
     // RSSからトレンドワードと詳細を抽出
@@ -34,65 +34,59 @@ async function main() {
     const now = new Date();
     const timeStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${now.getMinutes()}`;
 
-    // SEOに特化したHTML構造の生成
+    // SEOと利便性を両立した最強テンプレート
     const html = `
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>【${timeStr}更新】最新トレンドキーワード徹底解説・SEOまとめ</title>
-    <meta name="description" content="${articles.slice(0, 3).map(a => a.title).join('、')}などの最新トレンドを${timeStr}現在で集計。急上昇ワードの背景を徹底解説します。">
-    <meta name="keywords" content="${articles.map(a => a.title).join(',')}">
+    <title>【最新】今話題のトレンドまとめ - ${timeStr}更新</title>
+    <meta name="description" content="${articles.slice(0, 3).map(a => a.title).join('、')}などの急上昇ワードを解説。">
     <style>
-        body { font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif; line-height: 1.8; color: #333; max-width: 900px; margin: 0 auto; padding: 40px 20px; background-color: #f0f2f5; }
-        header { text-align: center; margin-bottom: 50px; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { color: #1a73e8; font-size: 2em; margin: 0; }
-        .update-time { color: #666; font-size: 0.9em; margin-top: 10px; }
-        .card { background: white; padding: 30px; margin-bottom: 30px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 8px solid #1a73e8; }
-        h2 { color: #1a73e8; border-bottom: 1px solid #eee; padding-bottom: 10px; font-size: 1.5em; }
-        .traffic { display: inline-block; background: #e8f0fe; color: #1967d2; padding: 2px 12px; border-radius: 20px; font-size: 0.8em; font-weight: bold; margin-bottom: 15px; }
-        .description { font-size: 1.1em; color: #444; }
-        .analysis { background: #fff9c4; padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 0.9em; }
-        footer { text-align: center; margin-top: 50px; color: #888; font-size: 0.8em; }
-        nav { margin-bottom: 20px; font-size: 0.9em; color: #1a73e8; }
+        :root { --primary: #1a73e8; --bg: #f8f9fa; }
+        body { font-family: "Segoe UI", Meiryo, sans-serif; line-height: 1.8; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; background-color: var(--bg); }
+        header { background: white; padding: 30px; border-radius: 20px; text-align: center; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        h1 { color: var(--primary); font-size: 1.8rem; margin: 0; }
+        .card { background: white; padding: 25px; margin-bottom: 25px; border-radius: 20px; box-shadow: 0 2px 15px rgba(0,0,0,0.05); transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); }
+        h2 { color: var(--primary); font-size: 1.4rem; border-left: 5px solid var(--primary); padding-left: 15px; }
+        .traffic-badge { background: #e8f0fe; color: #1967d2; padding: 4px 12px; border-radius: 50px; font-size: 0.8rem; font-weight: bold; }
+        .btn { display: inline-block; padding: 10px 20px; background: var(--primary); color: white; text-decoration: none; border-radius: 10px; font-size: 0.9rem; margin-top: 15px; }
+        footer { text-align: center; font-size: 0.8rem; color: #999; margin-top: 50px; }
     </style>
 </head>
 <body>
     <header>
-        <nav>ホーム ＞ トレンド分析 ＞ 最新記事</nav>
-        <h1>🚀 リアルタイム・トレンド解析システム</h1>
-        <p class="update-time">最終更新：${timeStr}（1時間ごとに自動生成中）</p>
+        <h1>📈 リアルタイム・トレンド・アーカイブ</h1>
+        <p>自動更新時刻: ${timeStr}</p>
     </header>
 
     <main>
         ${articles.map((a, i) => `
-            <article class="card">
-                <div class="traffic">検索数：${a.approxTraffic}以上</div>
+            <section class="card">
+                <span class="traffic-badge">検索数: ${a.approxTraffic}回以上</span>
                 <h2>${i + 1}. ${a.title}</h2>
-                <div class="description">
-                    <p>現在、<strong>${a.title}</strong>というキーワードが日本国内で急速に注目を集めています。</p>
-                    <p>${a.description}</p>
+                <p>${a.description}</p>
+                <div class="analysis" style="font-size: 0.9rem; color: #666; background: #fffde7; padding: 10px; border-radius: 10px;">
+                    <strong>SEO分析:</strong> 「${a.title}」は今、最も注目されているキーワードです。関連情報をチェックしましょう。
                 </div>
-                <div class="analysis">
-                    <strong>💡 AI-SEO分析：</strong><br>
-                    このワードは現在SNSおよび検索エンジンで非常に高いエンゲージメントを記録しています。
-                    「${a.title} 評判」「${a.title} 最新情報」といった複合キーワードでの検索が推奨されます。
-                </div>
-            </article>
+                <a href="https://www.google.com/search?q=${encodeURIComponent(a.title)}" target="_blank" class="btn">Googleで詳しく調べる</a>
+                <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(a.title + 'について詳しく知る ' + 'https://' + (process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split('/')[1] : ''))}" target="_blank" class="btn" style="background: #000;">Xでシェア</a>
+            </section>
         `).join('')}
     </main>
 
     <footer>
-        <p>&copy; 2026 Trend Auto-Generator System. All Rights Reserved.</p>
-        <p>当サイトは外部APIを一切使用せず、パブリックデータのみを構造化して生成された実験的SEOサイトです。</p>
+        <p>このサイトはAPIを一切使用せず、パブリックデータをGitHub Actionsで1時間ごとに再構築しています。</p>
+        <p>&copy; 2026 Auto Trend System</p>
     </footer>
 </body>
 </html>
     `;
 
     fs.writeFileSync('index.html', html);
-    console.log('SEO記事が正常に生成されました。');
+    console.log('記事が正常に生成されました。');
 }
 
 main().catch(console.error);
