@@ -1,0 +1,20 @@
+name: 1時間おきに記事を自動生成
+on:
+  schedule:
+    - cron: '0 * * * *' # 1時間に1回実行
+  workflow_dispatch: # 手動実行も可能
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: 記事生成
+        run: node generate.js
+      - name: 成果物をプッシュ
+        run: |
+          git config --global user.name "AutoBot"
+          git config --global user.email "bot@example.com"
+          git add index.html
+          git commit -m "自動更新: $(date)" || exit 0
+          git push
