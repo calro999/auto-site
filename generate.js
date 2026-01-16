@@ -1,16 +1,12 @@
 /**
- * 【全文コード】API不要・5分間隔更新・最強SEO自動生成システム
- * 常に全文で出力し、最新トレンドをRSSから抽出してHTMLを構築します。
+ * 【全文コード】Vercel最適化版・API不要自動更新システム
+ * 常に全文で出力。SEOタグと自動更新の安定性を強化しています。
  */
 const fs = require('fs');
 const https = require('https');
 
-// トレンド取得元（Googleトレンド 日本版RSS）
 const RSS_URL = 'https://trends.google.co.jp/trends/trendingsearches/daily/rss?geo=JP';
 
-/**
- * 外部データを取得するヘルパー関数
- */
 function fetch(url) {
     return new Promise((resolve, reject) => {
         https.get(url, (res) => {
@@ -21,95 +17,72 @@ function fetch(url) {
     });
 }
 
-/**
- * メイン実行関数
- */
 async function main() {
     console.log('--- トレンド同期プロセス開始 ---');
     try {
         const rssData = await fetch(RSS_URL);
-        
-        // RSSから各アイテムを抽出
         const items = rssData.match(/<item>([\s\S]*?)<\/item>/g) || [];
         const articles = items.slice(0, 20).map(item => {
-            const title = (item.match(/<title>([\s\S]*?)<\/title>/) || [null, "取得中..."])[1];
-            const description = (item.match(/<description>([\s\S]*?)<\/description>/) || [null, "最新の急上昇トピックです。"])[1];
+            const title = (item.match(/<title>([\s\S]*?)<\/title>/) || [null, "トレンド取得中"])[1];
+            const description = (item.match(/<description>([\s\S]*?)<\/description>/) || [null, "今話題のトピックです。"])[1];
             const approxTraffic = (item.match(/<ht:approx_traffic>(.*?)<\/ht:approx_traffic>/) || [null, "多数"])[1];
             return { title, description, approxTraffic };
         });
 
-        // タイムスタンプの作成（日本時間）
         const now = new Date();
         const timeStr = now.toLocaleString('ja-JP', { 
             timeZone: 'Asia/Tokyo',
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
         });
 
-        // 最強SEOテンプレート（サイバーパンク・ダークモード仕様）
         const html = `<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>【極秘】トレンド解析ポータル - ${timeStr} 同期</title>
-    <meta name="description" content="${articles.slice(0, 5).map(a => a.title).join(', ')}など、今この瞬間に日本で検索されているトレンドを5分おきに自動更新。">
+    <title>【${timeStr}】最新トレンドAI-SEO解析ポータル</title>
+    <meta name="description" content="${articles.slice(0, 3).map(a => a.title).join(', ')}など、最新の検索トレンドを5分ごとに集約。">
     <style>
         :root { --neon: #00ff41; --bg: #0d1117; --card: #161b22; --text: #c9d1d9; }
-        body { font-family: 'Courier New', Courier, monospace; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; line-height: 1.5; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
         .container { max-width: 900px; margin: 0 auto; }
-        header { border: 2px solid var(--neon); padding: 20px; border-radius: 5px; margin-bottom: 30px; box-shadow: 0 0 15px var(--neon); }
-        h1 { color: var(--neon); margin: 0; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; }
-        .sync-info { font-size: 0.8rem; margin-top: 10px; color: #888; }
-        .live-tag { display: inline-block; background: var(--neon); color: #000; padding: 2px 8px; font-weight: bold; font-size: 10px; border-radius: 3px; margin-bottom: 10px; animation: blink 1.5s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .card { background: var(--card); border: 1px solid #30363d; padding: 20px; border-radius: 10px; transition: 0.3s; }
-        .card:hover { border-color: var(--neon); transform: translateY(-5px); }
-        h2 { font-size: 1.2rem; color: #fff; margin: 10px 0; }
+        header { border-left: 5px solid var(--neon); padding: 10px 20px; margin-bottom: 30px; background: var(--card); }
+        h1 { color: #fff; margin: 0; font-size: 1.2rem; }
+        .sync { color: var(--neon); font-size: 0.8rem; font-family: monospace; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
+        .card { background: var(--card); padding: 20px; border-radius: 8px; border: 1px solid #30363d; transition: 0.2s; }
+        .card:hover { border-color: var(--neon); }
+        h2 { font-size: 1.1rem; color: #fff; margin: 0 0 10px 0; }
         .traffic { color: var(--neon); font-size: 11px; font-weight: bold; }
-        .desc { font-size: 13px; color: #8b949e; }
-        .search-btn { display: inline-block; margin-top: 15px; padding: 8px 15px; border: 1px solid var(--neon); color: var(--neon); text-decoration: none; font-size: 12px; border-radius: 5px; }
-        .search-btn:hover { background: var(--neon); color: #000; }
-        footer { text-align: center; padding: 40px; font-size: 10px; color: #444; }
+        .footer { text-align: center; padding: 40px; color: #666; font-size: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="live-tag">● DATA STREAMING</div>
-            <h1>Trend Intelligence System</h1>
-            <div class="sync-info">LAST SYNC: ${timeStr} (Updating every 5min)</div>
+            <h1>Trend Analysis System <span style="font-size: 0.8rem; opacity: 0.6;">(API-FREE)</span></h1>
+            <div class="sync">LAST_SYNC: ${timeStr} (Updating Every 5min)</div>
         </header>
-
         <main class="grid">
             ${articles.map((a, i) => `
-                <section class="card">
-                    <div class="traffic">RANK ${i + 1} / TRAFFIC: ${a.approxTraffic}+</div>
+                <article class="card">
+                    <div class="traffic">RANKING ${i + 1} / TRAFFIC ${a.approxTraffic}+</div>
                     <h2>${a.title}</h2>
-                    <p class="desc">${a.description}</p>
-                    <a href="https://www.google.com/search?q=${encodeURIComponent(a.title)}" target="_blank" class="search-btn">CHECK ANALYSIS</a>
-                </section>
+                    <p style="font-size: 14px; opacity: 0.8;">${a.description}</p>
+                    <a href="https://www.google.com/search?q=${encodeURIComponent(a.title)}" target="_blank" style="color:var(--neon); text-decoration:none; font-size:12px;">VIEW ANALYSIS ＞</a>
+                </article>
             `).join('')}
         </main>
-
-        <footer>
-            <p>NO API COST / SERVERLESS AUTOMATION / GENERATED BY GITHUB ACTIONS</p>
-        </footer>
+        <div class="footer">AUTO-GENERATED BY GITHUB ACTIONS & VERCEL</div>
     </div>
 </body>
 </html>`;
 
-        // ファイル書き出し
         fs.writeFileSync('index.html', html);
-        console.log(`[${timeStr}] 完了: index.html が更新されました。`);
+        console.log(`[Success] index.html updated at ${timeStr}`);
     } catch (err) {
-        console.error('致命的エラー:', err);
+        console.error('[Error]', err);
     }
 }
-
 main();
