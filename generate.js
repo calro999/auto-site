@@ -1,9 +1,11 @@
 /**
- * 【全文コード】Vercel最適化版・API不要自動更新システム
- * 常に全文で出力。SEOタグと自動更新の安定性を強化しています。
+ * 【全文コード】記事蓄積型・最強SEO自動生成システム
+ * 1. 常に最新の index.html を更新
+ * 2. 過去のトレンドも archive/ フォルダに自動保存
  */
 const fs = require('fs');
 const https = require('https');
+const path = require('path');
 
 const RSS_URL = 'https://trends.google.co.jp/trends/trendingsearches/daily/rss?geo=JP';
 
@@ -18,71 +20,56 @@ function fetch(url) {
 }
 
 async function main() {
-    console.log('--- トレンド同期プロセス開始 ---');
     try {
         const rssData = await fetch(RSS_URL);
         const items = rssData.match(/<item>([\s\S]*?)<\/item>/g) || [];
-        const articles = items.slice(0, 20).map(item => {
-            const title = (item.match(/<title>([\s\S]*?)<\/title>/) || [null, "トレンド取得中"])[1];
-            const description = (item.match(/<description>([\s\S]*?)<\/description>/) || [null, "今話題のトピックです。"])[1];
-            const approxTraffic = (item.match(/<ht:approx_traffic>(.*?)<\/ht:approx_traffic>/) || [null, "多数"])[1];
-            return { title, description, approxTraffic };
+        const articles = items.slice(0, 15).map(item => {
+            const title = (item.match(/<title>([\s\S]*?)<\/title>/) || [null, "トレンド"])[1];
+            const description = (item.match(/<description>([\s\S]*?)<\/description>/) || [null, "最新情報"])[1];
+            return { title, description };
         });
 
         const now = new Date();
-        const timeStr = now.toLocaleString('ja-JP', { 
-            timeZone: 'Asia/Tokyo',
-            year: 'numeric', month: '2-digit', day: '2-digit',
-            hour: '2-digit', minute: '2-digit', second: '2-digit'
-        });
+        const jstNow = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+        const dateStr = jstNow.toISOString().replace(/T/, ' ').replace(/\..+/, '').replace(/:/g, '-'); // ファイル名用
+        const displayTime = jstNow.toLocaleString('ja-JP');
 
-        const html = `<!DOCTYPE html>
+        // HTML生成
+        const htmlContent = `
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>【${timeStr}】最新トレンドAI-SEO解析ポータル</title>
-    <meta name="description" content="${articles.slice(0, 3).map(a => a.title).join(', ')}など、最新の検索トレンドを5分ごとに集約。">
+    <title>トレンド解析ポータル - ${displayTime}</title>
     <style>
-        :root { --neon: #00ff41; --bg: #0d1117; --card: #161b22; --text: #c9d1d9; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; }
-        header { border-left: 5px solid var(--neon); padding: 10px 20px; margin-bottom: 30px; background: var(--card); }
-        h1 { color: #fff; margin: 0; font-size: 1.2rem; }
-        .sync { color: var(--neon); font-size: 0.8rem; font-family: monospace; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
-        .card { background: var(--card); padding: 20px; border-radius: 8px; border: 1px solid #30363d; transition: 0.2s; }
-        .card:hover { border-color: var(--neon); }
-        h2 { font-size: 1.1rem; color: #fff; margin: 0 0 10px 0; }
-        .traffic { color: var(--neon); font-size: 11px; font-weight: bold; }
-        .footer { text-align: center; padding: 40px; color: #666; font-size: 10px; }
+        body { font-family: sans-serif; background: #0d1117; color: #c9d1d9; padding: 20px; }
+        .card { background: #161b22; border: 1px solid #30363d; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
+        h1 { color: #58a6ff; }
+        h2 { color: #fff; font-size: 1.1rem; }
+        .time { font-size: 0.8rem; color: #8b949e; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Trend Analysis System <span style="font-size: 0.8rem; opacity: 0.6;">(API-FREE)</span></h1>
-            <div class="sync">LAST_SYNC: ${timeStr} (Updating Every 5min)</div>
-        </header>
-        <main class="grid">
-            ${articles.map((a, i) => `
-                <article class="card">
-                    <div class="traffic">RANKING ${i + 1} / TRAFFIC ${a.approxTraffic}+</div>
-                    <h2>${a.title}</h2>
-                    <p style="font-size: 14px; opacity: 0.8;">${a.description}</p>
-                    <a href="https://www.google.com/search?q=${encodeURIComponent(a.title)}" target="_blank" style="color:var(--neon); text-decoration:none; font-size:12px;">VIEW ANALYSIS ＞</a>
-                </article>
-            `).join('')}
-        </main>
-        <div class="footer">AUTO-GENERATED BY GITHUB ACTIONS & VERCEL</div>
-    </div>
+    <h1>🚀 爆速トレンド解析</h1>
+    <p class="time">同期時刻: ${displayTime}</p>
+    ${articles.map(a => `<div class="card"><h2>${a.title}</h2><p>${a.description}</p></div>`).join('')}
+    <hr>
+    <footer><a href="./archive/" style="color:#58a6ff;">過去のアーカイブを見る</a></footer>
 </body>
 </html>`;
 
-        fs.writeFileSync('index.html', html);
-        console.log(`[Success] index.html updated at ${timeStr}`);
+        // 1. 最新版として index.html を保存
+        fs.writeFileSync('index.html', htmlContent);
+
+        // 2. 過去ログとして archive フォルダに保存
+        const archiveDir = './archive';
+        if (!fs.existsSync(archiveDir)) fs.mkdirSync(archiveDir);
+        fs.writeFileSync(path.join(archiveDir, `${dateStr}.html`), htmlContent);
+
+        console.log(`[Success] ページ生成完了: ${displayTime}`);
     } catch (err) {
-        console.error('[Error]', err);
+        console.error(err);
     }
 }
 main();

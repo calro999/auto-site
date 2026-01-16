@@ -26,6 +26,6 @@ jobs:
         run: |
           git config --global user.name "Auto-Bot"
           git config --global user.email "bot@example.com"
-          git add index.html
-          git commit -m "Auto update: $(date)" || exit 0
+          git add .
+          git commit -m "Auto update including archive: $(date)" || exit 0
           git push origin main
