@@ -2,31 +2,30 @@ name: 5分おきに記事を自動生成
 
 on:
   schedule:
-    - cron: '*/5 * * * *' # 5分おきに自動実行
-  workflow_dispatch:      # 手動実行ボタン
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write    # リポジトリへの書き込み権限を許可
+      contents: write
 
     steps:
-      - name: リポジトリをチェックアウト
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Node.jsのセットアップ
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      - name: 記事生成とアーカイブ作成を実行
+      - name: Generate Content
         run: node generate.js
 
-      - name: 増えたアーカイブも含めてすべてプッシュ
+      - name: Commit and Push
         run: |
           git config --global user.name "Auto-Bot"
           git config --global user.email "bot@example.com"
           git add .
-          git commit -m "Auto update: $(date)" || exit 0
+          git commit -m "Auto update including archive: $(date)" || exit 0
           git push origin main
