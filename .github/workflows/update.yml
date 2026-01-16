@@ -1,20 +1,34 @@
-name: 1時間おきに記事を自動生成
+name: 5分おきに記事を自動生成
+
 on:
   schedule:
-    - cron: '0 * * * *' # 1時間に1回実行
-  workflow_dispatch: # 手動実行も可能
+    - cron: '*/5 * * * *' # 5分おきに自動実行
+  workflow_dispatch:      # 手動実行ボタンを有効化
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    # GitHub Actionsにリポジトリへの書き込み権限を与える設定
+    permissions:
+      contents: write
+
     steps:
-      - uses: actions/checkout@v3
-      - name: 記事生成
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v3
+
+      - name: Node.jsのセットアップ
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 記事生成スクリプトの実行
         run: node generate.js
-      - name: 成果物をプッシュ
+
+      - name: 生成されたindex.htmlをリポジトリに反映
         run: |
-          git config --global user.name "AutoBot"
+          git config --global user.name "Auto-Bot"
           git config --global user.email "bot@example.com"
           git add index.html
-          git commit -m "自動更新: $(date)" || exit 0
-          git push
+          # 変更がない場合にエラーにならないよう設定
+          git commit -m "システム自動更新: $(date)" || exit 0
+          git push origin main
