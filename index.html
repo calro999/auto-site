@@ -3,142 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAL-INTEL | ギャルの熱狂インテリジェンス</title>
+    <title>GAL-INTEL | 世の中の「今」を、最速でバイブス変換。</title>
     <style>
         :root { 
-            --bg: #F8F9FA; 
-            --text: #2D3436; 
-            --accent-pink: #FF4DAD; 
-            --accent-blue: #00B4D8; 
-            --card-bg: #FFFFFF;
-            --tag-bg: #EDF2F7;
+            --bg: #F8F9FA; --text: #2D3436; --accent-pink: #FF4DAD; 
+            --accent-blue: #00B4D8; --card-bg: #FFFFFF; --border: #E2E8F0;
         }
         * { box-sizing: border-box; }
-        body { background: var(--bg); color: var(--text); font-family: 'Helvetica Neue', 'Arial', 'Hiragino Sans', sans-serif; margin: 0; padding: 0; }
-        
-        .layout { display: grid; grid-template-columns: 260px 1fr 300px; gap: 30px; max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
-        
-        /* Header */
-        .header-box { grid-column: 1 / -1; text-align: left; padding: 0 0 40px 0; display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #E2E8F0; }
-        .hero-title { font-size: 2.8rem; letter-spacing: -2px; color: var(--text); font-weight: 900; margin: 0; }
-        .hero-title span { color: var(--accent-pink); }
-        .sync-info { font-size: 0.8rem; color: #A0AEC0; font-weight: bold; }
-        
-        /* Sidebars */
-        .sidebar { position: sticky; top: 40px; display: flex; flex-direction: column; gap: 30px; }
-        .glass-box { background: var(--card-bg); border-radius: 24px; padding: 24px; shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #E2E8F0; box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
-        .box-title { font-size: 0.75rem; font-weight: 900; color: #A0AEC0; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 1px; }
-        
-        /* Tag List */
-        .tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
-        .tag { background: var(--tag-bg); color: #4A5568; padding: 8px 14px; border-radius: 12px; font-size: 0.75rem; text-decoration: none; font-weight: bold; transition: all 0.2s; }
-        .tag:hover { background: var(--accent-pink); color: #fff; transform: translateY(-2px); }
-        
-        /* Main Feed */
-        .main-feed { display: flex; flex-direction: column; gap: 30px; }
-        .trend-card { 
-            position: relative; background: var(--card-bg); border-radius: 32px; padding: 40px; 
-            border: 1px solid #E2E8F0; box-shadow: 0 15px 45px rgba(0,0,0,0.05);
-            transition: transform 0.3s;
+        body { 
+            background: var(--bg); color: var(--text); 
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Sans', sans-serif; 
+            margin: 0; padding: 0; overflow-x: hidden;
         }
-        .trend-card:hover { transform: scale(1.01); }
-        
-        .genre-badge { display: inline-flex; align-items: center; gap: 6px; background: #f0faff; color: var(--accent-blue); padding: 6px 14px; border-radius: 50px; font-size: 0.7rem; font-weight: 900; margin-bottom: 15px; }
-        .vibes-label { font-size: 0.9rem; font-weight: 900; color: var(--accent-pink); margin-bottom: 12px; display: block; }
-        
-        h3 { font-size: 1.8rem; margin: 0 0 15px 0; line-height: 1.3; font-weight: 900; color: #1A202C; }
-        .desc { font-size: 1rem; color: #4A5568; line-height: 1.7; margin-bottom: 25px; }
-        
-        .bet-btn { display: inline-block; background: var(--text); color: #fff; padding: 14px 32px; border-radius: 16px; text-decoration: none; font-weight: 900; font-size: 0.9rem; transition: 0.2s; }
-        .bet-btn:hover { background: var(--accent-pink); box-shadow: 0 10px 20px rgba(255, 77, 173, 0.3); }
 
-        .meta-container { margin-top: 30px; display: flex; gap: 30px; border-top: 1px solid #F7FAFC; padding-top: 20px; font-size: 0.7rem; color: #CBD5E0; font-weight: bold; }
-        .meta-val { color: #2D3436; font-size: 0.85rem; display: block; margin-top: 4px; }
+        /* バイブス・コネクト背景 (Canvas) */
+        #connect-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.4; }
 
-        /* Graveyard */
-        .grave-item { font-size: 0.8rem; color: #718096; padding: 12px 0; border-bottom: 1px solid #EDF2F7; display: flex; justify-content: space-between; }
-        .grave-item:last-child { border: none; }
+        .container { max-width: 800px; margin: 0 auto; padding: 60px 20px; text-align: center; }
 
-        @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } .sidebar { position: static; } }
-        #loading { position: fixed; inset: 0; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 900; color: var(--accent-pink); z-index: 1000; letter-spacing: 4px; }
+        /* Header */
+        header { margin-bottom: 60px; }
+        .hero-title { font-size: 3.5rem; font-weight: 900; margin: 0; letter-spacing: -2px; }
+        .hero-title span { color: var(--accent-pink); }
+        .sub-title { font-size: 0.9rem; font-weight: bold; color: #A0AEC0; margin-top: 10px; letter-spacing: 2px; }
+        .sync-info { font-size: 0.7rem; color: #CBD5E0; margin-top: 20px; }
+
+        /* Main Feed */
+        .main-feed { display: flex; flex-direction: column; gap: 40px; }
+        
+        /* 殿堂入りレインボー枠アニメーション */
+        @keyframes rainbow-border {
+            0% { border-color: #ff007f; box-shadow: 0 0 10px #ff007f; }
+            33% { border-color: #00d4ff; box-shadow: 0 0 10px #00d4ff; }
+            66% { border-color: #f9ff00; box-shadow: 0 0 10px #f9ff00; }
+            100% { border-color: #ff007f; box-shadow: 0 0 10px #ff007f; }
+        }
+
+        .trend-card { 
+            position: relative; background: var(--card-bg); border-radius: 30px; 
+            padding: 50px 40px; border: 1px solid var(--border);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.03); transition: 0.3s;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .trend-card.hall-of-fame { animation: rainbow-border 3s linear infinite; border-width: 2px; }
+        .trend-card:hover { transform: translateY(-5px); box-shadow: 0 30px 60px rgba(0,0,0,0.06); }
+
+        /* ジャンルとバイブス */
+        .badge-row { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        .genre-badge { background: #F1F5F9; color: var(--accent-blue); padding: 6px 16px; border-radius: 50px; font-size: 0.7rem; font-weight: 900; }
+        .vibes-label { color: var(--accent-pink); font-size: 0.9rem; font-weight: 900; }
+
+        h3 { font-size: 2rem; margin: 0 0 20px 0; line-height: 1.3; font-weight: 900; max-width: 90%; }
+        .desc { font-size: 1.05rem; color: #4A5568; line-height: 1.8; margin-bottom: 30px; max-width: 90%; }
+
+        /* イコライザー */
+        .eq-container { display: flex; gap: 4px; height: 30px; align-items: flex-end; margin-bottom: 20px; }
+        .eq-bar { width: 4px; background: linear-gradient(to top, var(--accent-blue), var(--accent-pink)); border-radius: 2px; transition: height 0.3s ease; }
+        .eq-active { animation: eq-pulse 0.5s ease-in-out infinite alternate; }
+        @keyframes eq-pulse { from { opacity: 0.6; } to { opacity: 1; transform: scaleY(1.1); } }
+
+        .bet-btn { 
+            background: var(--text); color: #fff; padding: 16px 40px; border-radius: 20px; 
+            text-decoration: none; font-weight: 900; transition: 0.3s; 
+        }
+        .bet-btn:hover { background: var(--accent-pink); transform: scale(1.05); }
+
+        /* 墓場 */
+        .graveyard { margin-top: 100px; padding-top: 60px; border-top: 2px solid var(--border); }
+        .grave-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 30px; }
+        .grave-item { font-size: 0.8rem; color: #A0AEC0; background: #fff; padding: 10px 20px; border-radius: 15px; border: 1px solid var(--border); }
+
+        #loading { position: fixed; inset: 0; background: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--accent-pink); z-index: 2000; }
     </style>
 </head>
 <body>
-    <div id="loading">LOADING INTEL...</div>
-    
-    <div class="layout">
-        <header class="header-box">
+    <canvas id="connect-bg"></canvas>
+    <div id="loading">VIBES TUNING...</div>
+
+    <div class="container">
+        <header>
             <h1 class="hero-title">GAL<span>-</span>INTEL</h1>
+            <div class="sub-title">世の中の「今」を、最速でバイブス変換。</div>
             <div id="sync-time" class="sync-info"></div>
         </header>
 
-        <aside class="sidebar">
-            <div class="glass-box">
-                <div class="box-title">Trending Hashtags</div>
-                <div id="tag-list" class="tag-list"></div>
-            </div>
-            <div class="glass-box">
-                <div class="box-title">System Status</div>
-                <div style="font-size: 0.8rem; line-height: 1.6; font-weight: bold;">
-                    VIBES: <span style="color:var(--accent-pink)">HIGH ACCURACY</span><br>
-                    SOURCE: GLOBAL_NET
-                </div>
-            </div>
-        </aside>
-
         <main class="main-feed" id="trend-list"></main>
 
-        <aside class="sidebar">
-            <div class="glass-box">
-                <div class="box-title">The Graveyard</div>
-                <div id="grave-list"></div>
-            </div>
-        </aside>
+        <section class="graveyard">
+            <div class="sub-title" style="color:#CBD5E0">THE GRAVEYARD</div>
+            <div id="grave-list" class="grave-list"></div>
+        </section>
     </div>
 
     <script>
-        async function init() {
+        // 背景のバイブス・コネクト描画
+        const canvas = document.getElementById('connect-bg');
+        const ctx = canvas.getContext('2d');
+        let dots = [];
+
+        function initBg(tags) {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            dots = tags.map(t => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                text: '#' + t,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5
+            }));
+            animate();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#CBD5E0';
+            ctx.strokeStyle = '#E2E8F0';
+
+            dots.forEach((d, i) => {
+                d.x += d.vx + Math.sin(Date.now() / 2000 + i) * 0.2;
+                d.y += d.vy + Math.cos(Date.now() / 2000 + i) * 0.2;
+                if (d.x < 0 || d.x > canvas.width) d.vx *= -1;
+                if (d.y < 0 || d.y > canvas.height) d.vy *= -1;
+
+                ctx.fillText(d.text, d.x, d.y);
+                
+                // 近いタグ同士を線で結ぶ
+                dots.slice(i + 1).forEach(d2 => {
+                    const dist = Math.hypot(d.x - d2.x, d.y - d2.y);
+                    if (dist < 150) {
+                        ctx.beginPath();
+                        ctx.moveTo(d.x, d.y);
+                        ctx.lineTo(d2.x, d2.y);
+                        ctx.stroke();
+                    }
+                });
+            });
+            requestAnimationFrame(animate);
+        }
+
+        async function load() {
             try {
                 const res = await fetch('./intelligence_db.json?v=' + Date.now());
                 const db = await res.json();
-                
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('sync-time').innerText = 'SYNCED: ' + db.lastUpdate;
+                document.getElementById('sync-time').innerText = 'SYNCED AT: ' + db.lastUpdate;
 
-                // Tags
-                document.getElementById('tag-list').innerHTML = db.tags.map(tag => `
-                    <a href="https://www.google.com/search?q=${encodeURIComponent(tag)}" target="_blank" class="tag">#${tag}</a>
-                `).join('');
+                initBg(db.tags);
 
-                // Main Feed
-                document.getElementById('trend-list').innerHTML = db.current.map(t => `
-                    <article class="trend-card">
-                        <div class="genre-badge">${t.genre.icon} ${t.genre.label}</div>
-                        <span class="vibes-label">${t.vibes}</span>
-                        <h3>${t.title}</h3>
-                        <p class="desc">${t.desc}</p>
-                        <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="bet-btn">VIEW ANALYSIS</a>
-                        <div class="meta-container">
-                            <div class="meta-item">STATUS<span class="meta-val">${t.isSerious ? 'CONFIRMED' : 'ANALYZING'}</span></div>
-                            <div class="meta-item">LIFETIME<span class="meta-val">${t.duration}M</span></div>
-                            <div class="meta-item">HEAT<span class="meta-val">${t.traffic}</span></div>
-                        </div>
-                    </article>
-                `).join('');
+                document.getElementById('trend-list').innerHTML = db.current.map(t => {
+                    const isHallOfFame = t.trafficNum >= 500000;
+                    const barCount = Math.min(10, Math.ceil(t.trafficNum / 50000));
+                    const eqHtml = Array.from({length: 10}, (_, i) => `
+                        <div class="eq-bar ${i < barCount ? 'eq-active' : ''}" style="height: ${i < barCount ? (20 + Math.random() * 80) : 10}%"></div>
+                    `).join('');
 
-                // Graveyard
+                    return `
+                        <article class="trend-card ${isHallOfFame ? 'hall-of-fame' : ''}">
+                            <div class="badge-row">
+                                <div class="genre-badge">${t.genre.icon} ${t.genre.label}</div>
+                                <div class="vibes-label">${t.vibes}</div>
+                            </div>
+                            <div class="eq-container">${eqHtml}</div>
+                            <h3>${t.title}</h3>
+                            <p class="desc">${t.desc}</p>
+                            <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="bet-btn">ANALYZE NOW</a>
+                            <div class="meta-container" style="display:flex; gap:20px; margin-top:30px; font-size:0.7rem; color:#A0AEC0; font-weight:bold;">
+                                <span>HEAT: ${t.traffic}</span>
+                                <span>LIFETIME: ${t.duration}M</span>
+                            </div>
+                        </article>
+                    `;
+                }).join('');
+
                 document.getElementById('grave-list').innerHTML = db.graveyard.map(g => `
-                    <div class="grave-item">
-                        <span>† ${g.title.substring(0, 15)}...</span>
-                    </div>
+                    <div class="grave-item">† ${g.title.substring(0, 15)}</div>
                 `).join('');
 
-            } catch (e) {
-                console.error("Load failed", e);
-                document.getElementById('loading').innerText = "CONNECTION ERROR";
-            }
+            } catch (e) { console.error(e); }
         }
-        init();
+        load();
     </script>
 </body>
 </html>

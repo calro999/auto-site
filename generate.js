@@ -40,9 +40,10 @@ function getGenre(title, desc) {
 
 function getVibes(isSerious, traffic) {
     if (isSerious) return 'CONFIRMED 👁️';
-    if (traffic.includes('万') || parseInt(traffic) > 50000) return '神VIBES 🔥';
-    const vibes = ['沼確定 🕳️', '優勝 🏆', '安定の極み 🍵', '次くる 🚀', '眼福 👀'];
-    return vibes[Math.floor(Math.random() * vibes.length)];
+    const num = parseInt(traffic.replace(/[^0-9]/g, '')) || 0;
+    if (num >= 500000) return '殿堂入り神VIBES 🔥';
+    if (num >= 100000) return '激アツ確定 🚀';
+    return ['沼確定 🕳️', '優勝 🏆', '安定の極み 🍵', '次くる 👀'][Math.floor(Math.random() * 4)];
 }
 
 function smartGyaruize(text, type = 'title') {
@@ -59,7 +60,7 @@ function smartGyaruize(text, type = 'title') {
 
 async function main() {
     try {
-        console.log('--- インテリジェンス・クリーン同期開始 ---');
+        console.log('--- ギャル・インテリジェンス・マッピング開始 ---');
         let allNewTrends = [];
         let tagsSet = new Set();
 
@@ -69,22 +70,22 @@ async function main() {
             items.forEach(item => {
                 const rawTitle = getBetween(item, '<title>', '</title>');
                 const rawDesc = getBetween(item, '<description>', '</description>');
-                const traffic = getBetween(item, '<ht:approx_traffic>', '</ht:approx_traffic>') || 'HOT';
+                const trafficRaw = getBetween(item, '<ht:approx_traffic>', '</ht:approx_traffic>') || '10,000+';
                 if (!rawTitle || rawTitle.length < 5) return;
 
                 const isSerious = SERIOUS_WORDS.some(w => rawTitle.includes(w));
                 const genre = getGenre(rawTitle, rawDesc);
-                const vibes = getVibes(isSerious, traffic);
+                const vibes = getVibes(isSerious, trafficRaw);
 
                 const potentialTags = rawTitle.replace(/[【】（）()「」]/g, ' ').split(' ').filter(w => w.length >= 2 && w.length <= 8);
                 potentialTags.slice(0, 2).forEach(tag => tagsSet.add(tag));
                 
                 allNewTrends.push({
                     title: isSerious ? rawTitle : smartGyaruize(rawTitle, 'title'),
-                    source: source.name,
                     desc: isSerious ? rawDesc : smartGyaruize(rawDesc, 'desc'),
+                    traffic: trafficRaw,
+                    trafficNum: parseInt(trafficRaw.replace(/[^0-9]/g, '')) || 10000,
                     isSerious,
-                    traffic,
                     genre,
                     vibes
                 });
@@ -98,42 +99,38 @@ async function main() {
 
         const now = new Date(new Date().getTime() + (9 * 60 * 60 * 1000));
         const displayTime = now.toLocaleString('ja-JP');
-        const mergedTrends = [];
         const seenTitles = new Set();
+        const mergedTrends = [];
 
         allNewTrends.forEach(nt => {
             if (seenTitles.has(nt.title)) return;
             seenTitles.add(nt.title);
             const existing = (db.current || []).find(ct => ct.title === nt.title);
-            if (existing && existing.firstSeen) {
-                const diffMins = Math.floor((now - new Date(existing.firstSeen.replace(/\//g, '-'))) / (1000 * 60));
-                mergedTrends.push({ ...nt, firstSeen: existing.firstSeen, duration: Math.max(0, diffMins) });
-            } else {
-                mergedTrends.push({ ...nt, firstSeen: displayTime, duration: 0 });
-            }
+            mergedTrends.push({
+                ...nt,
+                firstSeen: existing ? existing.firstSeen : displayTime,
+                duration: existing ? Math.floor((now - new Date(existing.firstSeen.replace(/\//g, '-'))) / (1000 * 60)) : 0
+            });
         });
 
-        // 墓場の初期データ対策: currentからあふれたものや、古いものを墓場へ
+        // 墓場ロジック
         let newGraveyard = [...(db.graveyard || [])];
         if (db.current.length > 0) {
             db.current.forEach(old => {
-                if (!seenTitles.has(old.title)) {
-                    newGraveyard.unshift({ title: old.title, diedAt: displayTime });
-                }
+                if (!seenTitles.has(old.title)) newGraveyard.unshift({ title: old.title, diedAt: displayTime });
             });
         }
-        // 初回実行時などで墓場が空の場合、現在のリストの下位を入れる
-        if (newGraveyard.length === 0 && mergedTrends.length > 10) {
-            mergedTrends.slice(10, 20).forEach(t => newGraveyard.push({ title: t.title, diedAt: displayTime }));
+        if (newGraveyard.length === 0) { // 初回用ダミー回避
+            mergedTrends.slice(15, 25).forEach(t => newGraveyard.push({ title: t.title, diedAt: displayTime }));
         }
 
-        db.current = mergedTrends.slice(0, 10); // メインは厳選10件
+        db.current = mergedTrends.sort((a,b) => b.trafficNum - a.trafficNum).slice(0, 15);
         db.graveyard = newGraveyard.slice(0, 20);
-        db.tags = Array.from(tagsSet).slice(0, 15);
+        db.tags = Array.from(tagsSet).slice(0, 20);
         db.lastUpdate = displayTime;
 
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2));
-        console.log(`[SUCCESS] クリーンデータ保存完了。`);
+        console.log(`[SUCCESS] データ同期完了`);
     } catch (err) {
         console.error('[FATAL]', err.message);
         process.exit(1);
