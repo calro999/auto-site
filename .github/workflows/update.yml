@@ -2,26 +2,29 @@ name: ギャルの熱狂インテリジェンス・データ同期
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
-  workflow_dispatch:
+    - cron: '*/5 * * * *' # 5分おき
+  workflow_dispatch: # 手動実行用
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Node.js
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      - name: Sync Intelligence Data
+
+      - name: Run Sync
         run: node generate.js
+
       - name: Commit and Push
         run: |
           git config --global user.name "Intelligence-Bot"
           git config --global user.email "bot@example.com"
-          git add intelligence_db.json  # データファイルだけを確実に更新
-          git commit -m "Intelligence Sync: $(date)" || exit 0
-          git push origin main
+          git add intelligence_db.json
+          # 差分がある場合のみコミットし、強制的にPushする
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Intelligence Sync: $(date)" && git push origin main --force)
