@@ -11,7 +11,10 @@ const SERIOUS_WORDS = ['事故', '事件', '死亡', '逮捕', '火災', '地震
 
 function fetch(url) {
     return new Promise((resolve, reject) => {
-        https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (res) => {
+        const options = {
+            headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36' }
+        };
+        https.get(url, options, (res) => {
             let data = '';
             res.on('data', (chunk) => data += chunk);
             res.on('end', () => resolve(data));
@@ -21,20 +24,22 @@ function fetch(url) {
 
 async function main() {
     try {
-        console.log('--- ギャルの熱狂インテリジェンス：同期開始 ---');
+        console.log('--- ギャルの熱狂インテリジェンス：強制同期開始 ---');
         let allNewTrends = [];
 
         for (const source of SOURCES) {
-            console.log(`Fetching from ${source.name}...`);
+            console.log(`[ACCESS] ${source.name} に接続中...`);
             const rssData = await fetch(source.url);
             
-            // 正規表現でitemタグの中身を確実に抽出
-            const items = rssData.match(/<item>([\s\S]*?)<\/item>/g) || [];
-            console.log(`Found ${items.length} items in ${source.name}`);
+            // アイテム抽出をより柔軟に (大文字小文字無視、改行対応)
+            const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
+            const items = rssData.match(itemRegex) || [];
+            console.log(`[INFO] ${source.name} から ${items.length} 件見つかりました。`);
 
             items.forEach(item => {
                 const extract = (tag) => {
-                    const match = item.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`));
+                    const regex = new RegExp(`<${tag}[^>]*?>([\\s\\S]*?)<\\/${tag}>`, 'i');
+                    const match = item.match(regex);
                     return match ? match[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim() : '';
                 };
 
@@ -47,20 +52,24 @@ async function main() {
                     source: source.name,
                     desc: extract('description').substring(0, 100),
                     isSerious,
-                    traffic: extract('ht:approx_traffic') || 'Rising'
+                    traffic: extract('ht:approx_traffic') || 'Rising',
+                    firstSeen: "" // 後で設定
                 });
             });
         }
 
         if (allNewTrends.length === 0) {
-            throw new Error('トレンドが1件も取得できませんでした。RSSの構造が変わった可能性があります。');
+            console.error('[ERROR] トレンドが0件です。RSSの内容を確認してください。');
+            process.exit(1);
         }
 
+        // DB読み込み
         let db = { current: [], graveyard: [], lastUpdate: "" };
         if (fs.existsSync(DATA_FILE)) {
             try {
-                db = JSON.parse(fs.readFileSync(DATA_FILE));
-            } catch(e) { console.log('JSON read error, reset db'); }
+                const raw = fs.readFileSync(DATA_FILE, 'utf8');
+                if (raw) db = JSON.parse(raw);
+            } catch(e) { console.log('[WARN] JSONパース失敗、リセットします'); }
         }
 
         const now = new Date(new Date().getTime() + (9 * 60 * 60 * 1000));
@@ -75,9 +84,9 @@ async function main() {
 
             const existing = db.current.find(ct => ct.title === nt.title);
             if (existing) {
-                const startTime = new Date(existing.firstSeen.replace(/\//g, '-'));
-                const diffMins = Math.max(0, Math.floor((now - startTime) / (1000 * 60)));
-                mergedTrends.push({ ...nt, firstSeen: existing.firstSeen, duration: diffMins });
+                const startStr = existing.firstSeen.replace(/\//g, '-');
+                const diffMins = Math.max(0, Math.floor((now - new Date(startStr)) / (1000 * 60)));
+                mergedTrends.push({ ...nt, firstSeen: existing.firstSeen, duration: diffMins || 0 });
             } else {
                 mergedTrends.push({ ...nt, firstSeen: displayTime, duration: 0 });
             }
@@ -91,14 +100,14 @@ async function main() {
         });
 
         db.current = mergedTrends.slice(0, 30);
-        db.graveyard = db.graveyard.slice(0, 20);
+        db.graveyard = db.graveyard.slice(0, 25);
         db.lastUpdate = displayTime;
 
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2));
-        console.log(`Successfully updated with ${db.current.length} trends!`);
+        console.log(`[SUCCESS] 全 ${db.current.length} 件をデプロイ可能状態にしました。`);
     } catch (err) {
-        console.error('Error:', err.message);
-        process.exit(1); // 失敗をActionsに知らせる
+        console.error('[FATAL] 実行エラー:', err);
+        process.exit(1);
     }
 }
 main();
