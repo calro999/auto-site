@@ -1,9 +1,9 @@
-name: ギャルの熱狂インテリジェンス・稼働
+name: ギャルの熱狂インテリジェンス・データ同期
 
 on:
   schedule:
-    - cron: '*/5 * * * *' # GitHubの仕様に合わせた最短の5分
-  workflow_dispatch:      # 手動実行ボタンは残しておく
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -12,18 +12,16 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      - name: Generate Intelligence
+      - name: Sync Intelligence Data
         run: node generate.js
       - name: Commit and Push
         run: |
           git config --global user.name "Intelligence-Bot"
           git config --global user.email "bot@example.com"
-          git add .
+          git add intelligence_db.json  # データファイルだけを確実に更新
           git commit -m "Intelligence Sync: $(date)" || exit 0
           git push origin main
