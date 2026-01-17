@@ -257,7 +257,10 @@
             border-bottom: 1px solid #F7FAFC; 
             display: block; 
             text-decoration: none; 
+            transition: 0.2s;
         }
+        
+        .grave-item:hover { color: var(--accent-pink); padding-left: 5px; }
 
         .footer-info {
             margin-top: 25px; 
@@ -295,6 +298,10 @@
                 <div id="tag-list" class="tag-list"></div>
             </div>
             <div class="glass-box">
+                <div class="box-title">📅 PAST_ARCHIVES</div>
+                <div id="archive-list" style="max-height: 300px; overflow-y: auto;"></div>
+            </div>
+            <div class="glass-box">
                 <div id="sync-info" style="font-size: 0.7rem; color: #A0AEC0;"></div>
             </div>
         </aside>
@@ -308,7 +315,7 @@
         </main>
 
         <aside class="sidebar">
-            <div class="glass-box" style="overflow-y: auto;">
+            <div class="glass-box" style="overflow-y: auto; height: 100%;">
                 <div class="box-title">💀 THE_GRAVEYARD</div>
                 <div id="grave-list"></div>
             </div>
@@ -359,7 +366,6 @@
 
         async function load() {
             try {
-                // generate.jsによってアーカイブ生成時にここが自動書き換えされます
                 const CDN_URL = 'https://cdn.jsdelivr.net/gh/calro999/auto-site/intelligence_db.json';
                 const res = await fetch(CDN_URL + '?v=' + Date.now());
                 if (!res.ok) throw new Error('Network response was not ok');
@@ -370,14 +376,19 @@
                 
                 initBg(db.tags);
 
-                const tagList = document.getElementById('tag-list');
-                tagList.innerHTML = db.tags.map(tag => {
-                    return `<a href="https://www.google.com/search?q=${encodeURIComponent(tag)}" target="_blank" class="tag-item">#${tag}</a>`;
+                document.getElementById('tag-list').innerHTML = db.tags.map(tag => `<a href="https://www.google.com/search?q=${encodeURIComponent(tag)}" target="_blank" class="tag-item">#${tag}</a>`).join('');
+
+                // アーカイブリストの表示 (相対パス考慮)
+                const isArchivePage = window.location.pathname.includes('/archive/');
+                const archivePrefix = isArchivePage ? './' : './archive/';
+                document.getElementById('archive-list').innerHTML = (db.archiveList || []).map(date => {
+                    const fDate = date.replace(/(\d{4})(\d{2})(\d{2})/, '$1/$2/$3');
+                    return `<a href="${archivePrefix}${date}.html" class="grave-item">📄 ${fDate}</a>`;
                 }).join('');
 
                 const trendList = document.getElementById('trend-list');
                 trendList.innerHTML = db.current.map(t => {
-                    const isHallOfFame = t.trafficNum >= 500000;
+                    const isHallOfFame = t.trafficNum >= 700000;
                     const barCount = Math.min(10, Math.max(2, Math.ceil(t.trafficNum / 100000)));
                     const eqHtml = Array.from({length: 10}, (_, i) => {
                         const h = i < barCount ? (30 + Math.random() * 70) : 10;
@@ -400,29 +411,20 @@
                                 <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="btn btn-analyze">詳細を見る</a>
                                 ${shopBtn}
                             </div>
-                            <div class="footer-info">
-                                HEAT: ${t.traffic} | LIVE: ${t.firstSeen}
-                            </div>
+                            <div class="footer-info">HEAT: ${t.traffic} | LIVE: ${t.firstSeen}</div>
                         </article>`;
                 }).join('');
 
-                const graveList = document.getElementById('grave-list');
-                graveList.innerHTML = db.graveyard.map(g => {
-                    return `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">† ${g.title.substring(0, 20)}...</a>`;
-                }).join('');
+                document.getElementById('grave-list').innerHTML = db.graveyard.map(g => `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">† ${g.title.substring(0, 20)}...</a>`).join('');
 
             } catch (e) { 
                 console.error('Fetch error:', e); 
-                document.getElementById('loading').innerText = 'DATA LOAD ERROR. PLEASE REFRESH.';
+                document.getElementById('loading').innerText = 'DATA LOAD ERROR.';
             }
         }
 
         load();
-
-        window.addEventListener('resize', () => { 
-            canvas.width = window.innerWidth; 
-            canvas.height = window.innerHeight; 
-        });
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
     </script>
 </body>
 </html>

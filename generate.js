@@ -10,7 +10,6 @@ const ARCHIVE_DIR = './archive';
 if (!fs.existsSync(LOGS_DIR)) fs.mkdirSync(LOGS_DIR);
 if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR);
 
-// 【ユーザー様生存確認済み】のソースのみを使用
 const SOURCES = [
     { name: 'GoogleNews_Top', url: 'https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja', genre: 'GENERAL' },
     { name: 'GoogleNews_Ent', url: 'https://news.google.com/rss/headlines/section/topic/ENTERTAINMENT?hl=ja&gl=JP&ceid=JP:ja', genre: 'SUB_CULTURE' },
@@ -24,11 +23,9 @@ const SERIOUS_WORDS = ['事故', '事件', '死亡', '逮捕', '火災', '地震
 const VIBES_REWRITE = [
     { target: '、', replace: '✨ ' }, { target: '。', replace: '！' },
     { target: '発表', replace: 'キタこれ発表' }, { target: '決定', replace: 'ガチ決定' },
-    { target: '開始', replace: '始まって草' }, { target: '開始', replace: '始まって草' },
-    { target: '検討', replace: '考えてるなう' }, { target: '判明', replace: 'マジか判明' },
-    { target: '公開', replace: '解禁されて沸いた' },
-    { target: '発売', replace: 'リリースされて神' },
-    { target: '放送', replace: 'オンエア決定で優勝' }
+    { target: '開始', replace: '始まって草' }, { target: '検討', replace: '考えてるなう' },
+    { target: '判明', replace: 'マジか判明' }, { target: '公開', replace: '解禁されて沸いた' },
+    { target: '発売', replace: 'リリースされて神' }, { target: '放送', replace: 'オンエア決定で優勝' }
 ];
 
 const MEMO_TEMPLATES = {
@@ -69,23 +66,21 @@ async function main() {
                     if (!title) return;
                     
                     const isSerious = SERIOUS_WORDS.some(w => title.includes(w));
-                    const label = isSerious ? 'ARCHIVE' : (Math.random() > 0.8 ? 'FLASH' : 'REAL');
-                    
                     allNewTrends.push({
                         title,
                         searchKey: title.split(/[ 　,]/)[0],
                         desc: desc.replace(/<[^>]*>/g, '').substring(0, 100),
                         genre: isSerious ? 'ARCHIVE' : source.genre,
-                        label: label,
+                        label: isSerious ? 'ARCHIVE' : (Math.random() > 0.8 ? 'FLASH' : 'REAL'),
                         traffic: (Math.floor(Math.random() * 900) + 100) + "℃",
-                        trafficNum: Math.floor(Math.random() * 1000000) // EQアニメーション用
+                        trafficNum: Math.floor(Math.random() * 1000000)
                     });
-                    title.split(/[ 　]/).filter(w => w.length >= 2).forEach(t => tagsSet.add(t));
+                    title.split(/[ 　]/).filter(w => w.length >= 2).slice(0, 3).forEach(t => tagsSet.add(t));
                 });
             } catch (e) { console.error(`ERR: ${source.name}`); }
         }
 
-        let db = { current: [], graveyard: [], tags: [], lastUpdate: "" };
+        let db = { current: [], graveyard: [], tags: [], archiveList: [], lastUpdate: "" };
         if (fs.existsSync(DATA_FILE)) db = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
 
         const now = new Date(new Date().getTime() + (9 * 60 * 60 * 1000));
@@ -107,6 +102,10 @@ async function main() {
         db.graveyard = db.graveyard.slice(0, 30);
         db.tags = Array.from(tagsSet).slice(0, 20);
         db.lastUpdate = displayTime;
+
+        // アーカイブ一覧を更新
+        const archives = fs.readdirSync(ARCHIVE_DIR).filter(f => f.endsWith('.html')).map(f => f.replace('.html', '')).sort((a, b) => b - a);
+        db.archiveList = archives;
 
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2));
         fs.writeFileSync(path.join(LOGS_DIR, `${dateKey}.json`), JSON.stringify(db, null, 2));
