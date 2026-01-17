@@ -59,7 +59,7 @@ function smartGyaruize(text, type = 'title') {
 
 async function main() {
     try {
-        console.log('--- 最終世代インテリジェンス・同期開始 ---');
+        console.log('--- インテリジェンス・クリーン同期開始 ---');
         let allNewTrends = [];
         let tagsSet = new Set();
 
@@ -76,7 +76,6 @@ async function main() {
                 const genre = getGenre(rawTitle, rawDesc);
                 const vibes = getVibes(isSerious, traffic);
 
-                // タグ抽出（固有名詞っぽいやつを簡易的に）
                 const potentialTags = rawTitle.replace(/[【】（）()「」]/g, ' ').split(' ').filter(w => w.length >= 2 && w.length <= 8);
                 potentialTags.slice(0, 2).forEach(tag => tagsSet.add(tag));
                 
@@ -114,13 +113,27 @@ async function main() {
             }
         });
 
-        db.current = mergedTrends.slice(0, 30);
-        db.graveyard = (db.graveyard || []).slice(0, 20);
-        db.tags = Array.from(tagsSet).slice(0, 15); // 上位15タグ
+        // 墓場の初期データ対策: currentからあふれたものや、古いものを墓場へ
+        let newGraveyard = [...(db.graveyard || [])];
+        if (db.current.length > 0) {
+            db.current.forEach(old => {
+                if (!seenTitles.has(old.title)) {
+                    newGraveyard.unshift({ title: old.title, diedAt: displayTime });
+                }
+            });
+        }
+        // 初回実行時などで墓場が空の場合、現在のリストの下位を入れる
+        if (newGraveyard.length === 0 && mergedTrends.length > 10) {
+            mergedTrends.slice(10, 20).forEach(t => newGraveyard.push({ title: t.title, diedAt: displayTime }));
+        }
+
+        db.current = mergedTrends.slice(0, 10); // メインは厳選10件
+        db.graveyard = newGraveyard.slice(0, 20);
+        db.tags = Array.from(tagsSet).slice(0, 15);
         db.lastUpdate = displayTime;
 
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2));
-        console.log(`[SUCCESS] ${db.current.length}件、${db.tags.length}タグを保存。`);
+        console.log(`[SUCCESS] クリーンデータ保存完了。`);
     } catch (err) {
         console.error('[FATAL]', err.message);
         process.exit(1);
