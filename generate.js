@@ -7,10 +7,8 @@ const SOURCES = [
     { name: 'Yahoo', url: 'https://news.yahoo.co.jp/rss/categories/domestic.xml' }
 ];
 
-// シリアス判定ワード（不謹慎防止ガードレール）
 const SERIOUS_WORDS = ['事故', '事件', '死亡', '逮捕', '火災', '地震', '不倫', '死去', '容疑', '被害', '遺体', '衝突', '刺', '殺', '判決', '倒産', 'ミサイル', '引退', '辞任', '震災', '追悼', '犠牲', '避難', '不明', '遺族', '訃報', '被災'];
 
-// バイブス・メモ：各10パターン
 const MEMO_TEMPLATES = {
     HOT: [
         "日本中の視線がここに集中してる。もはや義務教育レベルで知っとくべき。🔥",
@@ -84,11 +82,9 @@ function getClassification(title, desc, isSerious, trafficNum, duration) {
     if (isSerious) return { label: 'ARCHIVE', theme: 'serious' };
     if (trafficNum >= 500000) return { label: 'FLASH', theme: 'hot' };
     if (duration < 30) return { label: 'FLASH', theme: 'new' };
-    
     const text = (title + desc).toLowerCase();
     if (text.match(/株|円安|経済|予算|税|市場|物価|値上げ/)) return { label: 'REAL', theme: 'normal' };
     if (text.match(/ドラマ|映画|放送|タレント|歌手|アイドル|推し|主演/)) return { label: 'CULTURAL', theme: 'normal' };
-    
     return { label: 'CRITICAL', theme: 'normal' };
 }
 
@@ -99,7 +95,6 @@ function getMemo(theme) {
 
 async function main() {
     try {
-        console.log('--- インテリジェンス・バイブス同期開始 ---');
         let allNewTrends = [];
         let tagsSet = new Set();
 
@@ -111,13 +106,10 @@ async function main() {
                 const desc = getBetween(item, '<description>', '</description>');
                 const trafficRaw = getBetween(item, '<ht:approx_traffic>', '</ht:approx_traffic>') || '10,000+';
                 if (!title || title.length < 5) return;
-
                 const isSerious = SERIOUS_WORDS.some(w => title.includes(w) || desc.includes(w));
                 const trafficNum = parseInt(trafficRaw.replace(/[^0-9]/g, '')) || 10000;
-                
                 const potentialTags = title.replace(/[【】（）()「」]/g, ' ').split(/[ 　]/).filter(w => w.length >= 2 && w.length <= 8);
                 potentialTags.slice(0, 3).forEach(tag => tagsSet.add(tag));
-                
                 allNewTrends.push({ title, desc, traffic: trafficRaw, trafficNum, isSerious });
             });
         }
@@ -138,37 +130,41 @@ async function main() {
             const existing = (db.current || []).find(ct => ct.title === nt.title);
             const firstSeen = existing ? existing.firstSeen : displayTime;
             const duration = existing ? Math.floor((now - new Date(firstSeen.replace(/\//g, '-'))) / (1000 * 60)) : 0;
-            
             const classInfo = getClassification(nt.title, nt.desc, nt.isSerious, nt.trafficNum, duration);
-            
-            // 判定に基づいたメモの選択
             let theme = classInfo.theme;
             if (nt.isSerious) theme = 'ARCHIVE';
             else if (nt.trafficNum >= 500000) theme = 'HOT';
             else if (duration < 30) theme = 'NEW';
-
-            finalTrends.push({
-                ...nt,
-                firstSeen,
-                duration,
-                label: classInfo.label,
-                memo: getMemo(theme)
-            });
+            finalTrends.push({ ...nt, firstSeen, duration, label: classInfo.label, memo: getMemo(theme) });
         });
 
-        // 墓場
-        let newGrave = [...(db.graveyard || [])];
+        // 墓場ロジックの修正
+        let newGrave = (db.graveyard || []);
         if (db.current.length > 0) {
-            db.current.forEach(old => { if (!seenTitles.has(old.title)) newGrave.unshift({ title: old.title, diedAt: displayTime }); });
+            db.current.forEach(old => {
+                if (!seenTitles.has(old.title) && !newGrave.some(g => g.title === old.title)) {
+                    newGrave.unshift({ title: old.title, diedAt: displayTime });
+                }
+            });
+        }
+        
+        // 初回起動時の墓場確保：15位以降を墓場へ
+        if (finalTrends.length > 15) {
+            const leftover = finalTrends.slice(15);
+            leftover.forEach(t => {
+                if (!newGrave.some(g => g.title === t.title)) {
+                    newGrave.push({ title: t.title, diedAt: displayTime });
+                }
+            });
         }
 
         db.current = finalTrends.sort((a,b) => b.trafficNum - a.trafficNum).slice(0, 15);
-        db.graveyard = newGrave.slice(0, 25);
+        db.graveyard = newGrave.slice(0, 30);
         db.tags = Array.from(tagsSet).slice(0, 30);
         db.lastUpdate = displayTime;
 
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2));
-        console.log(`[SUCCESS] ALL SYNCED`);
+        console.log(`[SUCCESS] SYNC DONE`);
     } catch (err) {
         console.error('[FATAL]', err.message);
         process.exit(1);
