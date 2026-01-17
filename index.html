@@ -334,9 +334,12 @@
 
         async function load() {
             try {
-                // GitHubの生データから直接フェッチするURL
-                const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json';
-                const res = await fetch(GITHUB_RAW_URL + '?v=' + Date.now());
+                // セキュリティ制限(CORS)を回避するために jsDelivr CDN を使用
+                const GITHUB_CDN_URL = 'https://cdn.jsdelivr.net/gh/calro999/auto-site/intelligence_db.json';
+                
+                // ?v= でキャッシュを無効化
+                const res = await fetch(GITHUB_CDN_URL + '?v=' + Date.now());
+                
                 if (!res.ok) throw new Error('Network response was not ok');
                 
                 const db = await res.json();
@@ -381,6 +384,8 @@
 
             } catch (e) { 
                 console.error('Fetch error:', e); 
+                // エラー時はローディング画面にエラーメッセージを出す（任意）
+                document.getElementById('loading').innerText = 'DATA LOAD ERROR. PLEASE REFRESH.';
             }
         }
 
