@@ -24,19 +24,25 @@ const VIBES_REWRITE = [
     { target: '発表', replace: 'キタこれ発表' }, { target: '決定', replace: 'ガチ決定' }
 ];
 
-// 強力なクリーンアップ関数
+// 【最強版】クリーンアップ関数
 function cleanText(text) {
     if (!text) return "";
-    return text
-        .replace(/&nbsp;/g, ' ')                        // 空白ゴミ除去
-        .replace(/&lt;.*?&gt;/g, '')                    // エスケープされたHTMLタグ除去
-        .replace(/<.*?>/g, '')                          // 通常のHTMLタグ除去
-        .replace(/Photo:.*?\s/g, '')                    // 「Photo:名前」を除去
-        .replace(/Image:.*?\s/g, '')                    // 「Image:名前」を除去
-        .replace(/.*?再掲載しています。/g, '')           // 再掲載の定型文を一行まるごと消去
-        .replace(/Google ニュースですべての記事を見る/g, '') // Googleニュースの末尾ゴミ
-        .replace(/\s+/g, ' ')                           // 連続する空白を一つに
+    let clean = text
+        .replace(/&amp;nbsp;/g, ' ')                     // &amp;nbsp; を除去
+        .replace(/&nbsp;/g, ' ')                        // &nbsp; を除去
+        .replace(/&lt;.*?&gt;/g, '')                    // エスケープされたタグを除去
+        .replace(/<.*?>/g, '')                          // 通常のHTMLタグを除去
+        .replace(/Photo:.*?\s/g, '')                    // クレジット除去
+        .replace(/Image:.*?\s/g, '')                    // クレジット除去
+        .replace(/.*?のニュースを編集して再掲載しています。/g, '') 
+        .replace(/.*?の記事を編集して再掲載しています。/g, '')
+        .replace(/Google ニュースですべての記事を見る/g, '')
+        .replace(/\n/g, ' ')                            // 改行除去
+        .replace(/\s+/g, ' ')                           // 連続空白を一つに
         .trim();
+
+    // 自分のタイトルが説明文の先頭に含まれている場合、それを削る（Googleニュース対策）
+    return clean;
 }
 
 async function main() {
@@ -52,18 +58,26 @@ async function main() {
         for (const source of SOURCES) {
             try {
                 const rss = await rssFetch(source.url);
-                const items = rss.split('<item>').slice(1, 10);
+                const items = rss.split('<item>').slice(1, 12);
                 for (const item of items) {
-                    let title = cleanText(item.split('<title>')[1]?.split('</title>')[0] || "");
-                    let desc = cleanText(item.split('<description>')[1]?.split('</description>')[0] || "");
+                    let rawTitle = item.split('<title>')[1]?.split('</title>')[0] || "";
+                    let rawDesc = item.split('<description>')[1]?.split('</description>')[0] || "";
                     
+                    let title = cleanText(rawTitle);
+                    let desc = cleanText(rawDesc);
+                    
+                    // タイトルと説明が重複している場合、説明側の重複部分をカット
+                    if (desc.startsWith(title)) {
+                        desc = desc.replace(title, '').trim();
+                    }
+
                     if (!title) continue;
                     
                     const isSerious = SERIOUS_WORDS.some(w => title.includes(w));
                     allNewTrends.push({
                         title,
                         searchKey: title.split(/[ 　,]/)[0],
-                        desc: desc.substring(0, 80) + (desc.length > 80 ? '...' : ''),
+                        desc: desc.substring(0, 90) || "詳細はリンク先でチェック！",
                         genre: isSerious ? 'ARCHIVE' : source.genre,
                         label: isSerious ? 'ARCHIVE' : (Math.random() > 0.7 ? 'FLASH' : 'REAL'),
                         traffic: (Math.floor(Math.random() * 900) + 100) + "℃",
@@ -76,11 +90,9 @@ async function main() {
 
         const now = new Date(new Date().getTime() + (9 * 60 * 60 * 1000));
         const displayTime = now.toLocaleString('ja-JP');
-        const dateKey = now.toISOString().split('T')[0].replace(/-/g, '');
 
         let db = { current: allNewTrends.slice(0, 15), tags: Array.from(tagsSet).slice(0, 15), archiveList: [], lastUpdate: displayTime };
 
-        // アーカイブフォルダをスキャンしてリスト化
         if (fs.existsSync(ARCHIVE_DIR)) {
             db.archiveList = fs.readdirSync(ARCHIVE_DIR)
                 .filter(f => f.endsWith('.html'))
@@ -88,7 +100,6 @@ async function main() {
                 .sort((a, b) => b - a);
         }
 
-        // バイブス変換の適用
         db.current = db.current.map(t => {
             let vt = t.title;
             VIBES_REWRITE.forEach(r => vt = vt.split(r.target).join(r.replace));
@@ -96,7 +107,7 @@ async function main() {
         });
 
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2));
-        console.log("SUCCESS: JSON UPDATED");
+        console.log("SUCCESS: JSON UPDATED. Check intelligence_db.json now!");
     } catch (e) { console.error(e); }
 }
 main();
