@@ -11,8 +11,13 @@ const SERIOUS_WORDS = ['事故', '事件', '死亡', '逮捕', '火災', '地震
 
 function fetch(url) {
     return new Promise((resolve, reject) => {
+        // ここで「普通のブラウザ」だと偽装する
         const options = {
-            headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36' }
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/xml,application/xml,application/xhtml+xml',
+                'Accept-Language': 'ja,en-US;q=0.9,en;q=0.8'
+            }
         };
         https.get(url, options, (res) => {
             let data = '';
@@ -24,52 +29,51 @@ function fetch(url) {
 
 async function main() {
     try {
-        console.log('--- ギャルの熱狂インテリジェンス：強制同期開始 ---');
+        console.log('--- ギャルの熱狂インテリジェンス：人間偽装同期 ---');
         let allNewTrends = [];
 
         for (const source of SOURCES) {
-            console.log(`[ACCESS] ${source.name} に接続中...`);
+            console.log(`[TRY] ${source.name} のデータを取得中...`);
             const rssData = await fetch(source.url);
             
-            // アイテム抽出をより柔軟に (大文字小文字無視、改行対応)
+            // <item>タグを正規表現で切り出し
             const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
-            const items = rssData.match(itemRegex) || [];
-            console.log(`[INFO] ${source.name} から ${items.length} 件見つかりました。`);
+            let match;
+            let count = 0;
 
-            items.forEach(item => {
+            while ((match = itemRegex.exec(rssData)) !== null) {
+                const itemContent = match[1];
+                
                 const extract = (tag) => {
-                    const regex = new RegExp(`<${tag}[^>]*?>([\\s\\S]*?)<\\/${tag}>`, 'i');
-                    const match = item.match(regex);
-                    return match ? match[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim() : '';
+                    const tRegex = new RegExp(`<${tag}[^>]*?>([\\s\\S]*?)<\\/${tag}>`, 'i');
+                    const tMatch = itemContent.match(tRegex);
+                    return tMatch ? tMatch[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim() : '';
                 };
 
                 const title = extract('title');
-                if (!title) return;
-
-                const isSerious = SERIOUS_WORDS.some(w => title.includes(w));
-                allNewTrends.push({
-                    title,
-                    source: source.name,
-                    desc: extract('description').substring(0, 100),
-                    isSerious,
-                    traffic: extract('ht:approx_traffic') || 'Rising',
-                    firstSeen: "" // 後で設定
-                });
-            });
+                if (title) {
+                    const isSerious = SERIOUS_WORDS.some(w => title.includes(w));
+                    allNewTrends.push({
+                        title,
+                        source: source.name,
+                        desc: extract('description').substring(0, 80),
+                        isSerious,
+                        traffic: extract('ht:approx_traffic') || 'Rising'
+                    });
+                    count++;
+                }
+            }
+            console.log(`[SUCCESS] ${source.name} から ${count} 件ゲット！`);
         }
 
         if (allNewTrends.length === 0) {
-            console.error('[ERROR] トレンドが0件です。RSSの内容を確認してください。');
-            process.exit(1);
+            throw new Error('全ソースから1件も取れませんでした。ブロックされている可能性があります。');
         }
 
-        // DB読み込み
+        // DB処理
         let db = { current: [], graveyard: [], lastUpdate: "" };
         if (fs.existsSync(DATA_FILE)) {
-            try {
-                const raw = fs.readFileSync(DATA_FILE, 'utf8');
-                if (raw) db = JSON.parse(raw);
-            } catch(e) { console.log('[WARN] JSONパース失敗、リセットします'); }
+            try { db = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); } catch(e) {}
         }
 
         const now = new Date(new Date().getTime() + (9 * 60 * 60 * 1000));
@@ -85,8 +89,8 @@ async function main() {
             const existing = db.current.find(ct => ct.title === nt.title);
             if (existing) {
                 const startStr = existing.firstSeen.replace(/\//g, '-');
-                const diffMins = Math.max(0, Math.floor((now - new Date(startStr)) / (1000 * 60)));
-                mergedTrends.push({ ...nt, firstSeen: existing.firstSeen, duration: diffMins || 0 });
+                const diffMins = Math.floor((now - new Date(startStr)) / (1000 * 60));
+                mergedTrends.push({ ...nt, firstSeen: existing.firstSeen, duration: Math.max(0, diffMins) });
             } else {
                 mergedTrends.push({ ...nt, firstSeen: displayTime, duration: 0 });
             }
@@ -104,9 +108,9 @@ async function main() {
         db.lastUpdate = displayTime;
 
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2));
-        console.log(`[SUCCESS] 全 ${db.current.length} 件をデプロイ可能状態にしました。`);
+        console.log(`[DONE] 最新インテリジェンス ${db.current.length} 件を保存しました。`);
     } catch (err) {
-        console.error('[FATAL] 実行エラー:', err);
+        console.error('[FATAL ERROR]', err.message);
         process.exit(1);
     }
 }
