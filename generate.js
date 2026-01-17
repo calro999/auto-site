@@ -65,10 +65,22 @@ async function main() {
                 const title = getBetween(item, '<title>', '</title>');
                 const desc = getBetween(item, '<description>', '</description>');
                 const trafficRaw = getBetween(item, '<ht:approx_traffic>', '</ht:approx_traffic>') || '10,000+';
-                if (!title || title.length < 5) return;
+                if (!title || title.length < 2) return;
+                
                 const isSerious = SERIOUS_WORDS.some(w => title.includes(w) || desc.includes(w));
                 const trafficNum = parseInt(trafficRaw.replace(/[^0-9]/g, '')) || 10000;
-                allNewTrends.push({ title, desc, traffic: trafficRaw, trafficNum, isSerious });
+                
+                // 検索用キーワードを抽出（記号で区切った最初の塊）
+                const searchKey = title.split(/[ 　,、。!！「」]/).filter(s => s.length > 0)[0];
+                
+                allNewTrends.push({ 
+                    title: title, 
+                    searchKey: searchKey,
+                    desc: desc, 
+                    traffic: trafficRaw, 
+                    trafficNum: trafficNum, 
+                    isSerious: isSerious 
+                });
                 title.split(/[ 　]/).filter(w => w.length >= 2).slice(0, 3).forEach(tag => tagsSet.add(tag));
             });
         }
@@ -105,12 +117,10 @@ async function main() {
         db.tags = Array.from(tagsSet).slice(0, 30);
         db.lastUpdate = displayTime;
 
-        // 資産化：日付ごとのログを保存
         const dateKey = now.toISOString().split('T')[0];
         fs.writeFileSync(path.join(LOGS_DIR, `${dateKey}.json`), JSON.stringify(db, null, 2));
-        
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2));
-        console.log(`[SUCCESS] SYNC AND ASSET LOG CREATED`);
+        console.log(`[SUCCESS] SYNC DONE`);
     } catch (err) { console.error(err); process.exit(1); }
 }
 main();

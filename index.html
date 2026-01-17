@@ -352,7 +352,6 @@
 
         async function load() {
             try {
-                // セキュリティ制限(CORS)を回避してGitHubから直接読み込むURL
                 const CDN_URL = 'https://cdn.jsdelivr.net/gh/calro999/auto-site/intelligence_db.json';
                 const res = await fetch(CDN_URL + '?v=' + Date.now());
                 if (!res.ok) throw new Error('Network response was not ok');
@@ -378,8 +377,8 @@
                         return `<div class="eq-bar ${i < barCount ? 'eq-active' : ''}" style="height: ${h}%; animation-delay: ${delay}s"></div>`;
                     }).join('');
 
-                    // アフィリエイト用リンク
-                    const affiUrl = `https://www.amazon.co.jp/s?k=${encodeURIComponent(t.title)}&tag=mattan0290c-22`;
+                    // Amazonアソシエイトリンクを固定タグ「mattan0290c-22」に設定
+                    const affiUrl = `https://www.amazon.co.jp/s?k=${encodeURIComponent(t.searchKey)}&tag=mattan0290c-22`;
                     const shopBtn = t.label !== 'ARCHIVE' ? `<a href="${affiUrl}" target="_blank" class="btn btn-shop">関連グッズ ✨</a>` : '';
 
                     return `
@@ -387,7 +386,7 @@
                             <div class="label-badge label-${t.label}">${t.label}</div>
                             <div class="vibes-memo">“ ${t.memo} ”</div>
                             <div class="eq-container">${eqHtml}</div>
-                            <h3>${t.vibesTitle}</h3>
+                            <h3>${t.vibesTitle || t.title}</h3>
                             <p class="desc">${t.desc}</p>
                             <div class="btn-group">
                                 <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="btn btn-analyze">詳細を見る</a>
