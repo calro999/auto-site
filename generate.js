@@ -6,7 +6,6 @@ const DATA_FILE = './intelligence_db.json';
 const LOGS_DIR = './logs';
 const ARCHIVE_DIR = './archive';
 
-// 必要なディレクトリの作成
 if (!fs.existsSync(LOGS_DIR)) fs.mkdirSync(LOGS_DIR);
 if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR);
 
@@ -103,9 +102,13 @@ async function main() {
         db.tags = Array.from(tagsSet).slice(0, 20);
         db.lastUpdate = displayTime;
 
-        // アーカイブ一覧を更新
-        const archives = fs.readdirSync(ARCHIVE_DIR).filter(f => f.endsWith('.html')).map(f => f.replace('.html', '')).sort((a, b) => b - a);
-        db.archiveList = archives;
+        // アーカイブ一覧の更新
+        if (fs.existsSync(ARCHIVE_DIR)) {
+            db.archiveList = fs.readdirSync(ARCHIVE_DIR)
+                .filter(f => f.endsWith('.html'))
+                .map(f => f.replace('.html', ''))
+                .sort((a, b) => b - a);
+        }
 
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2));
         fs.writeFileSync(path.join(LOGS_DIR, `${dateKey}.json`), JSON.stringify(db, null, 2));
@@ -113,8 +116,8 @@ async function main() {
         if (fs.existsSync('./index.html')) {
             const template = fs.readFileSync('./index.html', 'utf8');
             const archiveHtml = template.replace(
-                "const CDN_URL = 'https://cdn.jsdelivr.net/gh/calro999/auto-site/intelligence_db.json';",
-                `const CDN_URL = '../logs/${dateKey}.json';`
+                /const DATA_SOURCE = '.*?';/,
+                `const DATA_SOURCE = '../logs/${dateKey}.json';`
             ).replace(
                 "<title>GAL-INTEL | 世の中の「今」を、最速でバイブス変換。</title>",
                 `<title>ARCHIVE_${dateKey} | GAL-INTEL</title>`

@@ -327,10 +327,13 @@
         const ctx = canvas.getContext('2d');
         let dots = [];
 
+        // 常に最新データを取得するためのRaw URL
+        const DATA_SOURCE_URL = 'https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json';
+
         function initBg(tags) {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            dots = tags.map(t => ({
+            dots = (tags || []).map(t => ({
                 x: Math.random() * canvas.width, 
                 y: Math.random() * canvas.height, 
                 text: '#' + t,
@@ -366,20 +369,25 @@
 
         async function load() {
             try {
-                // キャッシュを破壊するために ?v=[タイムスタンプ] を付与
-                const CDN_URL = 'https://cdn.jsdelivr.net/gh/calro999/auto-site/intelligence_db.json?v=' + Date.now();
-                const res = await fetch(CDN_URL);
-                if (!res.ok) throw new Error('Network response was not ok');
+                // キャッシュを強制回避
+                const urlWithTime = DATA_SOURCE_URL + '?t=' + Date.now();
+                const res = await fetch(urlWithTime);
+                if (!res.ok) throw new Error('Fetch failed');
                 
                 const db = await res.json();
+                console.log("SUCCESS: Data Loaded", db);
+
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('sync-info').innerText = 'LAST_UPDATE: ' + db.lastUpdate;
                 
                 initBg(db.tags);
 
-                document.getElementById('tag-list').innerHTML = db.tags.map(tag => `<a href="https://www.google.com/search?q=${encodeURIComponent(tag)}" target="_blank" class="tag-item">#${tag}</a>`).join('');
+                // タグの表示
+                document.getElementById('tag-list').innerHTML = (db.tags || []).map(tag => 
+                    `<a href="https://www.google.com/search?q=${encodeURIComponent(tag)}" target="_blank" class="tag-item">#${tag}</a>`
+                ).join('');
 
-                // アーカイブ表示の修正
+                // アーカイブの表示
                 const isArchivePage = window.location.pathname.includes('/archive/');
                 const archivePrefix = isArchivePage ? './' : './archive/';
                 const archiveContainer = document.getElementById('archive-list');
@@ -396,6 +404,7 @@
                     }).join('');
                 }
 
+                // トレンド記事の表示
                 const trendList = document.getElementById('trend-list');
                 trendList.innerHTML = db.current.map(t => {
                     const isHallOfFame = t.trafficNum >= 700000;
@@ -425,7 +434,10 @@
                         </article>`;
                 }).join('');
 
-                document.getElementById('grave-list').innerHTML = (db.graveyard || []).map(g => `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">† ${g.title.substring(0, 20)}...</a>`).join('');
+                // 墓場の表示
+                document.getElementById('grave-list').innerHTML = (db.graveyard || []).map(g => 
+                    `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">† ${g.title.substring(0, 20)}...</a>`
+                ).join('');
 
             } catch (e) { 
                 console.error('Fetch error:', e); 
@@ -434,7 +446,10 @@
         }
 
         load();
-        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+        window.addEventListener('resize', () => { 
+            canvas.width = window.innerWidth; 
+            canvas.height = window.innerHeight; 
+        });
     </script>
 </body>
 </html>
