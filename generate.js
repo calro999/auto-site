@@ -77,8 +77,8 @@ async function main() {
                 const genre = getGenre(rawTitle, rawDesc);
                 const vibes = getVibes(isSerious, trafficRaw);
 
-                const potentialTags = rawTitle.replace(/[【】（）()「」]/g, ' ').split(' ').filter(w => w.length >= 2 && w.length <= 8);
-                potentialTags.slice(0, 2).forEach(tag => tagsSet.add(tag));
+                const potentialTags = rawTitle.replace(/[【】（）()「」]/g, ' ').split(/[ 　]/).filter(w => w.length >= 2 && w.length <= 8);
+                potentialTags.slice(0, 3).forEach(tag => tagsSet.add(tag));
                 
                 allNewTrends.push({
                     title: isSerious ? rawTitle : smartGyaruize(rawTitle, 'title'),
@@ -113,24 +113,23 @@ async function main() {
             });
         });
 
-        // 墓場ロジック
         let newGraveyard = [...(db.graveyard || [])];
         if (db.current.length > 0) {
             db.current.forEach(old => {
                 if (!seenTitles.has(old.title)) newGraveyard.unshift({ title: old.title, diedAt: displayTime });
             });
         }
-        if (newGraveyard.length === 0) { // 初回用ダミー回避
-            mergedTrends.slice(15, 25).forEach(t => newGraveyard.push({ title: t.title, diedAt: displayTime }));
+        if (newGraveyard.length === 0) {
+            mergedTrends.slice(10, 30).forEach(t => newGraveyard.push({ title: t.title, diedAt: displayTime }));
         }
 
         db.current = mergedTrends.sort((a,b) => b.trafficNum - a.trafficNum).slice(0, 15);
-        db.graveyard = newGraveyard.slice(0, 20);
-        db.tags = Array.from(tagsSet).slice(0, 20);
+        db.graveyard = newGraveyard.slice(0, 25);
+        db.tags = Array.from(tagsSet).slice(0, 30);
         db.lastUpdate = displayTime;
 
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2));
-        console.log(`[SUCCESS] データ同期完了`);
+        console.log(`[SUCCESS] SYNC COMPLETE`);
     } catch (err) {
         console.error('[FATAL]', err.message);
         process.exit(1);
