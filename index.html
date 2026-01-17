@@ -384,7 +384,8 @@
                         return `<div class="eq-bar ${i < barCount ? 'eq-active' : ''}" style="height: ${h}%; animation-delay: ${delay}s"></div>`;
                     }).join('');
 
-                    // Amazonアソシエイトリンク固定 & 検索ワード修正
+                    // Amazonアソシエイトリンク固定: mattan0290c-22
+                    // 検索キーワード: searchKey (なければタイトルの先頭)
                     const kw = t.searchKey || t.title.split(/[ 　]/)[0];
                     const affiUrl = `https://www.amazon.co.jp/s?k=${encodeURIComponent(kw)}&tag=mattan0290c-22`;
                     const shopBtn = t.label !== 'ARCHIVE' ? `<a href="${affiUrl}" target="_blank" class="btn btn-shop">関連グッズ ✨</a>` : '';
