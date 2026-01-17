@@ -3,7 +3,10 @@ const https = require('https');
 const path = require('path');
 
 const RSS_URL = 'https://trends.google.co.jp/trends/trendingsearches/daily/rss?geo=JP';
+const DATA_FILE = './intelligence_db.json';
 const ARCHIVE_DIR = './archive';
+
+const SERIOUS_WORDS = ['事故', '事件', '死亡', '逮捕', '火災', '地震', '不倫', '死去', '容疑', '被害', '遺体', '衝突', '刺', '殺', '判決', '倒産', 'ミサイル'];
 
 function fetch(url) {
     return new Promise((resolve, reject) => {
@@ -17,62 +20,90 @@ function fetch(url) {
 
 async function main() {
     try {
-        console.log('--- 起動：トレンド解析エンジン ---');
+        console.log('--- ギャルの熱狂インテリジェンス：スキャン開始 ---');
         const rssData = await fetch(RSS_URL);
-        const items = rssData.match(/<item>([\s\S]*?)<\/item>/g) || [];
-        const articles = items.slice(0, 15).map(item => {
-            const title = (item.match(/<title>([\s\S]*?)<\/title>/) || [null, "取得失敗"])[1];
-            const description = (item.match(/<description>([\s\S]*?)<\/description>/) || [null, "詳細なし"])[1];
-            const traffic = (item.match(/<ht:approx_traffic>(.*?)<\/ht:approx_traffic>/) || [null, "不明"])[1];
-            return { title, description, traffic };
+        const items = rssData.split('<item>').slice(1);
+        
+        let db = { current: [], graveyard: [], total_heat: 0 };
+        if (fs.existsSync(DATA_FILE)) {
+            db = JSON.parse(fs.readFileSync(DATA_FILE));
+        }
+
+        const now = new Date(new Date().getTime() + (9 * 60 * 60 * 1000));
+        const displayTime = now.toLocaleString('ja-JP');
+
+        const newTrends = items.map(item => {
+            const getTag = (t) => (item.split(`<${t}>`)[1] || '').split(`</${t}>`)[0].replace(/<!\[CDATA\[|\]\]>/g, '').trim();
+            const title = getTag('title');
+            const isSerious = SERIOUS_WORDS.some(w => title.includes(w));
+            return {
+                title,
+                traffic: getTag('ht:approx_traffic'),
+                desc: getTag('description'),
+                isSerious,
+                firstSeen: displayTime
+            };
         });
 
-        const jstNow = new Date(new Date().getTime() + (9 * 60 * 60 * 1000));
-        const displayTime = jstNow.toLocaleString('ja-JP');
-        const fileSafeTime = jstNow.toISOString().replace(/[:.]/g, '-').slice(0, 19);
-        const fileName = `${fileSafeTime}.html`;
+        db.current.forEach(old => {
+            if (!newTrends.some(n => n.title === old.title) && !old.isSerious) {
+                db.graveyard.unshift({ title: old.title, diedAt: displayTime });
+            }
+        });
+        db.graveyard = db.graveyard.slice(0, 15);
+        db.current = newTrends;
 
-        if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR);
-
-        // 1. 個別アーカイブの生成
-        const articleHtml = `<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>${displayTime}</title><style>body{font-family:sans-serif;background:#0d1117;color:#c9d1d9;max-width:800px;margin:0 auto;padding:20px;}.card{background:#161b22;border:1px solid #30363d;padding:20px;margin-bottom:15px;border-radius:8px;}h1{color:#58a6ff;}span{color:#ff4d4d;font-weight:bold;}</style></head><body><h1>📈 解析ログ: ${displayTime}</h1><p><a href="../index.html" style="color:#58a6ff;">← 戻る</a></p>${articles.map(a => `<div class="card"><span>注目度: ${a.traffic}</span><h2>${a.title}</h2><p>${a.description}</p></div>`).join('')}</body></html>`;
-        fs.writeFileSync(path.join(ARCHIVE_DIR, fileName), articleHtml);
-
-        // 2. アーカイブ一覧の取得
-        const files = fs.readdirSync(ARCHIVE_DIR).filter(f => f.endsWith('.html')).sort().reverse().slice(0, 15);
-
-        // 3. index.html の生成（SEOメタタグ自動埋め込み）
-        const topTrend = articles[0]?.title || "最新ニュース";
-        const indexHtml = `<!DOCTYPE html>
+        const html = `
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>【${topTrend}】急上昇トレンド解析ポータル</title>
-    <meta name="description" content="${topTrend}など、${displayTime}現在の最新トレンド15選を自動解析中。">
+    <title>ギャルの熱狂インテリジェンス</title>
     <style>
-        body{font-family:-apple-system,sans-serif;background:#0d1117;color:#c9d1d9;max-width:800px;margin:0 auto;padding:40px 20px;}
-        h1{color:#58a6ff;text-align:center;}
-        .latest{background:linear-gradient(45deg, #161b22, #0d1117);border:2px solid #58a6ff;padding:20px;border-radius:15px;margin-bottom:40px;}
-        .archive-item{display:block;background:#161b22;padding:15px;margin-bottom:10px;border-radius:8px;text-decoration:none;color:#c9d1d9;border:1px solid #30363d;}
-        .archive-item:hover{border-color:#58a6ff;}
-        .tag{background:#238636;color:white;padding:2px 8px;border-radius:4px;font-size:12px;margin-right:10px;}
+        :root { --neon-blue: #00d4ff; --neon-pink: #ff007f; --serious-gray: #444; }
+        body { background: #050505; color: #fff; font-family: 'Helvetica Neue', sans-serif; margin: 0; padding: 20px; }
+        .header { text-align: center; border-bottom: 2px solid var(--neon-pink); padding-bottom: 10px; margin-bottom: 30px; }
+        .hero-title { font-size: 2rem; color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); }
+        .trend-card { background: #111; border: 1px solid #333; padding: 20px; border-radius: 15px; margin-bottom: 20px; position: relative; }
+        .trend-card.serious { border-left: 10px solid var(--serious-gray); opacity: 0.8; }
+        .trend-card.hot { border-left: 10px solid var(--neon-blue); }
+        .label { font-size: 0.7rem; font-weight: bold; padding: 3px 8px; border-radius: 5px; margin-bottom: 10px; display: inline-block; }
+        .label.serious { background: var(--serious-gray); }
+        .label.hot { background: var(--neon-blue); color: #000; }
+        .bet-btn { float: right; background: none; border: 1px solid var(--neon-pink); color: var(--neon-pink); padding: 5px 15px; border-radius: 20px; text-decoration: none; font-size: 0.8rem; }
+        .graveyard { background: #000; border: 2px dashed #222; padding: 20px; border-radius: 15px; margin-top: 50px; }
+        .grave-item { display: inline-block; background: #1a1a1a; padding: 10px; margin: 5px; border-radius: 5px; font-size: 0.8rem; color: #666; }
+        h2 { color: var(--neon-blue); font-size: 1.2rem; }
     </style>
 </head>
 <body>
-    <h1>🚀 トレンド Intelligence</h1>
-    <div class="latest">
-        <h2>TOPIC: ${topTrend}</h2>
-        <p>現在、日本で最も検索されているワードです。詳細はアーカイブを確認してください。</p>
-        <p>同期時刻: ${displayTime}</p>
+    <div class="header">
+        <div class="hero-title">ギャルの熱狂インテリジェンス</div>
+        <p style="font-size: 0.8rem; color: #888;">日本の「今」をハックする観測儀 / Sync: ${displayTime}</p>
     </div>
-    <h2>過去の解析ログ</h2>
-    ${files.map(f => `<a href="./archive/${f}" class="archive-item"><span class="tag">LOG</span> ${f.replace('.html', '').replace('T', ' ')}</a>`).join('')}
+    <h2>🔥 今、日本がアツくなってるやつ</h2>
+    ${db.current.map(t => `
+        <div class="trend-card ${t.isSerious ? 'serious' : 'hot'}">
+            <span class="label ${t.isSerious ? 'serious' : 'hot'}">${t.isSerious ? 'SERIOUS MODE' : 'INTELLIGENCE'}</span>
+            ${!t.isSerious ? `<a href="#" class="bet-btn">これ次くる！予言する🔥</a>` : ''}
+            <h3 style="margin: 10px 0;">${t.title}</h3>
+            <p style="font-size: 0.9rem; color: #ccc;">${t.desc}</p>
+            <div style="font-size: 0.7rem; color: #666;">検索ボリューム: ${t.traffic}以上 / 観測開始: ${t.firstSeen}</div>
+        </div>
+    `).join('')}
+    <div class="graveyard">
+        <h2 style="color: #444; margin-top: 0;">💀 トレンドの墓場 (The Graveyard)</h2>
+        ${db.graveyard.map(g => `
+            <div class="grave-item">† ${g.title} <span style="font-size: 0.6rem;">(${g.diedAt} 永眠)</span></div>
+        `).join('')}
+    </div>
 </body>
 </html>`;
 
-        fs.writeFileSync('index.html', indexHtml);
-        console.log(`[DONE] ${displayTime}`);
+        fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2));
+        fs.writeFileSync('index.html', html);
+        console.log('--- 同期完了 ---');
     } catch (err) {
         console.error(err);
     }
