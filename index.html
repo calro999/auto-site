@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GAL-INTEL | 世の中の「今」を、最速でバイブス変換。</title>
+    
+    <meta property="og:title" content="GAL-INTEL | 今のトレンドをギャル語解説">
+    <meta property="og:description" content="世の中のニュースを最速でバイブス変換。今の爆アツ話題はこれ！">
+    <meta property="og:image" content="https://raw.githubusercontent.com/calro999/auto-site/main/ogp-banner.png">
+    <meta name="twitter:card" content="summary_large_image">
+
     <style>
         :root { 
             --bg: #F8F9FA; 
@@ -14,9 +20,7 @@
             --border: #E2E8F0;
         }
 
-        * { 
-            box-sizing: border-box; 
-        }
+        * { box-sizing: border-box; }
 
         body { 
             background: var(--bg); 
@@ -144,9 +148,7 @@
 
         .label-FLASH { background: #FFF5F7; color: #E53E3E; }
         .label-ARCHIVE { background: #EDF2F7; color: #4A5568; }
-        .label-CULTURAL { background: #E6FFFA; color: #319795; }
         .label-REAL { background: #FFFAF0; color: #DD6B20; }
-        .label-CRITICAL { background: #F0FFF4; color: #38A169; }
 
         .vibes-memo { 
             background: #F8F9FA; 
@@ -200,9 +202,15 @@
             to { height: 100%; } 
         }
 
-        .bet-btn { 
-            background: var(--text); 
-            color: #fff; 
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn { 
             padding: 14px 35px; 
             border-radius: 18px; 
             text-decoration: none; 
@@ -211,8 +219,19 @@
             transition: 0.3s; 
         }
 
-        .bet-btn:hover { 
-            background: var(--accent-pink); 
+        .btn-analyze { 
+            background: var(--text); 
+            color: #fff; 
+        }
+
+        .btn-shop {
+            background: #FF9900;
+            color: #fff;
+        }
+
+        .btn-shop:hover {
+            background: #e68a00;
+            transform: scale(1.05);
         }
 
         .tag-list { 
@@ -311,8 +330,7 @@
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             dots.forEach((d, i) => {
-                d.x += d.vx + Math.sin(Date.now() / 2500 + i) * 0.3; 
-                d.y += d.vy + Math.cos(Date.now() / 2500 + i) * 0.3;
+                d.x += d.vx; d.y += d.vy;
                 if (d.x < 0 || d.x > canvas.width) d.vx *= -1; 
                 if (d.y < 0 || d.y > canvas.height) d.vy *= -1;
                 ctx.font = `bold ${d.size}px Arial`; 
@@ -334,12 +352,9 @@
 
         async function load() {
             try {
-                // セキュリティ制限(CORS)を回避するために jsDelivr CDN を使用
-                const GITHUB_CDN_URL = 'https://cdn.jsdelivr.net/gh/calro999/auto-site/intelligence_db.json';
-                
-                // ?v= でキャッシュを無効化
-                const res = await fetch(GITHUB_CDN_URL + '?v=' + Date.now());
-                
+                // セキュリティ制限(CORS)を回避してGitHubから直接読み込むURL
+                const CDN_URL = 'https://cdn.jsdelivr.net/gh/calro999/auto-site/intelligence_db.json';
+                const res = await fetch(CDN_URL + '?v=' + Date.now());
                 if (!res.ok) throw new Error('Network response was not ok');
                 
                 const db = await res.json();
@@ -363,16 +378,23 @@
                         return `<div class="eq-bar ${i < barCount ? 'eq-active' : ''}" style="height: ${h}%; animation-delay: ${delay}s"></div>`;
                     }).join('');
 
+                    // アフィリエイト用リンク
+                    const affiUrl = `https://www.amazon.co.jp/s?k=${encodeURIComponent(t.title)}&tag=mattan0290c-22`;
+                    const shopBtn = t.label !== 'ARCHIVE' ? `<a href="${affiUrl}" target="_blank" class="btn btn-shop">関連グッズ ✨</a>` : '';
+
                     return `
                         <article class="trend-card ${isHallOfFame ? 'hall-of-fame' : ''}">
                             <div class="label-badge label-${t.label}">${t.label}</div>
                             <div class="vibes-memo">“ ${t.memo} ”</div>
                             <div class="eq-container">${eqHtml}</div>
-                            <h3>${t.title}</h3>
+                            <h3>${t.vibesTitle}</h3>
                             <p class="desc">${t.desc}</p>
-                            <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="bet-btn">ANALYZE NOW</a>
+                            <div class="btn-group">
+                                <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="btn btn-analyze">詳細を見る</a>
+                                ${shopBtn}
+                            </div>
                             <div style="margin-top:25px; font-size:0.7rem; color:#CBD5E0; font-weight:bold;">
-                                HEAT: ${t.traffic} | LIVE: ${t.duration}M
+                                HEAT: ${t.traffic} | LIVE: ${t.firstSeen}
                             </div>
                         </article>`;
                 }).join('');
@@ -384,7 +406,6 @@
 
             } catch (e) { 
                 console.error('Fetch error:', e); 
-                // エラー時はローディング画面にエラーメッセージを出す（任意）
                 document.getElementById('loading').innerText = 'DATA LOAD ERROR. PLEASE REFRESH.';
             }
         }
