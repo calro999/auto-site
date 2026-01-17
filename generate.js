@@ -49,6 +49,24 @@ function getBetween(text, start, end) {
     return p[1].split(end)[0].replace(/<!\[CDATA\[|\]\]>/g, '').trim();
 }
 
+// 記事説明文のクリーンアップ関数
+function cleanDescription(text) {
+    if (!text) return "詳細はリンク先をチェック！";
+    
+    let clean = text
+        .replace(/&lt;/g, '<').replace(/&gt;/g, '>') // 実体参照を戻す
+        .replace(/<style.*?<\/style>/g, '')         // スタイル除去
+        .replace(/<[^>]*>/g, '')                     // タグを完全除去
+        .replace(/Photo:.*?\s/g, '')                 // Photoクレジット除去
+        .replace(/Image:.*?\s/g, '')                 // Imageクレジット除去
+        .replace(/.*?のニュースを編集して再掲載しています。/g, '') // 再掲載文言除去
+        .replace(/.*?の記事を編集して再掲載しています。/g, '')
+        .replace(/\n/g, ' ')                          // 改行をスペースに
+        .trim();
+    
+    return clean.length > 5 ? clean.substring(0, 100) : "最新トピックを今すぐチェック！";
+}
+
 async function main() {
     try {
         let allNewTrends = [];
@@ -60,21 +78,17 @@ async function main() {
                 const rss = await fetch(source.url);
                 rss.split('<item>').slice(1, 15).forEach(item => {
                     const title = getBetween(item, '<title>', '</title>');
-                    let desc = getBetween(item, '<description>', '</description>');
+                    const rawDesc = getBetween(item, '<description>', '</description>');
                     
                     if (!title) return;
                     
-                    // 【重要】HTMLタグを完全に排除し、実体参照（&nbsp;等）も解除
-                    desc = desc.replace(/<[^>]*>/g, '') 
-                               .replace(/&nbsp;/g, ' ')
-                               .replace(/\n/g, '')
-                               .substring(0, 100);
-
+                    const desc = cleanDescription(rawDesc);
                     const isSerious = SERIOUS_WORDS.some(w => title.includes(w));
+
                     allNewTrends.push({
                         title,
                         searchKey: title.split(/[ 　,]/)[0],
-                        desc: desc || "詳細はリンク先をチェック！",
+                        desc: desc,
                         genre: isSerious ? 'ARCHIVE' : source.genre,
                         label: isSerious ? 'ARCHIVE' : (Math.random() > 0.8 ? 'FLASH' : 'REAL'),
                         traffic: (Math.floor(Math.random() * 900) + 100) + "℃",
@@ -92,7 +106,6 @@ async function main() {
 
         const now = new Date(new Date().getTime() + (9 * 60 * 60 * 1000));
         const displayTime = now.toLocaleString('ja-JP');
-        const dateKey = now.toISOString().split('T')[0].replace(/-/g, '');
 
         const finalTrends = allNewTrends.slice(0, 20).map(t => {
             let vt = t.title;
@@ -102,11 +115,9 @@ async function main() {
         });
 
         db.current = finalTrends;
-        db.graveyard = (db.graveyard || []).slice(0, 30);
         db.tags = Array.from(tagsSet).slice(0, 20);
         db.lastUpdate = displayTime;
 
-        // アーカイブ一覧の取得をより確実に
         if (fs.existsSync(ARCHIVE_DIR)) {
             db.archiveList = fs.readdirSync(ARCHIVE_DIR)
                 .filter(f => f.endsWith('.html'))

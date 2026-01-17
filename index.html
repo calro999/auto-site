@@ -310,8 +310,6 @@
         const canvas = document.getElementById('connect-bg');
         const ctx = canvas.getContext('2d');
         let dots = [];
-
-        // GitHubのRaw URLを使ってキャッシュを回避
         const DATA_SOURCE_URL = 'https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json';
 
         function initBg(tags) {
@@ -353,22 +351,16 @@
 
         async function load() {
             try {
-                // タイムスタンプを付与して最新のJSONを強制取得
                 const res = await fetch(DATA_SOURCE_URL + '?t=' + Date.now());
-                if (!res.ok) throw new Error('Data fetch failed');
-                
                 const db = await res.json();
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('sync-info').innerText = 'LAST_UPDATE: ' + db.lastUpdate;
-                
                 initBg(db.tags);
 
-                // タグ一覧
                 document.getElementById('tag-list').innerHTML = (db.tags || []).map(tag => 
                     `<a href="https://www.google.com/search?q=${encodeURIComponent(tag)}" target="_blank" class="tag-item">#${tag}</a>`
                 ).join('');
 
-                // アーカイブ一覧（サイドバー）
                 const isArchivePage = window.location.pathname.includes('/archive/');
                 const archivePrefix = isArchivePage ? './' : './archive/';
                 const archiveContainer = document.getElementById('archive-list');
@@ -376,27 +368,14 @@
                 if (db.archiveList && db.archiveList.length > 0) {
                     archiveContainer.innerHTML = db.archiveList.map(date => {
                         let label = date;
-                        if (date.length === 8 && !isNaN(date)) {
-                            label = date.replace(/(\d{4})(\d{2})(\d{2})/, '$1/$2/$3');
-                        } else if (date.includes('T')) {
-                            label = date.split('T')[0] + ' (' + date.split('T')[1].substring(0,5).replace(/-/g, ':') + ')';
-                        }
+                        if (date.length === 8 && !isNaN(date)) label = date.replace(/(\d{4})(\d{2})(\d{2})/, '$1/$2/$3');
                         return `<a href="${archivePrefix}${date}.html" class="grave-item">📄 ${label}</a>`;
                     }).join('');
-                } else {
-                    archiveContainer.innerHTML = '<div style="font-size:0.7rem; color:#A0AEC0;">NO_ARCHIVES</div>';
                 }
 
-                // メインフィード
-                const trendList = document.getElementById('trend-list');
-                trendList.innerHTML = (db.current || []).map(t => {
+                document.getElementById('trend-list').innerHTML = (db.current || []).map(t => {
                     const barCount = Math.min(10, Math.max(2, Math.ceil(t.trafficNum / 100000)));
-                    const eqHtml = Array.from({length: 10}, (_, i) => {
-                        const h = i < barCount ? (30 + Math.random() * 70) : 10;
-                        const delay = i * 0.1;
-                        return `<div class="eq-bar ${i < barCount ? 'eq-active' : ''}" style="height: ${h}%; animation-delay: ${delay}s"></div>`;
-                    }).join('');
-
+                    const eqHtml = Array.from({length: 10}, (_, i) => `<div class="eq-bar ${i < barCount ? 'eq-active' : ''}" style="height: ${i < barCount ? (30+Math.random()*70)+'%' : '10%'}; animation-delay: ${i*0.1}s"></div>`).join('');
                     const kw = t.searchKey || t.title.split(/[ 　]/)[0];
                     return `
                         <article class="trend-card">
@@ -413,7 +392,6 @@
                         </article>`;
                 }).join('');
 
-                // 墓場
                 document.getElementById('grave-list').innerHTML = (db.graveyard || []).map(g => 
                     `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">† ${g.title.substring(0, 20)}...</a>`
                 ).join('');
@@ -425,10 +403,7 @@
         }
 
         load();
-        window.addEventListener('resize', () => { 
-            canvas.width = window.innerWidth; 
-            canvas.height = window.innerHeight; 
-        });
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
     </script>
 </body>
 </html>
