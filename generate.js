@@ -97,7 +97,6 @@ async function main() {
     try {
         let allNewTrends = [];
         let tagsSet = new Set();
-
         for (const source of SOURCES) {
             const rssData = await fetch(source.url);
             const items = rssData.split(/<item>/i).slice(1);
@@ -113,17 +112,14 @@ async function main() {
                 allNewTrends.push({ title, desc, traffic: trafficRaw, trafficNum, isSerious });
             });
         }
-
         let db = { current: [], graveyard: [], tags: [], lastUpdate: "" };
         if (fs.existsSync(DATA_FILE)) {
             try { db = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); } catch(e) {}
         }
-
         const now = new Date(new Date().getTime() + (9 * 60 * 60 * 1000));
         const displayTime = now.toLocaleString('ja-JP');
         const seenTitles = new Set();
         const finalTrends = [];
-
         allNewTrends.forEach(nt => {
             if (seenTitles.has(nt.title)) return;
             seenTitles.add(nt.title);
@@ -137,8 +133,6 @@ async function main() {
             else if (duration < 30) theme = 'NEW';
             finalTrends.push({ ...nt, firstSeen, duration, label: classInfo.label, memo: getMemo(theme) });
         });
-
-        // 墓場ロジックの修正
         let newGrave = (db.graveyard || []);
         if (db.current.length > 0) {
             db.current.forEach(old => {
@@ -147,8 +141,6 @@ async function main() {
                 }
             });
         }
-        
-        // 初回起動時の墓場確保：15位以降を墓場へ
         if (finalTrends.length > 15) {
             const leftover = finalTrends.slice(15);
             leftover.forEach(t => {
@@ -157,14 +149,12 @@ async function main() {
                 }
             });
         }
-
         db.current = finalTrends.sort((a,b) => b.trafficNum - a.trafficNum).slice(0, 15);
         db.graveyard = newGrave.slice(0, 30);
         db.tags = Array.from(tagsSet).slice(0, 30);
         db.lastUpdate = displayTime;
-
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2));
-        console.log(`[SUCCESS] SYNC DONE`);
+        console.log(`[SUCCESS] JSON UPDATED`);
     } catch (err) {
         console.error('[FATAL]', err.message);
         process.exit(1);

@@ -313,14 +313,11 @@
             dots.forEach((d, i) => {
                 d.x += d.vx + Math.sin(Date.now() / 2500 + i) * 0.3; 
                 d.y += d.vy + Math.cos(Date.now() / 2500 + i) * 0.3;
-                
                 if (d.x < 0 || d.x > canvas.width) d.vx *= -1; 
                 if (d.y < 0 || d.y > canvas.height) d.vy *= -1;
-
                 ctx.font = `bold ${d.size}px Arial`; 
                 ctx.fillStyle = 'rgba(160, 174, 192, 0.5)'; 
                 ctx.fillText(d.text, d.x, d.y);
-
                 dots.slice(i + 1).forEach(d2 => {
                     const dist = Math.hypot(d.x - d2.x, d.y - d2.y);
                     if (dist < 180) { 
@@ -337,7 +334,11 @@
 
         async function load() {
             try {
-                const res = await fetch('./intelligence_db.json?v=' + Date.now());
+                // GitHubの生データから直接フェッチするURL
+                const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json';
+                const res = await fetch(GITHUB_RAW_URL + '?v=' + Date.now());
+                if (!res.ok) throw new Error('Network response was not ok');
+                
                 const db = await res.json();
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('sync-info').innerText = 'LAST_UPDATE: ' + db.lastUpdate;
@@ -379,7 +380,7 @@
                 }).join('');
 
             } catch (e) { 
-                console.error(e); 
+                console.error('Fetch error:', e); 
             }
         }
 
