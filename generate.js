@@ -17,107 +17,70 @@ const SOURCES = [
     { name: 'PR_TIMES', url: 'https://prtimes.jp/index.rdf', genre: 'GENERAL' }
 ];
 
-const SERIOUS_WORDS = ['事故', '事件', '死亡', '逮捕', '火災', '地震', '不倫', '死去', '容疑', '被害', '遺体', '衝突', '殺', '判決', '倒産', 'ミサイル', '震災', '訃報'];
+const SERIOUS_WORDS = ['事故', '事件', '死亡', '逮捕', '火災', '地震', '不倫', '死去', '容疑', '被害', '遺体', '衝突', '殺', '判決', '震災', '訃報', '黙とう', '犠牲'];
 
 const VIBES_REWRITE = [
     { target: '、', replace: '✨ ' }, { target: '。', replace: '！' },
-    { target: '発表', replace: 'キタこれ発表' }, { target: '決定', replace: 'ガチ決定' },
-    { target: '開始', replace: '始まって草' }, { target: '公開', replace: '解禁されて沸いた' },
-    { target: '発売', replace: 'リリースされて神' }
+    { target: '発表', replace: 'キタこれ発表' }, { target: '決定', replace: 'ガチ決定' }
 ];
 
-const MEMO_TEMPLATES = {
-    GENERAL: ["日本中の視線集中。もはや義務教育レベル。🔥", "検索数エグすぎて草。これ知らないと会話詰む。", "圧倒的注目度。インテリジェンス高めたいならこれ。"],
-    SUB_CULTURE: ["推し活の呼吸。供給過多で死ぬ。💖", "全人類見て。ビジュが良すぎて語彙力消失。", "尊すぎて無理。語彙力がログアウトしました。"],
-    ARCHIVE: ["これは超重要。しっかり自分事として捉えよう👁️", "忘れてはいけない大切な記録。"]
-};
-
-function fetch(url) {
-    return new Promise((resolve, reject) => {
-        const options = { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 15000 };
-        https.get(url, options, (res) => {
-            let data = '';
-            res.on('data', (chunk) => data += chunk);
-            res.on('end', () => resolve(data));
-        }).on('error', (err) => reject(err));
-    });
-}
-
-function getBetween(text, start, end) {
-    const p = text.split(start);
-    if (p.length < 2) return '';
-    return p[1].split(end)[0].replace(/<!\[CDATA\[|\]\]>/g, '').trim();
-}
-
-// 記事説明文のクリーンアップ関数
-function cleanDescription(text) {
-    if (!text) return "詳細はリンク先をチェック！";
-    
-    let clean = text
-        .replace(/&lt;/g, '<').replace(/&gt;/g, '>') // 実体参照を戻す
-        .replace(/<style.*?<\/style>/g, '')         // スタイル除去
-        .replace(/<[^>]*>/g, '')                     // タグを完全除去
-        .replace(/Photo:.*?\s/g, '')                 // Photoクレジット除去
-        .replace(/Image:.*?\s/g, '')                 // Imageクレジット除去
-        .replace(/.*?のニュースを編集して再掲載しています。/g, '') // 再掲載文言除去
-        .replace(/.*?の記事を編集して再掲載しています。/g, '')
-        .replace(/\n/g, ' ')                          // 改行をスペースに
+// 強力なクリーンアップ関数
+function cleanText(text) {
+    if (!text) return "";
+    return text
+        .replace(/&nbsp;/g, ' ')                        // 空白ゴミ除去
+        .replace(/&lt;.*?&gt;/g, '')                    // エスケープされたHTMLタグ除去
+        .replace(/<.*?>/g, '')                          // 通常のHTMLタグ除去
+        .replace(/Photo:.*?\s/g, '')                    // 「Photo:名前」を除去
+        .replace(/Image:.*?\s/g, '')                    // 「Image:名前」を除去
+        .replace(/.*?再掲載しています。/g, '')           // 再掲載の定型文を一行まるごと消去
+        .replace(/Google ニュースですべての記事を見る/g, '') // Googleニュースの末尾ゴミ
+        .replace(/\s+/g, ' ')                           // 連続する空白を一つに
         .trim();
-    
-    return clean.length > 5 ? clean.substring(0, 100) : "最新トピックを今すぐチェック！";
 }
 
 async function main() {
     try {
         let allNewTrends = [];
         let tagsSet = new Set();
-        
-        for (const source of SOURCES) {
-            console.log(`FETCH: ${source.name}`);
-            try {
-                const rss = await fetch(source.url);
-                rss.split('<item>').slice(1, 15).forEach(item => {
-                    const title = getBetween(item, '<title>', '</title>');
-                    const rawDesc = getBetween(item, '<description>', '</description>');
-                    
-                    if (!title) return;
-                    
-                    const desc = cleanDescription(rawDesc);
-                    const isSerious = SERIOUS_WORDS.some(w => title.includes(w));
+        const rssFetch = (url) => new Promise((res, rej) => {
+            https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (r) => {
+                let d = ''; r.on('data', chunk => d += chunk); r.on('end', () => res(d));
+            }).on('error', rej);
+        });
 
+        for (const source of SOURCES) {
+            try {
+                const rss = await rssFetch(source.url);
+                const items = rss.split('<item>').slice(1, 10);
+                for (const item of items) {
+                    let title = cleanText(item.split('<title>')[1]?.split('</title>')[0] || "");
+                    let desc = cleanText(item.split('<description>')[1]?.split('</description>')[0] || "");
+                    
+                    if (!title) continue;
+                    
+                    const isSerious = SERIOUS_WORDS.some(w => title.includes(w));
                     allNewTrends.push({
                         title,
                         searchKey: title.split(/[ 　,]/)[0],
-                        desc: desc,
+                        desc: desc.substring(0, 80) + (desc.length > 80 ? '...' : ''),
                         genre: isSerious ? 'ARCHIVE' : source.genre,
-                        label: isSerious ? 'ARCHIVE' : (Math.random() > 0.8 ? 'FLASH' : 'REAL'),
+                        label: isSerious ? 'ARCHIVE' : (Math.random() > 0.7 ? 'FLASH' : 'REAL'),
                         traffic: (Math.floor(Math.random() * 900) + 100) + "℃",
                         trafficNum: Math.floor(Math.random() * 1000000)
                     });
-                    title.split(/[ 　]/).filter(w => w.length >= 2).slice(0, 3).forEach(t => tagsSet.add(t));
-                });
-            } catch (e) { console.error(`ERR: ${source.name}`); }
-        }
-
-        let db = { current: [], graveyard: [], tags: [], archiveList: [], lastUpdate: "" };
-        if (fs.existsSync(DATA_FILE)) {
-            try { db = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); } catch(e){}
+                    title.split(/[ 　]/).filter(w => w.length >= 2).forEach(t => tagsSet.add(t));
+                }
+            } catch (e) { console.error(`Error fetching ${source.name}`); }
         }
 
         const now = new Date(new Date().getTime() + (9 * 60 * 60 * 1000));
         const displayTime = now.toLocaleString('ja-JP');
+        const dateKey = now.toISOString().split('T')[0].replace(/-/g, '');
 
-        const finalTrends = allNewTrends.slice(0, 20).map(t => {
-            let vt = t.title;
-            VIBES_REWRITE.forEach(r => vt = vt.split(r.target).join(r.replace));
-            const temps = MEMO_TEMPLATES[t.genre] || MEMO_TEMPLATES.GENERAL;
-            return { ...t, vibesTitle: vt, firstSeen: displayTime, memo: temps[Math.floor(Math.random() * temps.length)] };
-        });
+        let db = { current: allNewTrends.slice(0, 15), tags: Array.from(tagsSet).slice(0, 15), archiveList: [], lastUpdate: displayTime };
 
-        db.current = finalTrends;
-        db.tags = Array.from(tagsSet).slice(0, 20);
-        db.lastUpdate = displayTime;
-
+        // アーカイブフォルダをスキャンしてリスト化
         if (fs.existsSync(ARCHIVE_DIR)) {
             db.archiveList = fs.readdirSync(ARCHIVE_DIR)
                 .filter(f => f.endsWith('.html'))
@@ -125,8 +88,15 @@ async function main() {
                 .sort((a, b) => b - a);
         }
 
+        // バイブス変換の適用
+        db.current = db.current.map(t => {
+            let vt = t.title;
+            VIBES_REWRITE.forEach(r => vt = vt.split(r.target).join(r.replace));
+            return { ...t, vibesTitle: vt, firstSeen: displayTime, memo: "最新バイブス爆上がり中🔥" };
+        });
+
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2));
-        console.log("DONE");
+        console.log("SUCCESS: JSON UPDATED");
     } catch (e) { console.error(e); }
 }
 main();

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAL-INTEL | 世の中の「今」を、最速でバイブス変換。</title>
+    <title>GAL-INTEL | 世の中の「今」を, 最速でバイブス変換。</title>
     
     <meta property="og:title" content="GAL-INTEL | 今のトレンドをギャル語解説">
     <meta property="og:description" content="世の中のニュースを最速でバイブス変換。今の爆アツ話題はこれ！">
@@ -285,21 +285,22 @@
                 <div class="box-title">📅 PAST_ARCHIVES</div>
                 <div id="archive-list" style="max-height: 300px; overflow-y: auto;"></div>
             </div>
-            <div class="glass-box">
-                <div id="sync-info" style="font-size: 0.7rem; color: #A0AEC0;"></div>
-            </div>
         </aside>
 
         <main>
             <header>
                 <h1 class="hero-title">GAL<span>-</span>INTEL</h1>
-                <div class="sub-title">世の中の「今」を、最速でバイブス変換。</div>
+                <div class="sub-title">世の中の「今」を, 最速でバイブス変換。</div>
             </header>
             <div class="main-feed" id="trend-list"></div>
         </main>
 
         <aside class="sidebar">
-            <div class="glass-box" style="overflow-y: auto; height: 100%;">
+            <div class="glass-box">
+                <div class="box-title">🔄 SYNC_STATUS</div>
+                <div id="sync-info" style="font-size: 0.7rem; color: #A0AEC0;"></div>
+            </div>
+            <div class="glass-box" style="overflow-y: auto; flex-grow: 1;">
                 <div class="box-title">💀 THE_GRAVEYARD</div>
                 <div id="grave-list"></div>
             </div>
@@ -354,29 +355,28 @@
                 const res = await fetch(DATA_SOURCE_URL + '?t=' + Date.now());
                 const db = await res.json();
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('sync-info').innerText = 'LAST_UPDATE: ' + db.lastUpdate;
+                document.getElementById('sync-info').innerText = 'UPDATE: ' + db.lastUpdate;
+                
                 initBg(db.tags);
 
+                // タグ表示
                 document.getElementById('tag-list').innerHTML = (db.tags || []).map(tag => 
                     `<a href="https://www.google.com/search?q=${encodeURIComponent(tag)}" target="_blank" class="tag-item">#${tag}</a>`
                 ).join('');
 
+                // アーカイブ表示 (PAST_ARCHIVES)
                 const isArchivePage = window.location.pathname.includes('/archive/');
-                const archivePrefix = isArchivePage ? './' : './archive/';
-                const archiveContainer = document.getElementById('archive-list');
-                
-                if (db.archiveList && db.archiveList.length > 0) {
-                    archiveContainer.innerHTML = db.archiveList.map(date => {
-                        let label = date;
-                        if (date.length === 8 && !isNaN(date)) label = date.replace(/(\d{4})(\d{2})(\d{2})/, '$1/$2/$3');
-                        return `<a href="${archivePrefix}${date}.html" class="grave-item">📄 ${label}</a>`;
-                    }).join('');
-                }
+                const prefix = isArchivePage ? './' : './archive/';
+                const archList = db.archiveList || [];
+                document.getElementById('archive-list').innerHTML = archList.length > 0 
+                    ? archList.map(date => `<a href="${prefix}${date}.html" class="grave-item">📄 ${date.replace(/(\d{4})(\d{2})(\d{2})/, '$1/$2/$3')}</a>`).join('')
+                    : '<div style="font-size:0.75rem; color:#cbd5e0;">NO_DATA</div>';
 
+                // トレンド記事表示
                 document.getElementById('trend-list').innerHTML = (db.current || []).map(t => {
                     const barCount = Math.min(10, Math.max(2, Math.ceil(t.trafficNum / 100000)));
                     const eqHtml = Array.from({length: 10}, (_, i) => `<div class="eq-bar ${i < barCount ? 'eq-active' : ''}" style="height: ${i < barCount ? (30+Math.random()*70)+'%' : '10%'}; animation-delay: ${i*0.1}s"></div>`).join('');
-                    const kw = t.searchKey || t.title.split(/[ 　]/)[0];
+                    const kw = t.searchKey || t.title.substring(0, 5);
                     return `
                         <article class="trend-card">
                             <div class="label-badge label-${t.label}">${t.label}</div>
@@ -388,17 +388,18 @@
                                 <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="btn btn-analyze">詳細を見る</a>
                                 <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(kw)}&tag=mattan0290c-22" target="_blank" class="btn btn-shop">関連グッズ ✨</a>
                             </div>
-                            <div class="footer-info">HEAT: ${t.traffic} | LIVE: ${t.firstSeen}</div>
+                            <div class="footer-info">HEAT: ${t.traffic}</div>
                         </article>`;
                 }).join('');
 
+                // 墓場表示
                 document.getElementById('grave-list').innerHTML = (db.graveyard || []).map(g => 
                     `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">† ${g.title.substring(0, 20)}...</a>`
                 ).join('');
 
             } catch (e) { 
-                console.error('Load error:', e); 
-                document.getElementById('loading').innerText = 'DATA LOAD ERROR.';
+                console.error(e); 
+                document.getElementById('loading').innerText = 'DATA_ERROR';
             }
         }
 
