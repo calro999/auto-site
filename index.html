@@ -259,9 +259,11 @@
             text-decoration: none; 
         }
 
-        @media (max-width: 1100px) { 
-            .layout { grid-template-columns: 1fr; } 
-            .sidebar { display: none; } 
+        .footer-info {
+            margin-top: 25px; 
+            font-size: 0.7rem; 
+            color: #CBD5E0; 
+            font-weight: bold;
         }
 
         #loading { 
@@ -274,6 +276,11 @@
             font-weight: 900; 
             color: var(--accent-pink); 
             z-index: 2000; 
+        }
+
+        @media (max-width: 1100px) { 
+            .layout { grid-template-columns: 1fr; } 
+            .sidebar { display: none; } 
         }
     </style>
 </head>
@@ -377,8 +384,9 @@
                         return `<div class="eq-bar ${i < barCount ? 'eq-active' : ''}" style="height: ${h}%; animation-delay: ${delay}s"></div>`;
                     }).join('');
 
-                    // Amazonアソシエイトリンクを固定タグ「mattan0290c-22」に設定
-                    const affiUrl = `https://www.amazon.co.jp/s?k=${encodeURIComponent(t.searchKey)}&tag=mattan0290c-22`;
+                    // Amazonアソシエイトリンク固定 & 検索ワード修正
+                    const kw = t.searchKey || t.title.split(/[ 　]/)[0];
+                    const affiUrl = `https://www.amazon.co.jp/s?k=${encodeURIComponent(kw)}&tag=mattan0290c-22`;
                     const shopBtn = t.label !== 'ARCHIVE' ? `<a href="${affiUrl}" target="_blank" class="btn btn-shop">関連グッズ ✨</a>` : '';
 
                     return `
@@ -392,7 +400,7 @@
                                 <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="btn btn-analyze">詳細を見る</a>
                                 ${shopBtn}
                             </div>
-                            <div style="margin-top:25px; font-size:0.7rem; color:#CBD5E0; font-weight:bold;">
+                            <div class="footer-info">
                                 HEAT: ${t.traffic} | LIVE: ${t.firstSeen}
                             </div>
                         </article>`;

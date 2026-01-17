@@ -4,7 +4,7 @@ const path = require('path');
 
 const DATA_FILE = './intelligence_db.json';
 const LOGS_DIR = './logs';
-// 過去ログ保存用のディレクトリがなければ作成
+// 過去ログ保存用のディレクトリがなければ作成（資産化）
 if (!fs.existsSync(LOGS_DIR)) fs.mkdirSync(LOGS_DIR);
 
 const SOURCES = [
@@ -14,7 +14,7 @@ const SOURCES = [
 
 const SERIOUS_WORDS = ['事故', '事件', '死亡', '逮捕', '火災', '地震', '不倫', '死去', '容疑', '被害', '遺体', '衝突', '刺', '殺', '判決', '倒産', 'ミサイル', '引退', '辞任', '震災', '追悼', '犠牲', '避難', '不明', '遺族', '訃報', '被災'];
 
-// SEO対策：タイトルをギャル風に自動リライトして独自コンテンツ化
+// タイトルをギャル風にリライト
 const VIBES_REWRITE = [
     { target: '、', replace: '✨ ' }, { target: '。', replace: '！' },
     { target: '発表', replace: 'キタこれ発表' }, { target: '決定', replace: 'ガチ決定' },
@@ -70,12 +70,12 @@ async function main() {
                 const isSerious = SERIOUS_WORDS.some(w => title.includes(w) || desc.includes(w));
                 const trafficNum = parseInt(trafficRaw.replace(/[^0-9]/g, '')) || 10000;
                 
-                // 検索用キーワードを抽出（記号で区切った最初の塊）
+                // 検索用キーワード（Amazon用）：記号で区切った最初の有効な単語
                 const searchKey = title.split(/[ 　,、。!！「」]/).filter(s => s.length > 0)[0];
                 
                 allNewTrends.push({ 
                     title: title, 
-                    searchKey: searchKey,
+                    searchKey: searchKey || title,
                     desc: desc, 
                     traffic: trafficRaw, 
                     trafficNum: trafficNum, 
@@ -117,6 +117,7 @@ async function main() {
         db.tags = Array.from(tagsSet).slice(0, 30);
         db.lastUpdate = displayTime;
 
+        // ログ保存
         const dateKey = now.toISOString().split('T')[0];
         fs.writeFileSync(path.join(LOGS_DIR, `${dateKey}.json`), JSON.stringify(db, null, 2));
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2));
