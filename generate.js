@@ -1,13 +1,8 @@
 const fs = require('fs');
 const https = require('https');
-const path = require('path');
 
 const DATA_FILE = './intelligence_db.json';
-const LOGS_DIR = './logs';
 const ARCHIVE_DIR = './archive';
-
-if (!fs.existsSync(LOGS_DIR)) fs.mkdirSync(LOGS_DIR);
-if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR);
 
 const SOURCES = [
     { name: 'GoogleNews_Top', url: 'https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja', genre: 'GENERAL' },
@@ -24,29 +19,25 @@ const VIBES_REWRITE = [
     { target: '発表', replace: 'キタこれ発表' }, { target: '決定', replace: 'ガチ決定' }
 ];
 
-// 【最強版】クリーンアップ関数
 function cleanText(text) {
     if (!text) return "";
-    let clean = text
-        .replace(/&amp;nbsp;/g, ' ')                     // &amp;nbsp; を除去
-        .replace(/&nbsp;/g, ' ')                        // &nbsp; を除去
-        .replace(/&lt;.*?&gt;/g, '')                    // エスケープされたタグを除去
-        .replace(/<.*?>/g, '')                          // 通常のHTMLタグを除去
-        .replace(/Photo:.*?\s/g, '')                    // クレジット除去
-        .replace(/Image:.*?\s/g, '')                    // クレジット除去
-        .replace(/.*?のニュースを編集して再掲載しています。/g, '') 
-        .replace(/.*?の記事を編集して再掲載しています。/g, '')
+    return text
+        .replace(/&amp;nbsp;/g, ' ').replace(/&nbsp;/g, ' ')
+        .replace(/&lt;.*?&gt;/g, '').replace(/<.*?>/g, '')
+        .replace(/Photo:.*?\s/g, '').replace(/Image:.*?\s/g, '')
+        .replace(/.*?のニュースを編集して再掲載しています。/g, '')
         .replace(/Google ニュースですべての記事を見る/g, '')
-        .replace(/\n/g, ' ')                            // 改行除去
-        .replace(/\s+/g, ' ')                           // 連続空白を一つに
-        .trim();
-
-    // 自分のタイトルが説明文の先頭に含まれている場合、それを削る（Googleニュース対策）
-    return clean;
+        .replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
 async function main() {
     try {
+        // --- 1. 既存のデータを読み込む (墓場を救出) ---
+        let oldDb = { current: [], graveyard: [], tags: [], archiveList: [] };
+        if (fs.existsSync(DATA_FILE)) {
+            try { oldDb = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); } catch(e){}
+        }
+
         let allNewTrends = [];
         let tagsSet = new Set();
         const rssFetch = (url) => new Promise((res, rej) => {
@@ -62,17 +53,11 @@ async function main() {
                 for (const item of items) {
                     let rawTitle = item.split('<title>')[1]?.split('</title>')[0] || "";
                     let rawDesc = item.split('<description>')[1]?.split('</description>')[0] || "";
-                    
                     let title = cleanText(rawTitle);
                     let desc = cleanText(rawDesc);
-                    
-                    // タイトルと説明が重複している場合、説明側の重複部分をカット
-                    if (desc.startsWith(title)) {
-                        desc = desc.replace(title, '').trim();
-                    }
+                    if (desc.startsWith(title)) desc = desc.replace(title, '').trim();
 
                     if (!title) continue;
-                    
                     const isSerious = SERIOUS_WORDS.some(w => title.includes(w));
                     allNewTrends.push({
                         title,
@@ -85,29 +70,32 @@ async function main() {
                     });
                     title.split(/[ 　]/).filter(w => w.length >= 2).forEach(t => tagsSet.add(t));
                 }
-            } catch (e) { console.error(`Error fetching ${source.name}`); }
+            } catch (e) { console.error(`ERR: ${source.name}`); }
         }
 
         const now = new Date(new Date().getTime() + (9 * 60 * 60 * 1000));
         const displayTime = now.toLocaleString('ja-JP');
 
-        let db = { current: allNewTrends.slice(0, 15), tags: Array.from(tagsSet).slice(0, 15), archiveList: [], lastUpdate: displayTime };
+        // --- 2. データのマージ (古い現在の記事は墓場へ) ---
+        let db = {
+            current: allNewTrends.slice(0, 15).map(t => {
+                let vt = t.title;
+                VIBES_REWRITE.forEach(r => vt = vt.split(r.target).join(r.replace));
+                return { ...t, vibesTitle: vt, firstSeen: displayTime, memo: "最新バイブス爆上がり中🔥" };
+            }),
+            // 前回のcurrentを墓場の先頭に追加し、30件までに制限
+            graveyard: [...(oldDb.current || []), ...(oldDb.graveyard || [])].slice(0, 30),
+            tags: Array.from(tagsSet).slice(0, 15),
+            archiveList: [],
+            lastUpdate: displayTime
+        };
 
         if (fs.existsSync(ARCHIVE_DIR)) {
-            db.archiveList = fs.readdirSync(ARCHIVE_DIR)
-                .filter(f => f.endsWith('.html'))
-                .map(f => f.replace('.html', ''))
-                .sort((a, b) => b - a);
+            db.archiveList = fs.readdirSync(ARCHIVE_DIR).filter(f => f.endsWith('.html')).map(f => f.replace('.html', '')).sort((a, b) => b - a);
         }
 
-        db.current = db.current.map(t => {
-            let vt = t.title;
-            VIBES_REWRITE.forEach(r => vt = vt.split(r.target).join(r.replace));
-            return { ...t, vibesTitle: vt, firstSeen: displayTime, memo: "最新バイブス爆上がり中🔥" };
-        });
-
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2));
-        console.log("SUCCESS: JSON UPDATED. Check intelligence_db.json now!");
+        console.log("SUCCESS: DB UPDATED (Graveyard preserved)");
     } catch (e) { console.error(e); }
 }
 main();

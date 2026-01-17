@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAL-INTEL | 世の中の「今」を, 最速でバイブス変換。</title>
+    <title>GAL-INTEL | 世の中の「今」を、最速でバイブス変換。</title>
     
     <meta property="og:title" content="GAL-INTEL | 今のトレンドをギャル語解説">
     <meta property="og:description" content="世の中のニュースを最速でバイブス変換。今の爆アツ話題はこれ！">
@@ -168,6 +168,7 @@
             margin-bottom: 25px; 
         }
 
+        /* 復活させたイコライザー装飾 */
         .eq-container { 
             display: flex; 
             gap: 4px; 
@@ -290,7 +291,7 @@
         <main>
             <header>
                 <h1 class="hero-title">GAL<span>-</span>INTEL</h1>
-                <div class="sub-title">世の中の「今」を, 最速でバイブス変換。</div>
+                <div class="sub-title">世の中の「今」を、最速でバイブス変換。</div>
             </header>
             <div class="main-feed" id="trend-list"></div>
         </main>
@@ -313,6 +314,7 @@
         let dots = [];
         const DATA_SOURCE_URL = 'https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json';
 
+        // 動く背景の演出ロジック（復活）
         function initBg(tags) {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -334,13 +336,13 @@
                 if (d.x < 0 || d.x > canvas.width) d.vx *= -1; 
                 if (d.y < 0 || d.y > canvas.height) d.vy *= -1;
                 ctx.font = `bold ${d.size}px Arial`; 
-                ctx.fillStyle = 'rgba(160, 174, 192, 0.5)'; 
+                ctx.fillStyle = 'rgba(160, 174, 192, 0.4)'; 
                 ctx.fillText(d.text, d.x, d.y);
                 dots.slice(i + 1).forEach(d2 => {
                     const dist = Math.hypot(d.x - d2.x, d.y - d2.y);
                     if (dist < 180) { 
                         ctx.beginPath(); 
-                        ctx.strokeStyle = `rgba(226, 232, 240, 0.6)`; 
+                        ctx.strokeStyle = `rgba(226, 232, 240, 0.5)`; 
                         ctx.moveTo(d.x, d.y); 
                         ctx.lineTo(d2.x, d2.y); 
                         ctx.stroke(); 
@@ -364,18 +366,22 @@
                     `<a href="https://www.google.com/search?q=${encodeURIComponent(tag)}" target="_blank" class="tag-item">#${tag}</a>`
                 ).join('');
 
-                // アーカイブ表示 (PAST_ARCHIVES)
+                // アーカイブ表示
                 const isArchivePage = window.location.pathname.includes('/archive/');
                 const prefix = isArchivePage ? './' : './archive/';
-                const archList = db.archiveList || [];
-                document.getElementById('archive-list').innerHTML = archList.length > 0 
-                    ? archList.map(date => `<a href="${prefix}${date}.html" class="grave-item">📄 ${date.replace(/(\d{4})(\d{2})(\d{2})/, '$1/$2/$3')}</a>`).join('')
-                    : '<div style="font-size:0.75rem; color:#cbd5e0;">NO_DATA</div>';
+                document.getElementById('archive-list').innerHTML = (db.archiveList || []).map(d => 
+                    `<a href="${prefix}${d}.html" class="grave-item">📄 ${d.replace(/(\d{4})(\d{2})(\d{2})/, '$1/$2/$3')}</a>`
+                ).join('') || 'NO_DATA';
 
-                // トレンド記事表示
+                // メインフィード表示
                 document.getElementById('trend-list').innerHTML = (db.current || []).map(t => {
-                    const barCount = Math.min(10, Math.max(2, Math.ceil(t.trafficNum / 100000)));
-                    const eqHtml = Array.from({length: 10}, (_, i) => `<div class="eq-bar ${i < barCount ? 'eq-active' : ''}" style="height: ${i < barCount ? (30+Math.random()*70)+'%' : '10%'}; animation-delay: ${i*0.1}s"></div>`).join('');
+                    // イコライザーのHTML生成（復活）
+                    const barCount = 10;
+                    const eqHtml = Array.from({length: barCount}, (_, i) => {
+                        const height = 30 + Math.random() * 70;
+                        return `<div class="eq-bar eq-active" style="height: ${height}%; animation-delay: ${i*0.1}s"></div>`;
+                    }).join('');
+                    
                     const kw = t.searchKey || t.title.substring(0, 5);
                     return `
                         <article class="trend-card">
@@ -388,7 +394,7 @@
                                 <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="btn btn-analyze">詳細を見る</a>
                                 <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(kw)}&tag=mattan0290c-22" target="_blank" class="btn btn-shop">関連グッズ ✨</a>
                             </div>
-                            <div class="footer-info">HEAT: ${t.traffic}</div>
+                            <div class="footer-info">HEAT: ${t.traffic} | LIVE: ${t.firstSeen}</div>
                         </article>`;
                 }).join('');
 
@@ -399,7 +405,7 @@
 
             } catch (e) { 
                 console.error(e); 
-                document.getElementById('loading').innerText = 'DATA_ERROR';
+                document.getElementById('loading').innerText = 'DATA_LOAD_ERROR';
             }
         }
 
