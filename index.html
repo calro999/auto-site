@@ -366,8 +366,9 @@
 
         async function load() {
             try {
-                const CDN_URL = 'https://cdn.jsdelivr.net/gh/calro999/auto-site/intelligence_db.json';
-                const res = await fetch(CDN_URL + '?v=' + Date.now());
+                // キャッシュを破壊するために ?v=[タイムスタンプ] を付与
+                const CDN_URL = 'https://cdn.jsdelivr.net/gh/calro999/auto-site/intelligence_db.json?v=' + Date.now();
+                const res = await fetch(CDN_URL);
                 if (!res.ok) throw new Error('Network response was not ok');
                 
                 const db = await res.json();
@@ -378,24 +379,21 @@
 
                 document.getElementById('tag-list').innerHTML = db.tags.map(tag => `<a href="https://www.google.com/search?q=${encodeURIComponent(tag)}" target="_blank" class="tag-item">#${tag}</a>`).join('');
 
-                // アーカイブリストの表示ロジック（修正：柔軟な日付表示）
+                // アーカイブ表示の修正
                 const isArchivePage = window.location.pathname.includes('/archive/');
                 const archivePrefix = isArchivePage ? './' : './archive/';
                 const archiveContainer = document.getElementById('archive-list');
                 
-                if (db.archiveList && db.archiveList.length > 0) {
+                if (db.archiveList && Array.isArray(db.archiveList)) {
                     archiveContainer.innerHTML = db.archiveList.map(date => {
-                        // 形式に関わらず表示用に整形
                         let label = date;
                         if (date.length === 8 && !isNaN(date)) {
                             label = date.replace(/(\d{4})(\d{2})(\d{2})/, '$1/$2/$3');
                         } else if (date.includes('T')) {
-                            label = date.split('T')[0] + ' (' + date.split('T')[1].replace(/-/g, ':') + ')';
+                            label = date.split('T')[0] + ' (' + date.split('T')[1].substring(0,5).replace(/-/g, ':') + ')';
                         }
                         return `<a href="${archivePrefix}${date}.html" class="grave-item">📄 ${label}</a>`;
                     }).join('');
-                } else {
-                    archiveContainer.innerHTML = '<div style="font-size:0.7rem; color:#A0AEC0;">NO_DATA</div>';
                 }
 
                 const trendList = document.getElementById('trend-list');
@@ -427,7 +425,7 @@
                         </article>`;
                 }).join('');
 
-                document.getElementById('grave-list').innerHTML = db.graveyard.map(g => `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">† ${g.title.substring(0, 20)}...</a>`).join('');
+                document.getElementById('grave-list').innerHTML = (db.graveyard || []).map(g => `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">† ${g.title.substring(0, 20)}...</a>`).join('');
 
             } catch (e) { 
                 console.error('Fetch error:', e); 
