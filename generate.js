@@ -11,12 +11,10 @@ const SERIOUS_WORDS = ['事故', '事件', '死亡', '逮捕', '火災', '地震
 
 function fetch(url) {
     return new Promise((resolve, reject) => {
-        // ここで「普通のブラウザ」だと偽装する
         const options = {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/xml,application/xml,application/xhtml+xml',
-                'Accept-Language': 'ja,en-US;q=0.9,en;q=0.8'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': '*/*'
             }
         };
         https.get(url, options, (res) => {
@@ -27,47 +25,52 @@ function fetch(url) {
     });
 }
 
+// シンプルにタグに挟まれた文字を抜く関数
+function getBetween(text, startTag, endTag) {
+    const parts = text.split(startTag);
+    if (parts.length < 2) return '';
+    const subParts = parts[1].split(endTag);
+    return subParts[0].replace(/<!\[CDATA\[|\]\]>/g, '').trim();
+}
+
 async function main() {
     try {
-        console.log('--- ギャルの熱狂インテリジェンス：人間偽装同期 ---');
+        console.log('--- ギャルの熱狂インテリジェンス：最終手段同期 ---');
         let allNewTrends = [];
 
         for (const source of SOURCES) {
-            console.log(`[TRY] ${source.name} のデータを取得中...`);
+            console.log(`[ACCESS] ${source.name} ...`);
             const rssData = await fetch(source.url);
             
-            // <item>タグを正規表現で切り出し
-            const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
-            let match;
-            let count = 0;
+            // <item>タグでぶった切る
+            const items = rssData.split(/<item>/i).slice(1);
+            console.log(`[INFO] 分割されたアイテム数: ${items.length}`);
 
-            while ((match = itemRegex.exec(rssData)) !== null) {
-                const itemContent = match[1];
-                
-                const extract = (tag) => {
-                    const tRegex = new RegExp(`<${tag}[^>]*?>([\\s\\S]*?)<\\/${tag}>`, 'i');
-                    const tMatch = itemContent.match(tRegex);
-                    return tMatch ? tMatch[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim() : '';
-                };
+            items.forEach(item => {
+                const title = getBetween(item, '<title>', '</title>');
+                const desc = getBetween(item, '<description>', '</description>');
+                const traffic = getBetween(item, '<ht:approx_traffic>', '</ht:approx_traffic>') || 'Rising';
 
-                const title = extract('title');
                 if (title) {
                     const isSerious = SERIOUS_WORDS.some(w => title.includes(w));
                     allNewTrends.push({
                         title,
                         source: source.name,
-                        desc: extract('description').substring(0, 80),
+                        desc: desc.substring(0, 80),
                         isSerious,
-                        traffic: extract('ht:approx_traffic') || 'Rising'
+                        traffic: traffic
                     });
-                    count++;
                 }
-            }
-            console.log(`[SUCCESS] ${source.name} から ${count} 件ゲット！`);
+            });
+            console.log(`[SUCCESS] ${source.name} から抽出完了`);
         }
 
         if (allNewTrends.length === 0) {
-            throw new Error('全ソースから1件も取れませんでした。ブロックされている可能性があります。');
+            console.log('--- RSS生データ(最初の500文字) ---');
+            // 失敗した時のために中身を一部ログに出す
+            const debugRss = await fetch(SOURCES[0].url);
+            console.log(debugRss.substring(0, 500));
+            throw new Error('データが1件も抽出できませんでした。');
         }
 
         // DB処理
@@ -85,7 +88,6 @@ async function main() {
         allNewTrends.forEach(nt => {
             if (seenTitles.has(nt.title)) return;
             seenTitles.add(nt.title);
-
             const existing = db.current.find(ct => ct.title === nt.title);
             if (existing) {
                 const startStr = existing.firstSeen.replace(/\//g, '-');
@@ -96,19 +98,12 @@ async function main() {
             }
         });
 
-        // 墓場
-        db.current.forEach(old => {
-            if (!mergedTrends.some(n => n.title === old.title) && !old.isSerious) {
-                db.graveyard.unshift({ title: old.title, diedAt: displayTime });
-            }
-        });
-
         db.current = mergedTrends.slice(0, 30);
-        db.graveyard = db.graveyard.slice(0, 25);
+        db.graveyard = (db.graveyard || []).slice(0, 25);
         db.lastUpdate = displayTime;
 
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2));
-        console.log(`[DONE] 最新インテリジェンス ${db.current.length} 件を保存しました。`);
+        console.log(`[DONE] ${db.current.length}件保存。`);
     } catch (err) {
         console.error('[FATAL ERROR]', err.message);
         process.exit(1);
