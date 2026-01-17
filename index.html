@@ -378,13 +378,25 @@
 
                 document.getElementById('tag-list').innerHTML = db.tags.map(tag => `<a href="https://www.google.com/search?q=${encodeURIComponent(tag)}" target="_blank" class="tag-item">#${tag}</a>`).join('');
 
-                // アーカイブリストの表示 (相対パス考慮)
+                // アーカイブリストの表示ロジック（修正：柔軟な日付表示）
                 const isArchivePage = window.location.pathname.includes('/archive/');
                 const archivePrefix = isArchivePage ? './' : './archive/';
-                document.getElementById('archive-list').innerHTML = (db.archiveList || []).map(date => {
-                    const fDate = date.replace(/(\d{4})(\d{2})(\d{2})/, '$1/$2/$3');
-                    return `<a href="${archivePrefix}${date}.html" class="grave-item">📄 ${fDate}</a>`;
-                }).join('');
+                const archiveContainer = document.getElementById('archive-list');
+                
+                if (db.archiveList && db.archiveList.length > 0) {
+                    archiveContainer.innerHTML = db.archiveList.map(date => {
+                        // 形式に関わらず表示用に整形
+                        let label = date;
+                        if (date.length === 8 && !isNaN(date)) {
+                            label = date.replace(/(\d{4})(\d{2})(\d{2})/, '$1/$2/$3');
+                        } else if (date.includes('T')) {
+                            label = date.split('T')[0] + ' (' + date.split('T')[1].replace(/-/g, ':') + ')';
+                        }
+                        return `<a href="${archivePrefix}${date}.html" class="grave-item">📄 ${label}</a>`;
+                    }).join('');
+                } else {
+                    archiveContainer.innerHTML = '<div style="font-size:0.7rem; color:#A0AEC0;">NO_DATA</div>';
+                }
 
                 const trendList = document.getElementById('trend-list');
                 trendList.innerHTML = db.current.map(t => {
