@@ -3,75 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ギャルの熱狂インテリジェンス</title>
+    <title>ギャルの熱狂インテリジェンス | 爆速トレンド解析</title>
+    <meta name="description" content="日本の最新トレンドをギャルの直感でマッピング。経済からLOVEまで、今一番アツい情報をインテリジェンスに提供。">
+    <meta name="keywords" content="トレンド,ニュース,ギャル語,要約,インテリジェンス">
+    <script type="application/ld+json" id="seo-data"></script>
     <style>
-        :root { --neon-blue: #00d4ff; --neon-pink: #ff007f; --neon-yellow: #f9ff00; }
-        body { background: #050505; color: #fff; font-family: 'Hiragino Sans', 'Arial', sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        #app { width: 100%; max-width: 600px; }
-        .header { text-align: center; border-bottom: 4px solid var(--neon-pink); padding-bottom: 15px; margin-bottom: 30px; box-shadow: 0 10px 10px -10px var(--neon-pink); }
-        .hero-title { font-size: 2rem; color: var(--neon-pink); text-shadow: 0 0 15px var(--neon-pink); font-weight: 900; }
+        :root { --neon-blue: #00d4ff; --neon-pink: #ff007f; --neon-yellow: #f9ff00; --bg: #050505; --card-bg: #111; }
+        * { box-sizing: border-box; }
+        body { background: var(--bg); color: #fff; font-family: 'Hiragino Sans', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
         
+        .layout { display: grid; grid-template-columns: 250px 1fr 300px; gap: 20px; max-width: 1400px; margin: 0 auto; padding: 20px; }
+        
+        /* Sidebars */
+        .sidebar { position: sticky; top: 20px; height: calc(100vh - 40px); display: flex; flex-direction: column; gap: 20px; }
+        
+        .header-box { grid-column: 1 / -1; text-align: center; border-bottom: 4px solid var(--neon-pink); padding: 20px; box-shadow: 0 10px 20px -10px var(--neon-pink); }
+        .hero-title { font-size: 2.5rem; color: var(--neon-pink); text-shadow: 0 0 15px var(--neon-pink); font-weight: 900; margin: 0; }
+        
+        /* Trending Tags Section */
+        .glass-box { background: var(--card-bg); border: 1px solid #333; border-radius: 20px; padding: 20px; }
+        .box-title { font-size: 0.9rem; font-weight: 900; color: var(--neon-blue); text-transform: uppercase; margin-bottom: 15px; border-left: 4px solid var(--neon-blue); padding-left: 10px; }
+        .tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        .tag { background: #222; color: #bbb; padding: 6px 12px; border-radius: 50px; font-size: 0.75rem; text-decoration: none; transition: 0.3s; border: 1px solid transparent; }
+        .tag:hover { border-color: var(--neon-pink); color: var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink); }
+        
+        /* Main Feed */
+        .main-feed { display: flex; flex-direction: column; gap: 25px; }
         .trend-card { 
-            position: relative; background: #111; border: 1px solid #333; padding: 30px 25px 25px; border-radius: 25px; margin-bottom: 30px; 
+            position: relative; background: var(--card-bg); border: 1px solid #333; padding: 35px 25px 25px; border-radius: 25px; 
             border-left: 5px solid var(--neon-blue); border-right: 5px solid var(--neon-pink);
-            transition: 0.3s;
         }
-        
-        /* ジャンルタグ */
-        .genre-tag {
-            position: absolute; top: -12px; left: 20px;
-            background: #000; border: 2px solid var(--neon-blue); color: var(--neon-blue);
-            font-size: 0.7rem; font-weight: 900; padding: 4px 12px; border-radius: 50px;
-            box-shadow: 0 0 10px var(--neon-blue);
-        }
+        .genre-tag { position: absolute; top: -12px; left: 20px; background: #000; border: 2px solid var(--neon-blue); color: var(--neon-blue); font-size: 0.7rem; font-weight: 900; padding: 4px 12px; border-radius: 50px; box-shadow: 0 0 10px var(--neon-blue); }
+        .vibes-label { font-size: 0.8rem; font-weight: 900; color: var(--neon-yellow); text-shadow: 0 0 5px var(--neon-yellow); margin-bottom: 10px; display: block; }
+        h3 { font-size: 1.6rem; margin: 10px 0; line-height: 1.3; }
+        .desc { font-size: 0.95rem; color: #ccc; line-height: 1.6; margin-bottom: 20px; }
+        .bet-btn { display: inline-block; background: var(--neon-pink); color: #fff; padding: 12px 30px; border-radius: 50px; text-decoration: none; font-weight: 900; box-shadow: 0 0 15px var(--neon-pink); transition: 0.2s; }
+        .bet-btn:hover { transform: translateY(-3px); }
 
-        .vibes-label {
-            font-size: 0.8rem; font-weight: 900; color: var(--neon-yellow);
-            text-shadow: 0 0 5px var(--neon-yellow); margin-bottom: 10px; display: block;
-        }
-        
-        h3 { margin: 10px 0; font-size: 1.5rem; line-height: 1.3; color: #fff; }
-        .desc { font-size: 0.85rem; color: #bbb; margin-bottom: 20px; line-height: 1.6; }
-        
-        .bet-btn { 
-            display: inline-block; background: var(--neon-pink); color: #fff; padding: 12px 35px; border-radius: 50px; 
-            text-decoration: none; font-size: 1rem; font-weight: 900; box-shadow: 0 0 15px var(--neon-pink); 
-        }
+        .meta-container { margin-top: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; border-top: 1px solid #222; padding-top: 15px; text-align: center; font-size: 0.6rem; color: #555; }
+        .meta-val { color: var(--neon-blue); font-size: 0.8rem; display: block; margin-top: 3px; font-weight: bold; }
 
-        .meta-container { width: 100%; margin-top: 25px; display: flex; justify-content: space-around; font-size: 0.65rem; font-weight: bold; color: #555; border-top: 1px solid #222; padding-top: 15px; }
-        .meta-val { color: var(--neon-blue); font-size: 0.8rem; display: block; margin-top: 3px; }
+        .grave-item { font-size: 0.75rem; color: #444; border-bottom: 1px solid #222; padding: 8px 0; }
 
-        .graveyard { background: #000; border: 2px dashed #333; padding: 30px 20px; border-radius: 25px; margin-top: 60px; text-align: center; }
-        .grave-item { display: inline-block; background: #111; padding: 10px; margin: 5px; border-radius: 10px; font-size: 0.7rem; color: #444; }
-        
-        #loading { text-align: center; font-size: 1.5rem; color: var(--neon-pink); margin-top: 150px; }
+        /* Responsive */
+        @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } .sidebar { position: static; height: auto; } }
+        #loading { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--neon-pink); z-index: 1000; }
     </style>
 </head>
 <body>
-    <div id="loading">📡 バイブス受信中...</div>
-    <div id="app" style="display:none;">
-        <div class="header">
-            <div class="hero-title">ギャルの熱狂インテリジェンス</div>
-            <p id="update-time" style="font-size:0.7rem; color:#666;"></p>
-        </div>
-        <div id="trend-list"></div>
-        <div class="graveyard">
-            <h2 style="color: #333; font-size: 1rem;">💀 トレンドの墓場</h2>
-            <div id="grave-list"></div>
-        </div>
+    <div id="loading">📡 INTEL SYNCHRONIZING...</div>
+    <div class="header-box">
+        <h1 class="hero-title">ギャルの熱狂インテリジェンス</h1>
+        <div id="sync-time" style="font-size: 0.8rem; color: #555; margin-top: 10px;"></div>
+    </div>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="glass-box">
+                <div class="box-title"># Trending_Tags</div>
+                <div id="tag-list" class="tag-list"></div>
+            </div>
+            <div class="glass-box">
+                <div class="box-title">Current_Vibes</div>
+                <div style="font-size: 0.8rem; color: #888;">
+                    日本全体の熱狂度: <span style="color:var(--neon-yellow)">MAXIMUM🔥</span><br>
+                    観測ソース: Google, Yahoo!
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-feed" id="trend-list"></main>
+
+        <aside class="sidebar">
+            <div class="glass-box">
+                <div class="box-title">💀 The_Graveyard</div>
+                <div id="grave-list"></div>
+            </div>
+        </aside>
     </div>
 
     <script>
-        async function load() {
+        async function init() {
             try {
-                const res = await fetch('./intelligence_db.json?t=' + Date.now());
+                const res = await fetch('./intelligence_db.json?v=' + Date.now());
                 const db = await res.json();
+                
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('app').style.display = 'block';
-                document.getElementById('update-time').innerText = 'SYNC: ' + db.lastUpdate;
+                document.getElementById('sync-time').innerText = 'LAST SYNC: ' + db.lastUpdate;
 
+                // Tags
+                document.getElementById('tag-list').innerHTML = db.tags.map(tag => `
+                    <a href="https://www.google.com/search?q=${encodeURIComponent(tag)}" target="_blank" class="tag">#${tag}</a>
+                `).join('');
+
+                // Main List
                 document.getElementById('trend-list').innerHTML = db.current.map(t => `
-                    <div class="trend-card">
+                    <article class="trend-card">
                         <div class="genre-tag">${t.genre.icon} ${t.genre.label}</div>
                         <span class="vibes-label">【 ${t.vibes} 】</span>
                         <h3>${t.title}</h3>
@@ -82,15 +109,33 @@
                             <div class="meta-item">DURATION<span class="meta-val">${t.duration} MINS</span></div>
                             <div class="meta-item">HEAT<span class="meta-val">${t.traffic}</span></div>
                         </div>
-                    </div>
+                    </article>
                 `).join('');
 
+                // Graveyard
                 document.getElementById('grave-list').innerHTML = db.graveyard.map(g => `
                     <div class="grave-item">† ${g.title}</div>
                 `).join('');
-            } catch (e) { console.error(e); }
+
+                // AI-SEO (Schema.org)
+                const schema = {
+                    "@context": "https://schema.org",
+                    "@type": "DataFeed",
+                    "name": "Japan Hot Trends Intelligence",
+                    "dataFeedElement": db.current.map(t => ({
+                        "@type": "NewsArticle",
+                        "headline": t.title,
+                        "description": t.desc
+                    }))
+                };
+                document.getElementById('seo-data').innerHTML = JSON.stringify(schema);
+
+            } catch (e) {
+                console.error("Load failed", e);
+                document.getElementById('loading').innerText = "📡 SYNC ERROR. RETRYING...";
+            }
         }
-        load();
+        init();
     </script>
 </body>
 </html>
