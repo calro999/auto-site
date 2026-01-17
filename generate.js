@@ -17,20 +17,19 @@ const SOURCES = [
     { name: 'PR_TIMES', url: 'https://prtimes.jp/index.rdf', genre: 'GENERAL' }
 ];
 
-const SERIOUS_WORDS = ['事故', '事件', '死亡', '逮捕', '火災', '地震', '不倫', '死去', '容疑', '被害', '遺体', '衝突', '刺', '殺', '判決', '倒産', 'ミサイル', '引退', '辞任', '震災', '追悼', '犠牲', '避難', '不明', '遺族', '訃報', '被災'];
+const SERIOUS_WORDS = ['事故', '事件', '死亡', '逮捕', '火災', '地震', '不倫', '死去', '容疑', '被害', '遺体', '衝突', '殺', '判決', '倒産', 'ミサイル', '震災', '訃報'];
 
 const VIBES_REWRITE = [
     { target: '、', replace: '✨ ' }, { target: '。', replace: '！' },
     { target: '発表', replace: 'キタこれ発表' }, { target: '決定', replace: 'ガチ決定' },
-    { target: '開始', replace: '始まって草' }, { target: '検討', replace: '考えてるなう' },
-    { target: '判明', replace: 'マジか判明' }, { target: '公開', replace: '解禁されて沸いた' },
-    { target: '発売', replace: 'リリースされて神' }, { target: '放送', replace: 'オンエア決定で優勝' }
+    { target: '開始', replace: '始まって草' }, { target: '公開', replace: '解禁されて沸いた' },
+    { target: '発売', replace: 'リリースされて神' }
 ];
 
 const MEMO_TEMPLATES = {
-    GENERAL: ["日本中の視線集中。もはや義務教育レベル。🔥", "検索数エグすぎて草。これ知らないと会話詰む。", "圧倒的注目度。インテリジェンス高めたいならこれ。", "今の空気感を最速でキャッチ。乗り遅れ厳禁。"],
-    SUB_CULTURE: ["推し活の呼吸。供給過多で死ぬ。💖", "全人類見て。ビジュが良すぎて語彙力消失。", "待機勢歓喜。これは覇権確定の予感しかしない。✨", "尊すぎて無理。語彙力がログアウトしました。"],
-    ARCHIVE: ["これは超重要。しっかり自分事として捉えよう👁️", "記憶に刻むべき大切なこと。真摯に向き合う時間🕰️", "忘れてはいけない大切な記録。"]
+    GENERAL: ["日本中の視線集中。もはや義務教育レベル。🔥", "検索数エグすぎて草。これ知らないと会話詰む。", "圧倒的注目度。インテリジェンス高めたいならこれ。"],
+    SUB_CULTURE: ["推し活の呼吸。供給過多で死ぬ。💖", "全人類見て。ビジュが良すぎて語彙力消失。", "尊すぎて無理。語彙力がログアウトしました。"],
+    ARCHIVE: ["これは超重要。しっかり自分事として捉えよう👁️", "忘れてはいけない大切な記録。"]
 };
 
 function fetch(url) {
@@ -61,14 +60,21 @@ async function main() {
                 const rss = await fetch(source.url);
                 rss.split('<item>').slice(1, 15).forEach(item => {
                     const title = getBetween(item, '<title>', '</title>');
-                    const desc = getBetween(item, '<description>', '</description>');
+                    let desc = getBetween(item, '<description>', '</description>');
+                    
                     if (!title) return;
                     
+                    // 【重要】HTMLタグを完全に排除し、実体参照（&nbsp;等）も解除
+                    desc = desc.replace(/<[^>]*>/g, '') 
+                               .replace(/&nbsp;/g, ' ')
+                               .replace(/\n/g, '')
+                               .substring(0, 100);
+
                     const isSerious = SERIOUS_WORDS.some(w => title.includes(w));
                     allNewTrends.push({
                         title,
                         searchKey: title.split(/[ 　,]/)[0],
-                        desc: desc.replace(/<[^>]*>/g, '').substring(0, 100),
+                        desc: desc || "詳細はリンク先をチェック！",
                         genre: isSerious ? 'ARCHIVE' : source.genre,
                         label: isSerious ? 'ARCHIVE' : (Math.random() > 0.8 ? 'FLASH' : 'REAL'),
                         traffic: (Math.floor(Math.random() * 900) + 100) + "℃",
@@ -80,7 +86,9 @@ async function main() {
         }
 
         let db = { current: [], graveyard: [], tags: [], archiveList: [], lastUpdate: "" };
-        if (fs.existsSync(DATA_FILE)) db = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+        if (fs.existsSync(DATA_FILE)) {
+            try { db = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); } catch(e){}
+        }
 
         const now = new Date(new Date().getTime() + (9 * 60 * 60 * 1000));
         const displayTime = now.toLocaleString('ja-JP');
@@ -93,16 +101,12 @@ async function main() {
             return { ...t, vibesTitle: vt, firstSeen: displayTime, memo: temps[Math.floor(Math.random() * temps.length)] };
         });
 
-        db.current.forEach(old => {
-            if (!finalTrends.some(f => f.title === old.title)) db.graveyard.unshift({ title: old.title, diedAt: displayTime });
-        });
-
         db.current = finalTrends;
-        db.graveyard = db.graveyard.slice(0, 30);
+        db.graveyard = (db.graveyard || []).slice(0, 30);
         db.tags = Array.from(tagsSet).slice(0, 20);
         db.lastUpdate = displayTime;
 
-        // アーカイブ一覧の更新
+        // アーカイブ一覧の取得をより確実に
         if (fs.existsSync(ARCHIVE_DIR)) {
             db.archiveList = fs.readdirSync(ARCHIVE_DIR)
                 .filter(f => f.endsWith('.html'))
@@ -111,19 +115,6 @@ async function main() {
         }
 
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2));
-        fs.writeFileSync(path.join(LOGS_DIR, `${dateKey}.json`), JSON.stringify(db, null, 2));
-
-        if (fs.existsSync('./index.html')) {
-            const template = fs.readFileSync('./index.html', 'utf8');
-            const archiveHtml = template.replace(
-                /const DATA_SOURCE = '.*?';/,
-                `const DATA_SOURCE = '../logs/${dateKey}.json';`
-            ).replace(
-                "<title>GAL-INTEL | 世の中の「今」を、最速でバイブス変換。</title>",
-                `<title>ARCHIVE_${dateKey} | GAL-INTEL</title>`
-            );
-            fs.writeFileSync(path.join(ARCHIVE_DIR, `${dateKey}.html`), archiveHtml);
-        }
         console.log("DONE");
     } catch (e) { console.error(e); }
 }

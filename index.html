@@ -107,12 +107,6 @@
             gap: 30px; 
         }
         
-        @keyframes rainbow-border {
-            0% { border-color: #ff4dad; box-shadow: 0 0 15px rgba(255, 77, 173, 0.2); }
-            50% { border-color: #00b4d8; box-shadow: 0 0 15px rgba(0, 180, 216, 0.2); }
-            100% { border-color: #ff4dad; box-shadow: 0 0 15px rgba(255, 77, 173, 0.2); }
-        }
-
         .trend-card { 
             position: relative; 
             background: var(--card-bg); 
@@ -125,11 +119,6 @@
             flex-direction: column; 
             align-items: center; 
             text-align: center;
-        }
-
-        .trend-card.hall-of-fame { 
-            animation: rainbow-border 3s linear infinite; 
-            border-width: 2px; 
         }
 
         .trend-card:hover { 
@@ -229,11 +218,6 @@
             color: #fff;
         }
 
-        .btn-shop:hover {
-            background: #e68a00;
-            transform: scale(1.05);
-        }
-
         .tag-list { 
             display: flex; 
             flex-wrap: wrap; 
@@ -327,7 +311,7 @@
         const ctx = canvas.getContext('2d');
         let dots = [];
 
-        // 常に最新データを取得するためのRaw URL
+        // GitHubのRaw URLを使ってキャッシュを回避
         const DATA_SOURCE_URL = 'https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json';
 
         function initBg(tags) {
@@ -369,30 +353,27 @@
 
         async function load() {
             try {
-                // キャッシュを強制回避
-                const urlWithTime = DATA_SOURCE_URL + '?t=' + Date.now();
-                const res = await fetch(urlWithTime);
-                if (!res.ok) throw new Error('Fetch failed');
+                // タイムスタンプを付与して最新のJSONを強制取得
+                const res = await fetch(DATA_SOURCE_URL + '?t=' + Date.now());
+                if (!res.ok) throw new Error('Data fetch failed');
                 
                 const db = await res.json();
-                console.log("SUCCESS: Data Loaded", db);
-
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('sync-info').innerText = 'LAST_UPDATE: ' + db.lastUpdate;
                 
                 initBg(db.tags);
 
-                // タグの表示
+                // タグ一覧
                 document.getElementById('tag-list').innerHTML = (db.tags || []).map(tag => 
                     `<a href="https://www.google.com/search?q=${encodeURIComponent(tag)}" target="_blank" class="tag-item">#${tag}</a>`
                 ).join('');
 
-                // アーカイブの表示
+                // アーカイブ一覧（サイドバー）
                 const isArchivePage = window.location.pathname.includes('/archive/');
                 const archivePrefix = isArchivePage ? './' : './archive/';
                 const archiveContainer = document.getElementById('archive-list');
                 
-                if (db.archiveList && Array.isArray(db.archiveList)) {
+                if (db.archiveList && db.archiveList.length > 0) {
                     archiveContainer.innerHTML = db.archiveList.map(date => {
                         let label = date;
                         if (date.length === 8 && !isNaN(date)) {
@@ -402,12 +383,13 @@
                         }
                         return `<a href="${archivePrefix}${date}.html" class="grave-item">📄 ${label}</a>`;
                     }).join('');
+                } else {
+                    archiveContainer.innerHTML = '<div style="font-size:0.7rem; color:#A0AEC0;">NO_ARCHIVES</div>';
                 }
 
-                // トレンド記事の表示
+                // メインフィード
                 const trendList = document.getElementById('trend-list');
-                trendList.innerHTML = db.current.map(t => {
-                    const isHallOfFame = t.trafficNum >= 700000;
+                trendList.innerHTML = (db.current || []).map(t => {
                     const barCount = Math.min(10, Math.max(2, Math.ceil(t.trafficNum / 100000)));
                     const eqHtml = Array.from({length: 10}, (_, i) => {
                         const h = i < barCount ? (30 + Math.random() * 70) : 10;
@@ -416,11 +398,8 @@
                     }).join('');
 
                     const kw = t.searchKey || t.title.split(/[ 　]/)[0];
-                    const affiUrl = `https://www.amazon.co.jp/s?k=${encodeURIComponent(kw)}&tag=mattan0290c-22`;
-                    const shopBtn = t.label !== 'ARCHIVE' ? `<a href="${affiUrl}" target="_blank" class="btn btn-shop">関連グッズ ✨</a>` : '';
-
                     return `
-                        <article class="trend-card ${isHallOfFame ? 'hall-of-fame' : ''}">
+                        <article class="trend-card">
                             <div class="label-badge label-${t.label}">${t.label}</div>
                             <div class="vibes-memo">“ ${t.memo} ”</div>
                             <div class="eq-container">${eqHtml}</div>
@@ -428,19 +407,19 @@
                             <p class="desc">${t.desc}</p>
                             <div class="btn-group">
                                 <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="btn btn-analyze">詳細を見る</a>
-                                ${shopBtn}
+                                <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(kw)}&tag=mattan0290c-22" target="_blank" class="btn btn-shop">関連グッズ ✨</a>
                             </div>
                             <div class="footer-info">HEAT: ${t.traffic} | LIVE: ${t.firstSeen}</div>
                         </article>`;
                 }).join('');
 
-                // 墓場の表示
+                // 墓場
                 document.getElementById('grave-list').innerHTML = (db.graveyard || []).map(g => 
                     `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">† ${g.title.substring(0, 20)}...</a>`
                 ).join('');
 
             } catch (e) { 
-                console.error('Fetch error:', e); 
+                console.error('Load error:', e); 
                 document.getElementById('loading').innerText = 'DATA LOAD ERROR.';
             }
         }
