@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAL-INTEL | 世の中の「今」を、最速でバイブス変換。</title>
+    <title>ARCHIVE_20260117 | GAL-INTEL</title>
     
     <meta property="og:title" content="GAL-INTEL | 今のトレンドをギャル語解説">
     <meta property="og:description" content="世の中のニュースを最速でバイブス変換。今の爆アツ話題はこれ！">
@@ -360,7 +360,7 @@
         async function load() {
             try {
                 // generate.jsによってアーカイブ生成時にここが自動書き換えされます
-                const CDN_URL = 'https://cdn.jsdelivr.net/gh/calro999/auto-site/intelligence_db.json';
+                const CDN_URL = '../logs/20260117.json';
                 const res = await fetch(CDN_URL + '?v=' + Date.now());
                 if (!res.ok) throw new Error('Network response was not ok');
                 
