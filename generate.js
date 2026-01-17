@@ -7,10 +7,29 @@ const SOURCES = [
 ];
 
 const DATA_FILE = './intelligence_db.json';
-// 不謹慎・真面目ワード
 const SERIOUS_WORDS = ['事故', '事件', '死亡', '逮捕', '火災', '地震', '不倫', '死去', '容疑', '被害', '遺体', '衝突', '刺', '殺', '判決', '倒産', 'ミサイル', '引退', '辞任'];
 
-const GYARU_SUFFIX = ['すぎｗ', '最高かよ', 'マジでアツい', '神展開', '草', '泣いた', '優勝', 'えぐいて'];
+// ギャル語の語尾
+const GYARU_SUFFIX = ['すぎｗ', '最高かよ', '神展開', '草', '泣いた', '優勝', 'えぐいて'];
+
+// ジャンル判定ロジック
+function getGenre(title, desc) {
+    const text = (title + desc).toLowerCase();
+    if (text.match(/株|円安|経済|倒産|予算|税|市場/)) return { label: 'ECONOMY', icon: '💰' };
+    if (text.match(/結婚|離婚|熱愛|不倫|側|密着/)) return { label: 'LOVE', icon: '💘' };
+    if (text.match(/首相|総理|政府|選挙|辞任|政治/)) return { label: 'POLITICS', icon: '⚖️' };
+    if (text.match(/ドラマ|映画|放送|タレント|歌手|アイドル/)) return { label: 'ENTAME', icon: '📺' };
+    if (text.match(/試合|勝利|優勝|引退|選手|ゴール/)) return { label: 'SPORTS', icon: '👟' };
+    return { label: 'CULTURE', icon: '✨' };
+}
+
+// バイブス格付け
+function getVibes(isSerious, traffic) {
+    if (isSerious) return 'CONFIRMED 👁️';
+    if (traffic.includes('万') || parseInt(traffic) > 50000) return '神VIBES 🔥';
+    const vibes = ['沼確定 🕳️', '優勝 🏆', '安定の極み 🍵', '次くる 🚀', '眼福 👀'];
+    return vibes[Math.floor(Math.random() * vibes.length)];
+}
 
 function fetch(url) {
     return new Promise((resolve, reject) => {
@@ -44,26 +63,29 @@ function smartGyaruize(text, type = 'title') {
 
 async function main() {
     try {
-        console.log('--- インテリジェンス・フラットデザイン更新 ---');
+        console.log('--- インテリジェンス・ランクアップ開始 ---');
         let allNewTrends = [];
-
         for (const source of SOURCES) {
             const rssData = await fetch(source.url);
             const items = rssData.split(/<item>/i).slice(1);
-
             items.forEach(item => {
                 const rawTitle = getBetween(item, '<title>', '</title>');
                 const rawDesc = getBetween(item, '<description>', '</description>');
+                const traffic = getBetween(item, '<ht:approx_traffic>', '</ht:approx_traffic>') || 'HOT';
                 if (!rawTitle || rawTitle.length < 5) return;
 
                 const isSerious = SERIOUS_WORDS.some(w => rawTitle.includes(w));
+                const genre = getGenre(rawTitle, rawDesc);
+                const vibes = getVibes(isSerious, traffic);
                 
                 allNewTrends.push({
                     title: isSerious ? rawTitle : smartGyaruize(rawTitle, 'title'),
                     source: source.name,
                     desc: isSerious ? rawDesc : smartGyaruize(rawDesc, 'desc'),
-                    isSerious, // 内部的な判定用として残す
-                    traffic: getBetween(item, '<ht:approx_traffic>', '</ht:approx_traffic>') || '🔥HOT'
+                    isSerious,
+                    traffic,
+                    genre,
+                    vibes
                 });
             });
         }
@@ -95,7 +117,7 @@ async function main() {
         db.lastUpdate = displayTime;
 
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2));
-        console.log(`[DONE] ${db.current.length}件をフラットに更新。`);
+        console.log(`[DONE] ジャンル判別完了。`);
     } catch (err) {
         console.error('[FATAL]', err.message);
         process.exit(1);

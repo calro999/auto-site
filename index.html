@@ -5,74 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ギャルの熱狂インテリジェンス</title>
     <style>
-        :root { --neon-blue: #00d4ff; --neon-pink: #ff007f; }
+        :root { --neon-blue: #00d4ff; --neon-pink: #ff007f; --neon-yellow: #f9ff00; }
         body { background: #050505; color: #fff; font-family: 'Hiragino Sans', 'Arial', sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        #app { width: 100%; max-width: 600px; text-align: center; }
-        .header { border-bottom: 4px solid var(--neon-pink); padding-bottom: 15px; margin-bottom: 30px; box-shadow: 0 10px 10px -10px var(--neon-pink); }
-        .hero-title { font-size: 2.2rem; color: var(--neon-pink); text-shadow: 0 0 15px var(--neon-pink); font-weight: 900; }
-        #update-time { font-size: 0.8rem; color: #888; font-family: monospace; }
+        #app { width: 100%; max-width: 600px; }
+        .header { text-align: center; border-bottom: 4px solid var(--neon-pink); padding-bottom: 15px; margin-bottom: 30px; box-shadow: 0 10px 10px -10px var(--neon-pink); }
+        .hero-title { font-size: 2rem; color: var(--neon-pink); text-shadow: 0 0 15px var(--neon-pink); font-weight: 900; }
         
-        .trend-card { background: #111; border: 1px solid #333; padding: 25px; border-radius: 25px; margin-bottom: 25px; display: flex; flex-direction: column; align-items: center; border-left: 5px solid var(--neon-blue); border-right: 5px solid var(--neon-pink); }
+        .trend-card { 
+            position: relative; background: #111; border: 1px solid #333; padding: 30px 25px 25px; border-radius: 25px; margin-bottom: 30px; 
+            border-left: 5px solid var(--neon-blue); border-right: 5px solid var(--neon-pink);
+            transition: 0.3s;
+        }
         
-        .label { font-size: 0.7rem; font-weight: 900; padding: 5px 15px; border-radius: 50px; margin-bottom: 15px; background: var(--neon-blue); color: #000; box-shadow: 0 0 10px var(--neon-blue); }
-        .duration-tag { color: var(--neon-pink); font-size: 0.8rem; font-weight: bold; margin-bottom: 10px; text-shadow: 0 0 5px var(--neon-pink); }
-        
-        h3 { margin: 15px 0; font-size: 1.6rem; line-height: 1.3; color: #fff; word-break: break-all; }
-        .desc { font-size: 0.9rem; color: #bbb; margin-bottom: 20px; line-height: 1.5; }
-        
-        .bet-btn { background: var(--neon-pink); color: #fff; padding: 10px 30px; border-radius: 50px; text-decoration: none; font-size: 1rem; font-weight: 900; box-shadow: 0 0 15px var(--neon-pink); }
-        
-        .meta-container { width: 100%; margin-top: 25px; display: flex; justify-content: space-around; font-size: 0.7rem; font-weight: bold; color: #666; border-top: 1px solid #222; padding-top: 15px; }
-        .meta-val { color: var(--neon-blue); font-size: 0.8rem; display: block; margin-top: 4px; }
+        /* ジャンルタグ */
+        .genre-tag {
+            position: absolute; top: -12px; left: 20px;
+            background: #000; border: 2px solid var(--neon-blue); color: var(--neon-blue);
+            font-size: 0.7rem; font-weight: 900; padding: 4px 12px; border-radius: 50px;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
 
-        .graveyard { background: #000; border: 2px dashed #333; padding: 30px 20px; border-radius: 25px; margin-top: 60px; width: 100%; }
-        .grave-item { display: inline-block; background: #111; padding: 10px; margin: 5px; border-radius: 10px; font-size: 0.75rem; color: #555; }
+        .vibes-label {
+            font-size: 0.8rem; font-weight: 900; color: var(--neon-yellow);
+            text-shadow: 0 0 5px var(--neon-yellow); margin-bottom: 10px; display: block;
+        }
         
-        h2 { font-size: 1.5rem; margin-bottom: 25px; color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
-        #loading { font-size: 1.5rem; color: var(--neon-pink); margin-top: 150px; }
+        h3 { margin: 10px 0; font-size: 1.5rem; line-height: 1.3; color: #fff; }
+        .desc { font-size: 0.85rem; color: #bbb; margin-bottom: 20px; line-height: 1.6; }
+        
+        .bet-btn { 
+            display: inline-block; background: var(--neon-pink); color: #fff; padding: 12px 35px; border-radius: 50px; 
+            text-decoration: none; font-size: 1rem; font-weight: 900; box-shadow: 0 0 15px var(--neon-pink); 
+        }
+
+        .meta-container { width: 100%; margin-top: 25px; display: flex; justify-content: space-around; font-size: 0.65rem; font-weight: bold; color: #555; border-top: 1px solid #222; padding-top: 15px; }
+        .meta-val { color: var(--neon-blue); font-size: 0.8rem; display: block; margin-top: 3px; }
+
+        .graveyard { background: #000; border: 2px dashed #333; padding: 30px 20px; border-radius: 25px; margin-top: 60px; text-align: center; }
+        .grave-item { display: inline-block; background: #111; padding: 10px; margin: 5px; border-radius: 10px; font-size: 0.7rem; color: #444; }
+        
+        #loading { text-align: center; font-size: 1.5rem; color: var(--neon-pink); margin-top: 150px; }
     </style>
 </head>
 <body>
-    <div id="loading">📡 インテリジェンス受信中...</div>
+    <div id="loading">📡 バイブス受信中...</div>
     <div id="app" style="display:none;">
         <div class="header">
             <div class="hero-title">ギャルの熱狂インテリジェンス</div>
-            <p id="update-time"></p>
+            <p id="update-time" style="font-size:0.7rem; color:#666;"></p>
         </div>
-        <h2>🔥 今、日本がアツくなってるやつ</h2>
         <div id="trend-list"></div>
         <div class="graveyard">
-            <h2 style="color: #444; text-shadow: none;">💀 トレンドの墓場 (The Graveyard)</h2>
+            <h2 style="color: #333; font-size: 1rem;">💀 トレンドの墓場</h2>
             <div id="grave-list"></div>
         </div>
     </div>
 
     <script>
-        const JSON_URL = './intelligence_db.json';
         async function load() {
             try {
-                const res = await fetch(JSON_URL + '?t=' + Date.now());
+                const res = await fetch('./intelligence_db.json?t=' + Date.now());
                 const db = await res.json();
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('app').style.display = 'block';
-                document.getElementById('update-time').innerText = 'LAST SYNC: ' + db.lastUpdate;
+                document.getElementById('update-time').innerText = 'SYNC: ' + db.lastUpdate;
 
                 document.getElementById('trend-list').innerHTML = db.current.map(t => `
                     <div class="trend-card">
-                        <span class="label">${t.source} INTEL</span>
-                        ${t.duration > 30 ? `<div class="duration-tag">🔥 ${t.duration}分間 継続中</div>` : ''}
+                        <div class="genre-tag">${t.genre.icon} ${t.genre.label}</div>
+                        <span class="vibes-label">【 ${t.vibes} 】</span>
                         <h3>${t.title}</h3>
                         <p class="desc">${t.desc}</p>
-                        <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="bet-btn">${t.isSerious ? '詳細をチェック' : 'これ次くる！🔥'}</a>
+                        <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="bet-btn">これ詳しく！✨</a>
                         <div class="meta-container">
                             <div class="meta-item">STATUS<span class="meta-val">${t.isSerious ? 'CONFIRMED' : 'ANALYZING'}</span></div>
+                            <div class="meta-item">DURATION<span class="meta-val">${t.duration} MINS</span></div>
                             <div class="meta-item">HEAT<span class="meta-val">${t.traffic}</span></div>
                         </div>
                     </div>
                 `).join('');
 
                 document.getElementById('grave-list').innerHTML = db.graveyard.map(g => `
-                    <div class="grave-item">† ${g.title}<br><span style="font-size:0.6rem;">${g.diedAt}</span></div>
+                    <div class="grave-item">† ${g.title}</div>
                 `).join('');
             } catch (e) { console.error(e); }
         }
