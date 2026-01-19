@@ -1,7 +1,7 @@
 /**
- * GAL-INTEL generate.js v3.0 - ULTIMATE_CLEAN_SYNC
- * 役割: RSS取得、不適切ワードフィルタ、完全HTML破壊ロジック
- * 修正: index.htmlのカード裏面を復活させるため、desc内のあらゆるHTMLコードを物理的に排除。
+ * GAL-INTEL generate.js v3.1 - SPECIAL_PAGE_RESTORE
+ * 役割: RSS取得、完全HTML破壊、特設（個別）ページ生成の完全修復
+ * 修正: index.htmlからのリンク構造を最適化し、archive内の個別ページを表示可能に。
  */
 
 const fs = require('fs');
@@ -16,6 +16,7 @@ const ARCHIVE_DIR = './archive';
 const IMAGE_DIR = './images';
 const MAX_DESC_LENGTH = 150; 
 
+// フォルダがない場合は作成
 if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR);
 if (!fs.existsSync(IMAGE_DIR)) fs.mkdirSync(IMAGE_DIR);
 
@@ -31,47 +32,24 @@ const VIBES_MEMOS = {
     SUB_CULTURE: ["これ界隈で絶対バズるやつじゃん！💖", "センス良すぎてバイブス伝わるわ〜", "推し活捗りすぎて幸せ案件", "世界観強すぎて語彙力失ったｗ", "エモすぎて無理。語彙力死んだ。"]
 };
 
-/**
- * 【最重要】あらゆるHTMLタグ・エンティティを破壊する関数
- */
+// --- 強力なクレンジング ---
 function ultimateClean(text) {
     if (!text) return "";
     let cleaned = String(text);
-
-    // 1. CDATAセクションの除去
     cleaned = cleaned.replace(/<!\[CDATA\[/g, '').replace(/\]\]>/g, '');
-
-    // 2. HTMLエンティティ（&lt; 等）を通常の記号（< 等）に一旦戻す
     cleaned = cleaned.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&nbsp;/g, ' ');
-
-    // 3. 全てのHTMLタグ（<...属性...>）を削除し、空白に置き換える
-    // これにより <ol><li><a>タグがURLごと消滅します
     cleaned = cleaned.replace(/<[^>]*>?/gm, ' ');
-
-    // 4. 残った特殊記号やURLの断片を掃除
-    cleaned = cleaned.replace(/https?:\/\/[\x21-\x7e]+/gi, ''); // URLそのものを削除
+    cleaned = cleaned.replace(/https?:\/\/[\x21-\x7e]+/gi, ''); 
     cleaned = cleaned.replace(/Google ニュースですべて表示/g, '');
     cleaned = cleaned.replace(/続きを読む/g, '');
-
-    // 5. 連続する空白・改行を1つにまとめる
     cleaned = cleaned.replace(/\s+/g, ' ').trim();
-
-    // 6. 文字数制限
-    if (cleaned.length > MAX_DESC_LENGTH) {
-        cleaned = cleaned.substring(0, MAX_DESC_LENGTH) + '...';
-    }
-
-    // 7. 最低限のテキスト担保（裏面が消えないように）
-    if (cleaned.length < 10) {
-        cleaned = "最新トレンドの詳細をチェック！バイブス上がる情報が盛りだくさん✨";
-    }
-
+    if (cleaned.length > MAX_DESC_LENGTH) cleaned = cleaned.substring(0, MAX_DESC_LENGTH) + '...';
+    if (cleaned.length < 10) cleaned = "最新トレンドの詳細をチェック！バイブス上がる情報が盛りだくさん✨";
     return cleaned;
 }
 
 function ensureString(input) {
-    if (input === undefined || input === null) return "";
-    return String(Array.isArray(input) ? input[0] : input).trim();
+    return String(Array.isArray(input) ? input[0] : input || "").trim();
 }
 
 function wrapText(text, maxLen = 12) {
@@ -83,6 +61,7 @@ function wrapText(text, maxLen = 12) {
     return lines.slice(0, 3);
 }
 
+// OGP画像生成
 async function generateVibeImage(title, slug) {
     const width = 1200;
     const height = 630;
@@ -108,8 +87,10 @@ async function generateVibeImage(title, slug) {
     return `https://raw.githubusercontent.com/calro999/auto-site/main/images/${fileName}`;
 }
 
+// スラッグ生成（ファイル名用）
 function createSlug(text) {
-    return ensureString(text).replace(/[^\w\s]/gi, '').split(/\s+/).filter(w => w.length > 0).slice(0, 5).join('-').toLowerCase() || Date.now().toString();
+    let slug = ensureString(text).replace(/[^\w\s]/gi, '').split(/\s+/).filter(w => w.length > 0).slice(0, 5).join('-').toLowerCase();
+    return slug || Date.now().toString();
 }
 
 const fetchRSS = (url) => new Promise((resolve, reject) => {
@@ -121,7 +102,7 @@ const fetchRSS = (url) => new Promise((resolve, reject) => {
 });
 
 async function main() {
-    console.log("🚀 Starting GAL-INTEL v3.0: ULTIMATE CLEAN BUILD...");
+    console.log("🚀 GAL-INTEL v3.1: Restoring Special Pages...");
     try {
         let db = { current: [], graveyard: [], tags: [], archiveList: [], dictionary: [] };
         if (fs.existsSync(DATA_FILE)) db = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
@@ -136,15 +117,10 @@ async function main() {
             const xml = await fetchRSS(s.url);
             const items = xml.split('<item>').slice(1, 15);
             for (const item of items) {
-                let rawTitle = item.split('<title>')[1]?.split('</title>')[0] || "";
-                let title = ultimateClean(rawTitle);
-
-                let rawDesc = item.split('<description>')[1]?.split('</description>')[0] || "";
-                let desc = ultimateClean(rawDesc); // descriptionを強制クリーン
-                
+                let title = ultimateClean(item.split('<title>')[1]?.split('</title>')[0] || "");
+                let desc = ultimateClean(item.split('<description>')[1]?.split('</description>')[0] || "");
                 if (!title || FORBIDDEN_WORDS.some(w => title.includes(w))) continue;
                 if (fetchedTrends.some(t => t.title === title)) continue;
-                
                 fetchedTrends.push({ title, desc, genre: s.genre });
             }
         }
@@ -152,6 +128,8 @@ async function main() {
         const now = new Date(new Date().getTime() + (9 * 60 * 60 * 1000));
         const dateKey = now.toISOString().split('T')[0].replace(/-/g, '');
         let processedCurrent = [];
+        
+        // メインのテンプレート（index.html）を読み込む
         const templateHTML = fs.readFileSync(INDEX_PATH, 'utf8');
 
         for (let t of fetchedTrends.slice(0, 10)) {
@@ -159,17 +137,24 @@ async function main() {
             const aiImage = await generateVibeImage(t.title, slug);
             const memos = VIBES_MEMOS[t.genre] || VIBES_MEMOS.GENERAL;
             
-            processedCurrent.push({
+            const item = {
                 title: t.title,
-                desc: t.desc, // ここが100%プレーンテキストになる
+                desc: t.desc,
                 slug: slug,
                 aiImage: aiImage,
                 memo: memos[Math.floor(Math.random() * memos.length)],
-                aiSummary: `「${t.title}」バイブス解析完了。トレンド爆上がり中。`
-            });
+                aiSummary: `「${t.title}」バイブス解析完了。個別特設ページ公開中。`
+            };
+            processedCurrent.push(item);
             
-            const singleHTML = templateHTML.replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json');
-            fs.writeFileSync(path.join(ARCHIVE_DIR, `${slug}.html`), singleHTML);
+            // 【重要】特設ページの生成
+            // 個別ページからは上の階層のJSONを見に行くようにパスを調整
+            const specialPageHTML = templateHTML
+                .replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json')
+                // ページタイトルを記事名に変更
+                .replace('<title>GAL-INTEL</title>', `<title>${t.title} | GAL-INTEL</title>`);
+            
+            fs.writeFileSync(path.join(ARCHIVE_DIR, `${slug}.html`), specialPageHTML);
         }
 
         const finalDb = {
@@ -181,10 +166,13 @@ async function main() {
             lastUpdate: now.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) + ' JST'
         };
 
+        // 日付アーカイブも生成
         fs.writeFileSync(path.join(ARCHIVE_DIR, `${dateKey}.html`), templateHTML.replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json'));
+        
+        // データベース保存
         fs.writeFileSync(DATA_FILE, JSON.stringify(finalDb, null, 2), 'utf8');
         
-        console.log("✅ Build Success! JSON is now ULTIMATE CLEAN.");
+        console.log(`✅ Build Success! ${processedCurrent.length} Special pages generated in /archive/`);
     } catch (e) { 
         console.error("❌ Fatal Build Error:", e); 
         process.exit(1); 
