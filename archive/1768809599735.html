@@ -183,15 +183,15 @@
             flex-direction: column;
             align-items: center; 
             text-align: center;
-            overflow: hidden; /* はみ出し防止 */
+            overflow: hidden; 
         }
 
         .back { 
             transform: rotateY(180deg); 
             background: #FAFAFA; 
             overflow-y: auto; 
-            align-items: flex-start;
-            text-align: left;
+            align-items: center; /* 裏面も中央揃えで崩れ防止 */
+            text-align: center;
         }
 
         .vibes-memo { 
@@ -207,7 +207,7 @@
             width: 100%;
             overflow: hidden;
             display: -webkit-box;
-            -webkit-line-clamp: 2; /* メモも最大2行制限 */
+            -webkit-line-clamp: 2; 
             -webkit-box-orient: vertical;
         }
 
@@ -238,7 +238,7 @@
             width: 100%;
             overflow: hidden;
             display: -webkit-box;
-            -webkit-line-clamp: 2; /* タイトル最大2行 */
+            -webkit-line-clamp: 2; 
             -webkit-box-orient: vertical;
         }
 
@@ -250,11 +250,11 @@
             width: 100%;
             overflow: hidden;
             display: -webkit-box;
-            -webkit-line-clamp: 3; /* 説明文最大3行 */
+            -webkit-line-clamp: 3; 
             -webkit-box-orient: vertical;
         }
 
-        /* AMAZON & BUTTONS */
+        /* BUTTONS */
         .btn-group { 
             display: flex; 
             gap: 15px; 
@@ -276,7 +276,7 @@
             cursor: pointer; 
             border: none;
             flex: 1;
-            white-space: nowrap; /* ボタン内の改行防止 */
+            white-space: nowrap; 
         }
 
         .btn-pink { 
@@ -310,6 +310,7 @@
             background: var(--text);
             color: #fff;
             width: 100%;
+            margin-top: 20px;
         }
 
         /* ELEMENTS */
@@ -337,8 +338,8 @@
             border: 1px solid var(--border);
             padding: 20px;
             border-radius: 20px;
-            margin-bottom: 20px;
             width: 100%;
+            text-align: left;
         }
 
         .summary-label {
@@ -445,8 +446,9 @@
             requestAnimationFrame(animate);
         }
 
-        // 文字数制限用ヘルパー関数
+        // 文字数制限用ヘルパー関数（安全に緩和）
         function truncate(str, len) {
+            if (!str) return "";
             return str.length <= len ? str : str.substr(0, len) + "...";
         }
 
@@ -462,12 +464,11 @@
                 document.getElementById('grave-list').innerHTML = (db.graveyard || []).slice(0, 10).map(g => `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">⚡️ ${truncate(g.title, 20)}</a>`).join('');
                 document.getElementById('archive-links').innerHTML = (db.archiveList || []).slice(0,5).map(a => `<a href="archive/${a}.html" class="btn btn-outline" style="font-size:0.75rem; padding:10px;">📅 ${a} Archive</a>`).join('');
 
-                // メインフィード生成のループを確実に実行
                 const trendContainer = document.getElementById('trend-list');
                 let htmlBuffer = "";
 
                 (db.current || []).forEach((t, idx) => {
-                    // 15本のイコライザーバーを各記事で個別に生成
+                    // 各記事ごとにイコライザーバーを生成
                     let eqBars = "";
                     for (let i = 0; i < 15; i++) {
                         const h = Math.floor(Math.random() * 70) + 20;
@@ -475,10 +476,11 @@
                         eqBars += `<div class="eq-bar" style="height: ${h}%; animation-delay: ${delay}s"></div>`;
                     }
 
-                    // 文字数制限を適用（はみ出し防止の二重策）
-                    const safeTitle = truncate(t.title, 40);
-                    const safeDesc = truncate(t.desc, 100);
-                    const safeMemo = truncate(t.memo, 60);
+                    // 文字数制限を適切に設定（はみ出し防止）
+                    const safeTitle = truncate(t.title, 60);
+                    const safeDesc = truncate(t.desc, 150);
+                    const safeMemo = truncate(t.memo, 100);
+                    const safeSummary = truncate(t.aiSummary, 250);
 
                     htmlBuffer += `
                         <div class="trend-card-container" id="card-${idx}">
@@ -493,18 +495,16 @@
                                     <div class="btn-group">
                                         <a href="archive/${t.slug}.html" class="btn btn-pink">📖 DETAILS</a>
                                         <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(t.title)}&tag=YOUR_TAG" target="_blank" class="btn btn-amazon">🛒 Amazon</a>
-                                        <div class="btn btn-outline" onclick="document.getElementById('card-${idx}').classList.toggle('flipped')">🔄 VIBE</div>
+                                        <div class="btn btn-outline" onclick="document.getElementById('card-${idx}').classList.add('flipped')">🔄 VIBE</div>
                                     </div>
                                 </div>
                                 <div class="back">
                                     <div class="ai-image-wrap"><img src="${t.aiImage}" onerror="this.src='https://placehold.jp/24/7928ca/ffffff/800x450.png?text=VIBE_IMAGE...'"></div>
                                     <div class="summary-box">
                                         <div class="summary-label">AI_INSIGHT_SUMMARY</div>
-                                        <div class="summary-text">${t.aiSummary}</div>
+                                        <div class="summary-text">${safeSummary}</div>
                                     </div>
-                                    <div class="btn-group">
-                                        <div class="btn btn-dark" onclick="document.getElementById('card-${idx}').classList.toggle('flipped')">🔙 戻る</div>
-                                    </div>
+                                    <div class="btn btn-dark" onclick="document.getElementById('card-${idx}').classList.remove('flipped')">🔙 戻る</div>
                                 </div>
                             </div>
                         </div>`;
