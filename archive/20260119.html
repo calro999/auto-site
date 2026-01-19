@@ -233,34 +233,40 @@
     <canvas id="connect-bg"></canvas>
     <div id="loading">CONNECTING VIBES...</div>
 
+    <a href="#archive-section" class="mobile-nav-btn">📅 過去記事アーカイブ</a>
+
     <div class="layout">
         <aside class="sidebar">
-            <div class="glass-box">
-                <div class="box-title"># TRENDING_TAGS</div>
-                <div id="tag-list" class="tag-list"></div>
-            </div>
-            <div class="glass-box">
-                <div class="box-title">📅 PAST_ARCHIVES</div>
-                <div id="archive-list" style="max-height: 250px; overflow-y: auto;"></div>
+            <div class="scroll-area">
+                <div class="glass-box">
+                    <div class="box-title"><span>#</span> TRENDING_TAGS</div>
+                    <div id="tag-list" class="tag-list"></div>
+                </div>
+                <div class="glass-box" id="archive-section">
+                    <div class="box-title"><span>📅</span> PAST_ARCHIVES</div>
+                    <div id="archive-list"></div>
+                </div>
             </div>
         </aside>
 
         <main>
             <header>
-                <h1 class="hero-title">GAL<span>-</span>INTEL</h1>
-                <div class="sub-title">世の中の「今」を、最速でバイブス変換。</div>
+                <h1 class="hero-title"><a id="nav-logo" href="/">GAL<span>-</span>INTEL</a></h1>
+                <div class="sub-title">VIBES CONVERTER SYSTEM</div>
             </header>
             <div class="main-feed" id="trend-list"></div>
         </main>
 
         <aside class="sidebar">
-            <div class="glass-box">
-                <div class="box-title">🔄 SYNC_STATUS</div>
-                <div id="sync-info" style="font-size: 0.65rem; color: #A0AEC0;"></div>
-            </div>
-            <div class="glass-box" style="overflow-y: auto; flex-grow: 1;">
-                <div class="box-title">💀 THE_GRAVEYARD</div>
-                <div id="grave-list"></div>
+            <div class="scroll-area">
+                <div class="glass-box">
+                    <div class="box-title"><span>🔄</span> SYNC_STATUS</div>
+                    <div id="sync-info" style="font-size: 0.8rem; font-weight: 900; color: var(--accent-blue);"></div>
+                </div>
+                <div class="glass-box" style="flex-grow: 1;">
+                    <div class="box-title"><span>💀</span> THE_GRAVEYARD</div>
+                    <div id="grave-list"></div>
+                </div>
             </div>
         </aside>
     </div>
@@ -269,7 +275,7 @@
         const canvas = document.getElementById('connect-bg');
         const ctx = canvas.getContext('2d');
         let dots = [];
-        const DATA_SOURCE_URL = 'https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json';
+        const DB_URL = 'https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json';
 
         function initBg(tags) {
             canvas.width = window.innerWidth;
@@ -280,7 +286,7 @@
                 text: '#' + t,
                 vx: (Math.random() - 0.5) * 0.3, 
                 vy: (Math.random() - 0.5) * 0.3, 
-                size: 9
+                size: 10
             }));
             animate();
         }
@@ -291,18 +297,10 @@
                 d.x += d.vx; d.y += d.vy;
                 if (d.x < 0 || d.x > canvas.width) d.vx *= -1; 
                 if (d.y < 0 || d.y > canvas.height) d.vy *= -1;
-                ctx.font = `bold ${d.size}px Arial`; 
-                ctx.fillStyle = 'rgba(160, 174, 192, 0.3)'; 
-                ctx.fillText(d.text, d.x, d.y);
+                ctx.font = `bold ${d.size}px Arial`; ctx.fillStyle = 'rgba(160, 174, 192, 0.3)'; ctx.fillText(d.text, d.x, d.y);
                 dots.slice(i + 1).forEach(d2 => {
                     const dist = Math.hypot(d.x - d2.x, d.y - d2.y);
-                    if (dist < 150) { 
-                        ctx.beginPath(); 
-                        ctx.strokeStyle = `rgba(226, 232, 240, 0.4)`; 
-                        ctx.moveTo(d.x, d.y); 
-                        ctx.lineTo(d2.x, d2.y); 
-                        ctx.stroke(); 
-                    }
+                    if (dist < 150) { ctx.beginPath(); ctx.strokeStyle = `rgba(226, 232, 240, 0.4)`; ctx.moveTo(d.x, d.y); ctx.lineTo(d2.x, d2.y); ctx.stroke(); }
                 });
             });
             requestAnimationFrame(animate);
@@ -310,52 +308,45 @@
 
         async function load() {
             try {
-                const res = await fetch(DATA_SOURCE_URL + '?t=' + Date.now());
+                const res = await fetch(DB_URL + '?t=' + Date.now());
                 const db = await res.json();
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('sync-info').innerText = 'UPDATE: ' + db.lastUpdate;
-                
                 initBg(db.tags);
 
-                document.getElementById('tag-list').innerHTML = (db.tags || []).map(tag => 
+                const isArchive = window.location.pathname.includes('/archive/');
+                document.getElementById('nav-logo').href = isArchive ? '../index.html' : './index.html';
+                const prefix = isArchive ? './' : './archive/';
+
+                document.getElementById('tag-list').innerHTML = (db.tags || []).slice(0, 15).map(tag => 
                     `<a href="https://www.google.com/search?q=${encodeURIComponent(tag)}" target="_blank" class="tag-item">#${tag}</a>`
                 ).join('');
 
-                const isArchivePage = window.location.pathname.includes('/archive/');
-                const prefix = isArchivePage ? './' : './archive/';
                 document.getElementById('archive-list').innerHTML = (db.archiveList || []).map(d => 
                     `<a href="${prefix}${d}.html" class="grave-item">📄 ${d}</a>`
-                ).join('') || 'NO_DATA';
+                ).join('');
 
                 document.getElementById('trend-list').innerHTML = (db.current || []).map(t => {
-                    const eqHtml = Array.from({length: 10}, (_, i) => 
-                        `<div class="eq-bar eq-active" style="height: ${30+Math.random()*70}%; animation-delay: ${i*0.1}s"></div>`
-                    ).join('');
-                    const kw = t.searchKey || t.title.substring(0, 5);
+                    const eqBars = Array.from({length: 10}, (_, i) => `<div class="eq-bar eq-active" style="height: ${30+Math.random()*70}%; animation-delay: ${i*0.1}s"></div>`).join('');
                     return `
                         <article class="trend-card">
                             <div class="label-badge label-${t.label}">${t.label}</div>
                             <div class="vibes-memo">“ ${t.memo} ”</div>
-                            <div class="eq-container">${eqHtml}</div>
+                            <div class="eq-container">${eqBars}</div>
                             <h3>${t.vibesTitle || t.title}</h3>
                             <p class="desc">${t.desc}</p>
                             <div class="btn-group">
-                                <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="btn btn-analyze">詳細を見る</a>
-                                <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(kw)}&tag=mattan0290c-22" target="_blank" class="btn btn-shop">Shop ✨</a>
+                                <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="btn btn-analyze">🔍 CHECK</a>
+                                <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(t.searchKey)}" target="_blank" class="btn btn-shop">🛍️ SHOP</a>
                             </div>
-                            <div class="footer-info">HEAT: ${t.traffic}</div>
                         </article>`;
                 }).join('');
 
                 document.getElementById('grave-list').innerHTML = (db.graveyard || []).map(g => 
-                    `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">† ${g.title.substring(0, 18)}...</a>`
+                    `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">† ${g.title}</a>`
                 ).join('');
-
-            } catch (e) { 
-                console.error(e); 
-            }
+            } catch (e) { console.error(e); }
         }
-
         load();
         window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
     </script>

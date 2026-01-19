@@ -3,6 +3,7 @@ const https = require('https');
 const path = require('path');
 
 const DATA_FILE = './intelligence_db.json';
+const INDEX_PATH = './index.html';
 const ARCHIVE_DIR = './archive';
 
 if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR);
@@ -91,18 +92,19 @@ async function main() {
             lastUpdate: displayTime
         };
 
-        // アーカイブページの生成（物理ファイル化）
+        // 修正：アーカイブページの生成（常に最新のindex.htmlのデザインを上書き適用）
         const archivePath = path.join(ARCHIVE_DIR, `${dateKey}.html`);
-        if (!fs.existsSync(archivePath)) {
-            const template = fs.readFileSync('./index.html', 'utf8');
-            fs.writeFileSync(archivePath, template);
+        if (fs.existsSync(INDEX_PATH)) {
+            const template = fs.readFileSync(INDEX_PATH, 'utf8');
+            fs.writeFileSync(archivePath, template, 'utf8');
+            console.log(`ARCHIVE UPDATED: ${dateKey}.html with latest design.`);
         }
 
         if (fs.existsSync(ARCHIVE_DIR)) {
             db.archiveList = fs.readdirSync(ARCHIVE_DIR).filter(f => f.endsWith('.html')).map(f => f.replace('.html', '')).sort((a, b) => b - a);
         }
 
-        fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2));
+        fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2), 'utf8');
         console.log(`SUCCESS: DB Updated & Archive generated for ${dateKey}`);
     } catch (e) { console.error(e); }
 }
