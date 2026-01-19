@@ -6,7 +6,8 @@
     <title>GAL-INTEL // Realtime Intelligence Feed</title>
     <style>
         :root {
-            --bg-black: #050505; /* 真っ黒すぎない深みのある黒 */
+            /* 背景色を「黒」から「深みのあるグラデーション用ネイビー」へ変更 */
+            --bg-black: #0a0a1a; 
             --accent-pink: #ff007a;
             --accent-blue: #00f0ff;
             --accent-purple: #7928ca;
@@ -16,7 +17,14 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg-black); color: var(--text-main); overflow-x: hidden; }
+        
+        /* 背景にグラデーションを適用して「黒一色」を回避 */
+        body { 
+            background: radial-gradient(circle at 50% 50%, #1a0b2e 0%, #050505 100%);
+            background-attachment: fixed;
+            color: var(--text-main); 
+            overflow-x: hidden; 
+        }
 
         #connect-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -43,7 +51,7 @@
             font-size: 4rem; font-weight: 900; letter-spacing: -0.05em; 
             background: linear-gradient(to bottom, #fff, #666); 
             -webkit-background-clip: text; 
-            background-clip: text; /* 標準プロパティを追加してエラー解消 */
+            background-clip: text; /* 標準プロパティでエラー回避 */
             -webkit-text-fill-color: transparent; 
         }
         .hero-subtitle { color: var(--accent-blue); font-family: monospace; letter-spacing: 0.3em; }
@@ -61,27 +69,28 @@
             display: flex; flex-direction: column; overflow: hidden;
         }
 
-        .front { background: rgba(15, 15, 15, 0.9); }
+        .front { background: rgba(10, 10, 20, 0.85); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .back { background: linear-gradient(135deg, #1a0b2e 0%, #000 100%); transform: rotateY(180deg); }
 
-        /* 復活したバイブスメモ背景 */
+        /* バイブスメモ背景：ネオン感のあるグラデーション */
         .vibes-memo { 
             font-style: italic; 
             color: #fff; 
             font-size: 1.1rem; 
             margin-bottom: 20px; 
-            background: linear-gradient(90deg, rgba(255,0,122,0.3), transparent); 
-            padding: 10px 15px; 
+            background: linear-gradient(90deg, rgba(255, 0, 122, 0.4) 0%, rgba(121, 40, 202, 0.2) 100%); 
+            padding: 12px 18px; 
             border-radius: 8px; 
             border-left: 4px solid var(--accent-pink);
+            text-shadow: 0 0 10px rgba(255, 0, 122, 0.5);
         }
 
-        .trend-title { font-size: 2.5rem; font-weight: 900; margin-bottom: 10px; line-height: 1.1; }
-        .trend-desc { color: #94a3b8; line-height: 1.6; margin-bottom: 20px; flex-grow: 1; }
+        .trend-title { font-size: 2.5rem; font-weight: 900; margin-bottom: 10px; line-height: 1.1; color: #fff; }
+        .trend-desc { color: #cbd5e1; line-height: 1.6; margin-bottom: 20px; flex-grow: 1; }
 
         /* EQ Visualization */
         .eq-container { display: flex; align-items: flex-end; gap: 3px; height: 60px; margin-bottom: 30px; }
-        .eq-bar { flex: 1; background: var(--accent-purple); animation: eq 0.6s infinite alternate ease-in-out; }
+        .eq-bar { flex: 1; background: var(--accent-purple); animation: eq 0.6s infinite alternate ease-in-out; box-shadow: 0 0 10px var(--accent-purple); }
         @keyframes eq { from { height: 10%; opacity: 0.3; } to { height: 100%; opacity: 1; } }
 
         /* AI Back View */
@@ -210,7 +219,7 @@
                                     <p class="trend-desc">${t.desc}</p>
                                     <div class="btn-group">
                                         <a href="archive/${t.slug}.html" class="btn btn-pink">📖 DETAILS (特設)</a>
-                                        <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(t.title)}&tag=YOUR_TAG" target="_blank" class="btn btn-amazon">🛒 Amazon</a>
+                                        <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(t.title)}&tag=mattan0290c-22" target="_blank" class="btn btn-amazon">🛒 Amazon</a>
                                         <div class="btn btn-outline" onclick="document.getElementById('card-${idx}').classList.toggle('flipped')">🔄 AI_VIBE</div>
                                     </div>
                                 </div>
