@@ -12,13 +12,13 @@
 
     <style>
         :root { 
-            --bg: #F0F2F5; 
+            --bg: #F8F9FA; 
             --text: #1A202C; 
             --accent-pink: #FF0080; 
             --accent-blue: #7928CA; 
             --card-bg: #FFFFFF; 
-            --border: rgba(0,0,0,0.08);
-            --glass: rgba(255, 255, 255, 0.8);
+            --border: #E2E8F0;
+            --glass: rgba(255, 255, 255, 0.9);
         }
 
         * { box-sizing: border-box; }
@@ -26,26 +26,27 @@
         body { 
             background: var(--bg); 
             color: var(--text); 
-            font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif; 
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Sans', 'Meiryo', sans-serif; 
             margin: 0; 
             padding: 0; 
             overflow-x: hidden;
             line-height: 1.6;
         }
 
+        /* 背景：視認性を上げたハッシュタグ用 */
         #connect-bg { 
             position: fixed; 
             top: 0; left: 0; 
             width: 100%; height: 100%; 
             z-index: -1; 
-            opacity: 0.5; 
+            opacity: 0.8; /* 以前より濃く設定 */
         }
 
         .layout { 
             display: grid; 
             grid-template-columns: 260px 1fr 260px; 
-            gap: 25px; 
-            max-width: 1400px; 
+            gap: 30px; 
+            max-width: 1450px; 
             margin: 0 auto; 
             padding: 20px;
         }
@@ -68,143 +69,131 @@
             gap: 20px;
         }
 
-        .scroll-area::-webkit-scrollbar { width: 5px; }
+        .scroll-area::-webkit-scrollbar { width: 4px; }
         .scroll-area::-webkit-scrollbar-thumb { background: #CBD5E0; border-radius: 10px; }
 
         .glass-box { 
             background: var(--glass); 
-            backdrop-filter: blur(12px); 
+            backdrop-filter: blur(10px); 
             border-radius: 20px; 
             padding: 20px; 
-            border: 1px solid rgba(255,255,255,0.7); 
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.07); 
+            border: 1px solid var(--border); 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
         }
 
         .box-title { 
-            font-size: 0.75rem; 
+            font-size: 0.7rem; 
             font-weight: 900; 
-            color: #4A5568; 
+            color: #718096; 
             text-transform: uppercase; 
-            margin-bottom: 15px; 
-            letter-spacing: 2px; 
+            margin-bottom: 12px; 
+            letter-spacing: 1.5px; 
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        header { 
-            text-align: center; 
-            margin-bottom: 30px; 
-        }
-        
+        header { text-align: center; margin-bottom: 25px; padding-top: 10px; }
         .hero-title { 
-            font-size: 3.5rem; 
+            font-size: 3.2rem; 
             font-weight: 900; 
             margin: 0; 
-            letter-spacing: -3px; 
-            background: linear-gradient(to right, #FF0080, #7928CA);
+            letter-spacing: -2px; 
+            background: linear-gradient(to right, var(--accent-pink), var(--accent-blue));
             -webkit-background-clip: text;
-            background-clip: text; /* 修正：標準プロパティを追加 */
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         .hero-title a { text-decoration: none; color: inherit; }
-        .sub-title { font-size: 0.85rem; font-weight: 900; color: #718096; margin-top: 5px; letter-spacing: 2px; }
+        .sub-title { font-size: 0.8rem; font-weight: bold; color: #718096; margin-top: 5px; letter-spacing: 1px; }
 
-        .main-feed { display: flex; flex-direction: column; gap: 25px; }
+        .main-feed { display: flex; flex-direction: column; gap: 20px; }
         
         .trend-card { 
             background: var(--card-bg); 
-            border-radius: 35px; 
-            padding: 45px; 
+            border-radius: 30px; 
+            padding: 35px; 
             border: 1px solid var(--border);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.05); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02); 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .label-badge { 
-            font-size: 0.7rem; font-weight: 900; padding: 5px 15px; border-radius: 50px; margin-bottom: 20px;
-            background: #000; color: #fff;
         }
 
         .vibes-memo { 
-            background: linear-gradient(135deg, #FFF5F7 0%, #F0F5FF 100%);
-            border-left: 8px solid var(--accent-pink);
-            padding: 25px; 
-            border-radius: 15px; 
-            font-size: 1.1rem;
-            font-weight: 900; 
-            margin-bottom: 25px; 
-            color: #2D3748;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-            max-width: 95%;
+            background: #F7FAFC; 
+            border-left: 6px solid var(--accent-pink);
+            padding: 20px 25px; 
+            border-radius: 12px; 
+            font-size: 1.05rem;
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            font-style: italic;
+            max-width: 90%;
+            line-height: 1.6;
         }
 
-        h3 { font-size: 1.9rem; margin: 0 0 15px 0; font-weight: 900; color: #1A202C; line-height: 1.3; }
-        .desc { font-size: 1.1rem; color: #4A5568; line-height: 1.8; margin-bottom: 30px; max-width: 650px; }
+        h3 { font-size: 1.7rem; margin: 0 0 12px 0; font-weight: 900; color: #1A202C; line-height: 1.3; }
+        .desc { font-size: 1.05rem; color: #4A5568; line-height: 1.7; margin-bottom: 25px; max-width: 600px; }
 
-        .eq-container { display: flex; gap: 6px; height: 40px; align-items: flex-end; margin-bottom: 25px; }
-        .eq-bar { width: 6px; background: linear-gradient(to top, var(--accent-pink), var(--accent-blue)); border-radius: 4px; }
+        .eq-container { display: flex; gap: 5px; height: 35px; align-items: flex-end; margin-bottom: 20px; }
+        .eq-bar { width: 5px; background: linear-gradient(to top, var(--accent-blue), var(--accent-pink)); border-radius: 4px; }
         .eq-active { animation: eq-pulse 0.7s ease-in-out infinite alternate; }
 
-        .btn-group { display: flex; gap: 20px; width: 100%; justify-content: center; }
+        /* ボタンデザイン：PC */
+        .btn-group { display: flex; gap: 15px; }
         .btn { 
-            padding: 18px 35px; 
-            border-radius: 50px; 
+            padding: 14px 25px; 
+            border-radius: 18px; 
             text-decoration: none; 
             font-weight: 900; 
-            font-size: 1rem; 
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            font-size: 0.9rem; 
+            transition: 0.3s; 
             display: inline-flex; 
             align-items: center; 
-            gap: 12px;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 12px 20px rgba(0,0,0,0.15); }
-
-        .btn-analyze { background: #1A202C; color: #fff; }
+        .btn-analyze { background: var(--text); color: #fff; }
         .btn-shop { background: linear-gradient(45deg, #FF9900, #FFB700); color: #fff; }
 
-        .tag-item { 
-            font-size: 0.75rem; background: #fff; border: 1px solid #E2E8F0;
-            padding: 6px 14px; border-radius: 12px; color: #4A5568; text-decoration: none; font-weight: 800; 
-        }
-
-        .grave-item { 
-            font-size: 0.85rem; color: #718096; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.03); 
-            display: block; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
-        }
+        .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag-item { font-size: 0.7rem; background: #EDF2F7; padding: 5px 10px; border-radius: 8px; color: #4A5568; text-decoration: none; font-weight: bold; }
+        .grave-item { font-size: 0.8rem; color: #718096; padding: 10px 0; border-bottom: 1px solid #F7FAFC; display: block; text-decoration: none; }
 
         .mobile-nav-btn {
             display: none; 
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
             background: linear-gradient(45deg, var(--accent-pink), var(--accent-blue)); color: white; 
-            padding: 25px 0; width: 90%; border-radius: 100px; 
-            font-weight: 900; font-size: 1.4rem; text-align: center;
-            box-shadow: 0 15px 40px rgba(255, 0, 128, 0.4); z-index: 1000;
-            text-decoration: none; border: 4px solid #fff;
+            padding: 22px 0; width: 88%; border-radius: 100px; 
+            font-weight: 900; font-size: 1.3rem; text-align: center;
+            box-shadow: 0 10px 30px rgba(255, 77, 173, 0.5); z-index: 1000;
+            text-decoration: none; border: 3px solid white;
         }
 
+        /* --- モバイル最適化 --- */
         @media (max-width: 1000px) { 
-            .layout { grid-template-columns: 1fr; padding: 15px 10px; } 
-            .sidebar:last-child { display: none; }
-            .sidebar:first-child { position: static; height: auto; order: 2; margin-top: 30px; padding-bottom: 140px; } 
+            .layout { grid-template-columns: 1fr; padding: 10px 8px; } 
+            .sidebar:last-child { display: none; } 
+            .sidebar:first-child { position: static; height: auto; order: 2; margin-top: 20px; padding-bottom: 120px; } 
             
-            .hero-title { font-size: 2.8rem; }
-            h3 { font-size: 1.8rem; color: #000; }
-            .vibes-memo { font-size: 1.3rem; border-left-width: 10px; background: #fff; }
-            .desc { font-size: 1.3rem; line-height: 1.7; color: #2D3436; font-weight: 500; }
-            
-            .trend-card { padding: 40px 20px; border-radius: 30px; }
-            .btn-group { flex-direction: column; }
-            .btn { width: 100%; justify-content: center; padding: 25px; font-size: 1.2rem; }
-            
-            .tag-item { font-size: 1.1rem; padding: 18px; width: 100%; display: block; text-align: center; margin-bottom: 10px; }
-            .grave-item { font-size: 1.2rem; padding: 20px 0; }
+            h3 { font-size: 1.6rem; }
+            .vibes-memo { font-size: 1.2rem; }
+            .desc { font-size: 1.2rem; }
+
+            /* モバイルボタン：横並び1行 */
+            .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+            .btn { 
+                padding: 12px 5px; 
+                font-size: 0.85rem; 
+                border-radius: 12px; 
+                justify-content: center; 
+                gap: 5px;
+                white-space: nowrap;
+            }
+            .btn span { display: none; } /* 長いテキストをモバイルで隠す場合はここを調整 */
+
             .mobile-nav-btn { display: block; }
         }
 
@@ -267,9 +256,9 @@
                 x: Math.random() * canvas.width, 
                 y: Math.random() * canvas.height, 
                 text: '#' + t,
-                vx: (Math.random() - 0.5) * 0.3, 
-                vy: (Math.random() - 0.5) * 0.3, 
-                size: 10
+                vx: (Math.random() - 0.5) * 0.4, 
+                vy: (Math.random() - 0.5) * 0.4, 
+                size: 14 // 少し大きくした
             }));
             animate();
         }
@@ -280,10 +269,11 @@
                 d.x += d.vx; d.y += d.vy;
                 if (d.x < 0 || d.x > canvas.width) d.vx *= -1; 
                 if (d.y < 0 || d.y > canvas.height) d.vy *= -1;
-                ctx.font = `bold ${d.size}px Arial`; ctx.fillStyle = 'rgba(160, 174, 192, 0.3)'; ctx.fillText(d.text, d.x, d.y);
+                // 色を少し濃く（rgbaの0.4〜0.5付近）
+                ctx.font = `bold ${d.size}px Arial`; ctx.fillStyle = 'rgba(121, 40, 202, 0.45)'; ctx.fillText(d.text, d.x, d.y);
                 dots.slice(i + 1).forEach(d2 => {
                     const dist = Math.hypot(d.x - d2.x, d.y - d2.y);
-                    if (dist < 150) { ctx.beginPath(); ctx.strokeStyle = `rgba(226, 232, 240, 0.4)`; ctx.moveTo(d.x, d.y); ctx.lineTo(d2.x, d2.y); ctx.stroke(); }
+                    if (dist < 150) { ctx.beginPath(); ctx.strokeStyle = `rgba(226, 232, 240, 0.5)`; ctx.moveTo(d.x, d.y); ctx.lineTo(d2.x, d2.y); ctx.stroke(); }
                 });
             });
             requestAnimationFrame(animate);
@@ -310,17 +300,16 @@
                 ).join('');
 
                 document.getElementById('trend-list').innerHTML = (db.current || []).map(t => {
-                    const eqBars = Array.from({length: 12}, (_, i) => `<div class="eq-bar eq-active" style="height: ${20+Math.random()*80}%; animation-delay: ${i*0.1}s"></div>`).join('');
+                    const eqBars = Array.from({length: 10}, (_, i) => `<div class="eq-bar eq-active" style="height: ${30+Math.random()*70}%; animation-delay: ${i*0.1}s"></div>`).join('');
                     return `
                         <article class="trend-card">
-                            <div class="label-badge">${t.label}</div>
                             <div class="vibes-memo">“ ${t.memo} ”</div>
                             <div class="eq-container">${eqBars}</div>
                             <h3>${t.vibesTitle || t.title}</h3>
                             <p class="desc">${t.desc}</p>
                             <div class="btn-group">
-                                <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="btn btn-analyze">🔗 詳細を確認する</a>
-                                <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(t.searchKey)}" target="_blank" class="btn btn-shop">🛍️ Amazonで関連商品</a>
+                                <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="btn btn-analyze">🔗 <span>詳細を</span>確認</a>
+                                <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(t.searchKey)}" target="_blank" class="btn btn-shop">🛍️ <span>Amazon</span>検索</a>
                             </div>
                         </article>`;
                 }).join('');
