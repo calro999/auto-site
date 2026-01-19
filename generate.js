@@ -1,7 +1,7 @@
 /**
- * GAL-INTEL generate.js v3.6 - ABSOLUTE_LINK_FIX
- * 修正: ブラウザ上での archive/archive/ 二重階層を物理的に阻止。
- * リンク生成ロジックに「現在のURL階層チェック」を強制注入します。
+ * GAL-INTEL generate.js v3.7 - RECURSIVE_404_DESTROYER
+ * 修正: 404エラー（archive/archive/）を「物理的・論理的」に完全封殺。
+ * 生成されるすべてのHTMLに対し、URL階層をリアルタイムで自動修正するロジックを強制注入します。
  */
 
 const fs = require('fs');
@@ -18,7 +18,8 @@ const MAX_DESC_LENGTH = 180;
 if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR);
 if (!fs.existsSync(IMAGE_DIR)) fs.mkdirSync(IMAGE_DIR);
 
-const FORBIDDEN_WORDS = ['事故','事件','死','亡','逮捕','火災','地震','不倫','容疑','被害','遺体','衝突','殺','判決','震災','訃報','黙とう','犠牲','重体','負傷','強盗','窃盗','摘発','送検','被疑','不祥事','倒産','破産','解雇','ミサイル','爆発','テロ','拉致','監禁','虐待','毒','薬物','大麻','覚醒剤','脱税','横領','汚職','墜落','転落','漂流','行方不明','捜索','津波','噴火','豪雨','土砂崩れ','浸水','竜巻','雷雨','デモ','暴動','紛争','戦争','空爆','侵攻','核','被爆'];
+// 不適切ワード（火事など、ネガティブすぎるニュースを排除）
+const FORBIDDEN_WORDS = ['事故','事件','死','亡','逮捕','火災','火事','地震','不倫','容疑','被害','遺体','衝突','殺','判決','震災','訃報','黙とう','犠牲','重体','負傷','強盗','窃盗','摘発','送検','被疑','不祥事','倒産','破産','解雇','ミサイル','爆発','テロ','拉致','監禁','虐待','毒','薬物','大麻','覚醒剤','脱税','横領','汚職','墜落','転落','漂流','行方不明','捜索','津波','噴火','豪雨','土砂崩れ','浸水','竜巻','雷雨','デモ','暴動','紛争','戦争','空爆','侵攻','核','被爆'];
 
 function ultimateClean(text) {
     if (!text) return "";
@@ -33,7 +34,8 @@ function ultimateClean(text) {
 }
 
 function createSafeSlug(text) {
-    return text.replace(/[／＼＼：＊？＂＜＞｜]/g, '').replace(/[\/:*?"<>|]/g, '').replace(/\s+/g, '_').substring(0, 50);
+    // 日本語もファイル名に含めるが、URL的に危険な記号だけ徹底除外
+    return text.replace(/[／＼＼：＊？＂＜＞｜]/g, '').replace(/[\/:*?"<>|]/g, '').replace(/\s+/g, '_').substring(0, 80);
 }
 
 async function generateVibeImage(title, slug) {
@@ -64,7 +66,7 @@ const fetchRSS = (url) => new Promise((resolve, reject) => {
 });
 
 async function main() {
-    console.log("🚀 GAL-INTEL v3.6: Starting Absolute Link Fix...");
+    console.log("🚀 GAL-INTEL v3.7: Deploying Ultimate Path Controller...");
     try {
         if (!fs.existsSync(INDEX_PATH)) throw new Error("index.htmlが見つかりません。");
         const templateHTML = fs.readFileSync(INDEX_PATH, 'utf8');
@@ -80,7 +82,7 @@ async function main() {
         let fetchedTrends = [];
         for (const s of SOURCES) {
             const xml = await fetchRSS(s.url);
-            const items = xml.split('<item>').slice(1, 12);
+            const items = xml.split('<item>').slice(1, 15);
             for (const item of items) {
                 let title = ultimateClean(item.split('<title>')[1]?.split('</title>')[0] || "");
                 let desc = ultimateClean(item.split('<description>')[1]?.split('</description>')[0] || "");
@@ -105,21 +107,33 @@ async function main() {
                 aiSummary: `「${t.title}」解析完了。`
             });
             
-            // 【解決策の核心】JavaScript内のパス生成を「動的判定型」に強制置換
-            // 既に /archive/ にいる場合は archive/ を付けず、ルートにいる場合のみ付ける
-            const pathScript = "(window.location.pathname.includes('/archive/') ? '' : 'archive/')";
+            // 【404解決の最終回答】
+            // ページがどこにあっても「正しいパス」を計算するJavaScriptをHTMLの末尾に強制的に差し込みます
+            const pathFixerScript = `
+            <script>
+            (function() {
+                const isArchive = window.location.pathname.includes('/archive/');
+                const fixLinks = () => {
+                    document.querySelectorAll('a').forEach(a => {
+                        let href = a.getAttribute('href');
+                        if (href && href.startsWith('archive/') && isArchive) {
+                            // archive内にいるのに archive/ で始まるリンクがあれば、二重化を防ぐ
+                            a.setAttribute('href', href.replace('archive/', './'));
+                        }
+                    });
+                };
+                fixLinks();
+                // ギャラリーの動的生成後にも対応できるよう定期監視
+                setInterval(fixLinks, 1000);
+            })();
+            </script>
+            </body>`;
             
             let specialPageHTML = templateHTML
                 .replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json')
-                // 記事リンクの全パターンをカバーする置換
-                .replace(/'archive\/' \+ item\.slug \+ '\.html'/g, `${pathScript} + item.slug + '.html'`)
-                .replace(/'archive\/' \+ item\.slug/g, `${pathScript} + item.slug + '.html'`)
-                .replace(/'archive\/' \+ p\.slug \+ '\.html'/g, `${pathScript} + p.slug + '.html'`)
-                .replace(/'archive\/' \+ p\.slug/g, `${pathScript} + p.slug + '.html'`)
-                // 静的リンクの補正
-                .replace(/href=["']archive\//g, 'href="./')
+                .replace(/href=["']index.html["']/g, 'href="../index.html"')
                 .replace(/src=["']images\//g, 'src="../images/')
-                .replace(/href=["']index.html["']/g, 'href="../index.html"');
+                .replace('</body>', pathFixerScript);
 
             fs.writeFileSync(path.join(ARCHIVE_DIR, `${slug}.html`), specialPageHTML);
         }
@@ -128,18 +142,24 @@ async function main() {
         db.graveyard = [...processedCurrent, ...(db.graveyard || [])].slice(0, 100);
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2), 'utf8');
 
-        // 日付アーカイブも同様に
-        const pathScript = "(window.location.pathname.includes('/archive/') ? '' : 'archive/')";
+        // 日付アーカイブ
         const dateArchiveHTML = templateHTML
             .replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json')
-            .replace(/'archive\/' \+ item\.slug \+ '\.html'/g, `${pathScript} + item.slug + '.html'`)
-            .replace(/'archive\/' \+ item\.slug/g, `${pathScript} + item.slug + '.html'`)
-            .replace(/href=["']archive\//g, 'href="./')
+            .replace(/href=["']index.html["']/g, 'href="../index.html"')
             .replace(/src=["']images\//g, 'src="../images/')
-            .replace(/href=["']index.html["']/g, 'href="../index.html"');
+            .replace('</body>', `
+            <script>
+            (function() {
+                const fix = () => document.querySelectorAll('a').forEach(a => {
+                    let h = a.getAttribute('href');
+                    if (h && h.startsWith('archive/')) a.setAttribute('href', h.replace('archive/', './'));
+                });
+                fix(); setInterval(fix, 1000);
+            })();
+            </script></body>`);
         fs.writeFileSync(path.join(ARCHIVE_DIR, `${dateKey}.html`), dateArchiveHTML);
 
-        console.log(`✅ Fixed! Absolute path detection script injected.`);
+        console.log(`✅ Success: 404 issue physically blocked by script injection.`);
     } catch (e) { console.error(e); }
 }
 
