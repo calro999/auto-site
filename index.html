@@ -34,7 +34,7 @@
             line-height: 1.6;
         }
 
-        /* 背景アニメーション */
+        /* 背景アニメーション：GAL-NETWORK */
         #connect-bg { 
             position: fixed; 
             top: 0; 
@@ -45,48 +45,49 @@
             opacity: 0.7; 
         }
 
-        /* 全体レイアウト */
+        /* 全体レイアウト設計 */
         .layout { 
             display: grid; 
             grid-template-columns: 280px 1fr 280px; 
             gap: 30px; 
             max-width: 1500px; 
             margin: 0 auto; 
-            padding: 20px;
+            padding: 40px 20px;
         }
 
-        /* 修正点：PCサイドバーのスクロール対応 */
+        /* サイドバー：PC固定＆独立スクロール */
         .sidebar { 
             position: sticky; 
-            top: 20px; 
-            height: calc(100vh - 40px); 
+            top: 40px; 
+            height: calc(100vh - 80px); 
             display: flex; 
             flex-direction: column; 
-            gap: 20px; 
-            overflow: hidden; /* 親ははみ出さない */
+            gap: 25px; 
         }
 
         .scroll-area {
             flex-grow: 1;
             overflow-y: auto;
-            padding-right: 5px;
+            padding-right: 12px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 25px;
         }
 
-        /* スクロールバー装飾 */
+        /* スクロールバーのカスタマイズ */
         .scroll-area::-webkit-scrollbar { width: 5px; }
-        .scroll-area::-webkit-scrollbar-track { background: transparent; }
+        .scroll-area::-webkit-scrollbar-track { background: rgba(0,0,0,0.02); border-radius: 10px; }
         .scroll-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        .scroll-area::-webkit-scrollbar-thumb:hover { background: #CBD5E0; }
 
         .glass-box { 
-            background: rgba(255,255,255,0.85); 
-            backdrop-filter: blur(12px); 
-            border-radius: 24px; 
+            background: rgba(255,255,255,0.8); 
+            backdrop-filter: blur(15px); 
+            border-radius: 28px; 
             padding: 24px; 
             border: 1px solid var(--border); 
             box-shadow: var(--shadow); 
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .box-title { 
@@ -94,69 +95,85 @@
             font-weight: 900; 
             color: #A0AEC0; 
             text-transform: uppercase; 
-            margin-bottom: 15px; 
+            margin-bottom: 20px; 
             letter-spacing: 1.5px; 
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         header { 
             text-align: center; 
-            margin-bottom: 40px; 
-            padding-top: 20px;
+            margin-bottom: 50px; 
+            position: relative;
         }
 
         .hero-title { 
-            font-size: 3.2rem; 
+            font-size: 3.5rem; 
             font-weight: 900; 
             margin: 0; 
             letter-spacing: -2px; 
+            line-height: 1;
         }
 
-        /* 修正点：タイトルリンク */
+        /* 修正：ロゴリンク（JSで絶対/相対を制御） */
         .hero-title a {
             text-decoration: none;
             color: inherit;
-            cursor: pointer;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: inline-block;
         }
+
+        .hero-title a:hover {
+            transform: scale(1.05) rotate(-2deg);
+            color: var(--accent-pink);
+        }
+
         .hero-title span { color: var(--accent-pink); }
 
         .sub-title { 
-            font-size: 0.85rem; 
+            font-size: 0.9rem; 
             font-weight: bold; 
             color: #718096; 
-            margin-top: 5px; 
+            margin-top: 12px; 
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         .main-feed { 
             display: flex; 
             flex-direction: column; 
-            gap: 25px; 
+            gap: 30px; 
         }
         
-        /* 記事カード */
+        /* 記事カード：バイブス調整版 */
         .trend-card { 
             background: var(--card-bg); 
-            border-radius: 30px; 
-            padding: 30px 40px; 
+            border-radius: 35px; 
+            padding: 40px; 
             border: 1px solid var(--border);
             box-shadow: var(--shadow); 
-            transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            transition: 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             text-align: center;
+            position: relative;
         }
 
-        .trend-card:hover { transform: translateY(-5px); }
+        .trend-card:hover { 
+            transform: translateY(-10px); 
+            box-shadow: 0 40px 80px rgba(0,0,0,0.07); 
+        }
 
         .label-badge { 
             font-size: 0.7rem; 
             font-weight: 900; 
-            padding: 5px 15px; 
+            padding: 6px 20px; 
             border-radius: 50px; 
-            margin-bottom: 15px; 
+            margin-bottom: 20px; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .label-FLASH { background: #FFF5F7; color: #E53E3E; border: 1px solid #FED7E2; }
@@ -164,116 +181,173 @@
         .label-REAL { background: #FFFAF0; color: #DD6B20; border: 1px solid #FEEBC8; }
 
         .vibes-memo { 
-            background: #F8F9FA; 
-            border-left: 4px solid var(--accent-pink);
-            padding: 12px 18px; 
-            border-radius: 10px; 
-            font-size: 0.85rem;
+            background: #F7FAFC; 
+            border-left: 5px solid var(--accent-pink);
+            padding: 18px 25px; 
+            border-radius: 15px; 
+            font-size: 0.95rem;
             color: var(--text); 
-            font-weight: bold; 
-            margin-bottom: 20px; 
+            font-weight: 800; 
+            margin-bottom: 25px; 
             font-style: italic;
+            line-height: 1.5;
+            max-width: 85%;
         }
 
         h3 { 
-            font-size: 1.5rem; 
-            margin: 0 0 10px 0; 
-            line-height: 1.4; 
+            font-size: 1.8rem; 
+            margin: 0 0 15px 0; 
+            line-height: 1.3; 
             font-weight: 900; 
             color: #1A202C; 
         }
 
         .desc { 
-            font-size: 0.9rem; 
+            font-size: 1rem; 
             color: #4A5568; 
-            margin-bottom: 20px; 
-            max-width: 550px;
+            line-height: 1.8;
+            margin-bottom: 25px; 
+            max-width: 600px;
         }
 
-        /* イコライザー(サイズ維持) */
+        /* イコライザー演出 */
         .eq-container { 
             display: flex; 
-            gap: 4px; 
-            height: 35px; 
+            gap: 6px; 
+            height: 45px; 
             align-items: flex-end; 
-            margin-bottom: 20px; 
+            margin-bottom: 25px; 
         }
 
         .eq-bar { 
-            width: 5px; 
+            width: 6px; 
             background: linear-gradient(to top, var(--accent-blue), var(--accent-pink)); 
-            border-radius: 3px; 
+            border-radius: 4px; 
         }
 
-        .eq-active { animation: eq-pulse 0.6s ease-in-out infinite alternate; }
+        .eq-active { animation: eq-pulse 0.7s ease-in-out infinite alternate; }
 
-        @keyframes eq-pulse { from { height: 25%; } to { height: 100%; } }
+        @keyframes eq-pulse { 
+            from { height: 15%; opacity: 0.5; } 
+            to { height: 100%; opacity: 1; } 
+        }
 
-        .btn-group { display: flex; gap: 15px; margin-top: 10px; }
+        .btn-group { 
+            display: flex; 
+            gap: 20px; 
+            margin-top: 15px; 
+        }
 
         .btn { 
-            padding: 12px 28px; 
-            border-radius: 16px; 
+            padding: 15px 35px; 
+            border-radius: 20px; 
             text-decoration: none; 
             font-weight: 900; 
-            font-size: 0.8rem; 
-            transition: 0.3s; 
+            font-size: 0.9rem; 
+            transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
 
         .btn-analyze { background: var(--text); color: #fff; }
         .btn-shop { background: #FF9900; color: #fff; }
 
-        .tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
-        .tag-item { font-size: 0.75rem; background: #EDF2F7; padding: 6px 12px; border-radius: 10px; color: #4A5568; text-decoration: none; font-weight: bold; }
+        .btn:hover { 
+            transform: translateY(-3px) scale(1.02);
+            filter: brightness(1.1);
+        }
+
+        .tag-list { display: flex; flex-wrap: wrap; gap: 10px; }
+        .tag-item { 
+            font-size: 0.8rem; 
+            background: #EDF2F7; 
+            padding: 8px 16px; 
+            border-radius: 12px; 
+            color: #4A5568; 
+            text-decoration: none; 
+            font-weight: bold; 
+            transition: 0.2s;
+        }
+        .tag-item:hover { background: var(--accent-pink); color: #fff; }
 
         .grave-item { 
-            font-size: 0.75rem; 
+            font-size: 0.8rem; 
             color: #718096; 
-            padding: 10px 0; 
+            padding: 14px 0; 
             border-bottom: 1px solid #F7FAFC; 
             display: block; 
             text-decoration: none; 
             transition: 0.2s;
         }
-        .grave-item:hover { color: var(--accent-pink); padding-left: 5px; }
+        .grave-item:hover { color: var(--accent-pink); padding-left: 10px; background: rgba(255,255,255,0.5); }
 
-        .footer-info { margin-top: 20px; font-size: 0.65rem; color: #CBD5E0; font-weight: 800; }
+        /* モバイル専用：アーカイブフローティングボタン */
+        .mobile-nav-btn {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--accent-pink);
+            color: white;
+            padding: 18px 28px;
+            border-radius: 60px;
+            font-weight: 900;
+            font-size: 1rem;
+            box-shadow: 0 15px 30px rgba(255, 77, 173, 0.4);
+            z-index: 1000;
+            text-decoration: none;
+            border: 2px solid white;
+        }
 
-        #loading { position: fixed; inset: 0; background: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--accent-pink); z-index: 2000; }
+        #loading { 
+            position: fixed; inset: 0; background: #fff; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            font-weight: 900; color: var(--accent-pink); z-index: 2000; 
+        }
 
-        /* 修正点：モバイル時 枠が横長すぎる問題を解消 */
-        @media (max-width: 950px) { 
+        /* モバイル最適化修正：枠が横長すぎないように制御 */
+        @media (max-width: 1000px) { 
             .layout { 
                 grid-template-columns: 1fr; 
-                padding: 15px;
-                gap: 15px;
+                padding: 20px 15px;
+                gap: 20px;
             } 
-            .sidebar { 
+            /* 墓場サイドバーをモバイルで非表示に */
+            .sidebar:last-child { display: none; }
+            
+            .sidebar:first-child { 
                 position: static; 
                 height: auto; 
-                order: 2;
-                margin-top: 10px;
+                order: 2; 
+                margin-top: 20px;
             } 
-            .scroll-area { overflow-y: visible; }
-            .hero-title { font-size: 2.5rem; }
+            .scroll-area { overflow-y: visible; padding-right: 0; }
+            .hero-title { font-size: 2.6rem; }
+            
             .trend-card { 
-                padding: 25px 20px; 
-                border-radius: 25px; 
-                width: 95%; /* 横に広がりすぎない */
+                padding: 30px 20px; 
+                border-radius: 30px; 
+                width: 92%; /* モバイル時に少しスリムにして見やすく */
                 margin: 0 auto;
             }
-            h3 { font-size: 1.25rem; }
-            .btn-group { flex-direction: column; width: 100%; gap: 10px; }
-            .btn { width: 100%; justify-content: center; }
+            .vibes-memo { width: 100%; font-size: 0.9rem; }
+            .btn-group { flex-direction: column; width: 100%; gap: 12px; }
+            .btn { width: 100%; justify-content: center; padding: 18px; }
+            .mobile-nav-btn { display: block; }
         }
     </style>
 </head>
 <body>
     <canvas id="connect-bg"></canvas>
-    <div id="loading">CONNECTING VIBES...</div>
+    
+    <div id="loading">
+        <div style="font-size: 3rem; margin-bottom: 20px;">🔋</div>
+        CONNECTING VIBES...
+    </div>
+
+    <a href="#archive-section" class="mobile-nav-btn">📅 ARCHIVES</a>
 
     <div class="layout">
         <aside class="sidebar">
@@ -282,9 +356,13 @@
                     <div class="box-title"><span>#</span> TRENDING_TAGS</div>
                     <div id="tag-list" class="tag-list"></div>
                 </div>
-                <div class="glass-box">
+                <div class="glass-box" id="archive-section">
                     <div class="box-title"><span>📅</span> PAST_ARCHIVES</div>
                     <div id="archive-list"></div>
+                </div>
+                <div class="glass-box" style="background: var(--text); color: #fff;">
+                    <div class="box-title" style="color: #718096;">ABOUT</div>
+                    <p style="font-size: 0.75rem; font-weight: bold; opacity: 0.8;">世の中のニュースをギャル語とバイブスで超速変換。GAL-INTEL is watching you.</p>
                 </div>
             </div>
         </aside>
@@ -292,9 +370,9 @@
         <main>
             <header>
                 <h1 class="hero-title">
-                    <a id="logo-link" href="/">GAL<span>-</span>INTEL</a>
+                    <a id="nav-logo" href="/">GAL<span>-</span>INTEL</a>
                 </h1>
-                <div class="sub-title">世の中の「今」を、最速でバイブス変換。</div>
+                <div class="sub-title">VIBES CONVERTER SYSTEM v3.0</div>
             </header>
             <div class="main-feed" id="trend-list"></div>
         </main>
@@ -303,9 +381,10 @@
             <div class="scroll-area">
                 <div class="glass-box">
                     <div class="box-title"><span>🔄</span> SYNC_STATUS</div>
-                    <div id="sync-info" style="font-size: 0.7rem; font-weight: bold;"></div>
+                    <div id="sync-info" style="font-size: 0.75rem; font-weight: 900; color: var(--accent-blue);"></div>
+                    <div style="font-size: 0.65rem; color: #A0AEC0; margin-top: 10px;">VIBES LEVEL: <span style="color: var(--accent-pink);">MAX</span></div>
                 </div>
-                <div class="glass-box">
+                <div class="glass-box" style="flex-grow: 1;">
                     <div class="box-title"><span>💀</span> THE_GRAVEYARD</div>
                     <div id="grave-list"></div>
                 </div>
@@ -319,6 +398,7 @@
         let dots = [];
         const DB_URL = 'https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json';
 
+        // 背景アニメーションロジック：点の接続
         function initBg(tags) {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -326,9 +406,9 @@
                 x: Math.random() * canvas.width, 
                 y: Math.random() * canvas.height, 
                 text: '#' + t,
-                vx: (Math.random() - 0.5) * 0.3, 
-                vy: (Math.random() - 0.5) * 0.3, 
-                size: 9
+                vx: (Math.random() - 0.5) * 0.4, 
+                vy: (Math.random() - 0.5) * 0.4, 
+                size: 10 + Math.random() * 5
             }));
             animate();
         }
@@ -339,15 +419,20 @@
                 d.x += d.vx; d.y += d.vy;
                 if (d.x < 0 || d.x > canvas.width) d.vx *= -1; 
                 if (d.y < 0 || d.y > canvas.height) d.vy *= -1;
+                
                 ctx.font = `bold ${d.size}px Arial`; 
-                ctx.fillStyle = 'rgba(160, 174, 192, 0.3)'; 
+                ctx.fillStyle = 'rgba(160, 174, 192, 0.4)'; 
                 ctx.fillText(d.text, d.x, d.y);
+                
                 dots.slice(i + 1).forEach(d2 => {
                     const dist = Math.hypot(d.x - d2.x, d.y - d2.y);
-                    if (dist < 150) { 
+                    if (dist < 180) { 
                         ctx.beginPath(); 
-                        ctx.strokeStyle = `rgba(226, 232, 240, 0.4)`; 
-                        ctx.moveTo(d.x, d.y); ctx.lineTo(d2.x, d2.y); ctx.stroke(); 
+                        ctx.strokeStyle = `rgba(226, 232, 240, 0.5)`; 
+                        ctx.lineWidth = 1;
+                        ctx.moveTo(d.x, d.y); 
+                        ctx.lineTo(d2.x, d2.y); 
+                        ctx.stroke(); 
                     }
                 });
             });
@@ -358,31 +443,43 @@
             try {
                 const res = await fetch(DB_URL + '?t=' + Date.now());
                 const db = await res.json();
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('sync-info').innerText = 'UPDATE: ' + db.lastUpdate;
+                
+                // ローディング解除
+                const loader = document.getElementById('loading');
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 600);
+                
+                document.getElementById('sync-info').innerText = 'LAST UPDATE: ' + db.lastUpdate;
+                
                 initBg(db.tags);
 
-                // 修正点：トップページへのパス解決
+                // パス階層の動的解決（アーカイブ用）
                 const isArchive = window.location.pathname.includes('/archive/');
-                document.getElementById('logo-link').href = isArchive ? '../index.html' : './index.html';
+                const prefix = isArchive ? './' : './archive/';
+                const homePath = isArchive ? '../index.html' : './index.html';
+                
+                // 修正：ロゴリンクを正しく設定
+                document.getElementById('nav-logo').href = homePath;
 
-                // タグ
-                document.getElementById('tag-list').innerHTML = (db.tags || []).slice(0, 15).map(tag => 
+                // タグの生成
+                document.getElementById('tag-list').innerHTML = (db.tags || []).slice(0, 20).map(tag => 
                     `<a href="https://www.google.com/search?q=${encodeURIComponent(tag)}" target="_blank" class="tag-item">#${tag}</a>`
                 ).join('');
 
-                // アーカイブ
-                const pfx = isArchive ? './' : './archive/';
+                // アーカイブリストの生成
                 document.getElementById('archive-list').innerHTML = (db.archiveList || []).map(d => 
-                    `<a href="${pfx}${d}.html" class="grave-item">📄 ${d}</a>`
-                ).join('') || 'NONE';
+                    `<a href="${prefix}${d}.html" class="grave-item">📄 ${d}</a>`
+                ).join('') || 'NO ARCHIVES';
 
-                // メインフィード
+                // メインフィード：記事カード
                 document.getElementById('trend-list').innerHTML = (db.current || []).map(t => {
-                    const eqBars = Array.from({length: 10}, (_, i) => 
-                        `<div class="eq-bar eq-active" style="height: ${30+Math.random()*70}%; animation-delay: ${i*0.1}s"></div>`
-                    ).join('');
-                    const kw = t.searchKey || t.title.substring(0, 5);
+                    const eqBars = Array.from({length: 12}, (_, i) => {
+                        const h = 20 + Math.random() * 80;
+                        return `<div class="eq-bar eq-active" style="height: ${h}%; animation-delay: ${i * 0.08}s"></div>`;
+                    }).join('');
+                    
+                    const kw = t.searchKey || t.title.substring(0, 8);
+
                     return `
                         <article class="trend-card">
                             <div class="label-badge label-${t.label}">${t.label}</div>
@@ -391,19 +488,24 @@
                             <h3>${t.vibesTitle || t.title}</h3>
                             <p class="desc">${t.desc}</p>
                             <div class="btn-group">
-                                <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="btn btn-analyze">詳細</a>
-                                <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(kw)}&tag=mattan0290c-22" target="_blank" class="btn btn-shop">Shop ✨</a>
+                                <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="btn btn-analyze">🔍 CHECK NOW</a>
+                                <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(kw)}&tag=mattan0290c-22" target="_blank" class="btn btn-shop">🛍️ SHOP</a>
                             </div>
-                            <div class="footer-info">HEAT: ${t.traffic}</div>
+                            <div style="margin-top:20px; font-size:0.65rem; color:#A0AEC0; font-weight:bold;">TRAFFIC: ${t.traffic} | FIRST_SEEN: ${t.firstSeen}</div>
                         </article>`;
                 }).join('');
 
-                // 墓場
+                // 墓場：消えていったトレンド
                 document.getElementById('grave-list').innerHTML = (db.graveyard || []).map(g => 
-                    `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">† ${g.title.substring(0, 18)}...</a>`
+                    `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">
+                        † ${g.title.substring(0, 20)}${g.title.length > 20 ? '...' : ''}
+                    </a>`
                 ).join('');
 
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error('VIBES ERROR:', e); 
+                document.getElementById('loading').innerHTML = '<div style="color:red;">VIBES DISCONNECTED. CHECK NETWORK.</div>';
+            }
         }
 
         load();
