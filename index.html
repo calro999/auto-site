@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAL-INTEL | 世の中の「今」を、最速でバイブス変換。</title>
+    <title>GAL-INTEL | 世の中の「今」を, 最速でバイブス変換。</title>
     
-    <meta name="description" content="最新ニュースを最速バイブス変換。AI検索エンジン(Perplexity/SearchGPT)に特化した、世界一速いトレンド要約サイト。">
+    <meta name="description" content="最新ニュースを最速バイブス変換。AI検索エンジン(Perplexity/SearchGPT)に特化した, 世界一速いトレンド要約サイト。">
     <meta name="keywords" content="ギャル語, ニュース要約, トレンド, AI検索, バイブス">
     <meta property="og:title" content="GAL-INTEL | 今のトレンドをバイブスチェック">
     <meta property="og:description" content="今の爆アツ話題を最速チェック！">
@@ -184,7 +184,8 @@
             align-items: center; 
             text-align: center;
             overflow: hidden; 
-            min-height: 520px; /* 裏面も高さを維持 */
+            min-height: 520px;
+            width: 100%;
         }
 
         .back { 
@@ -449,10 +450,11 @@
             requestAnimationFrame(animate);
         }
 
-        // ヘルパー関数: 引数の順番を修正 (text, limit)
-        function truncate(text, limit) {
-            if (!text) return "";
-            return text.length <= limit ? text : text.substring(0, limit) + "...";
+        // 文字数制限用：引数を正しく扱う
+        function truncateStr(input, max) {
+            if (!input) return "";
+            const str = String(input);
+            return str.length <= max ? str : str.substring(0, max) + "...";
         }
 
         async function load() {
@@ -464,7 +466,7 @@
 
                 document.getElementById('word-ranking').innerHTML = (db.tags || []).map(t => `<span class="tag-item">#${t}</span>`).join('');
                 document.getElementById('vibes-dict').innerHTML = (db.dictionary || []).map(d => `<div class="dict-item"><span class="dict-word">${d.word}</span><span style="color:#718096; font-size:0.8rem;">${d.mean}</span></div>`).join('');
-                document.getElementById('grave-list').innerHTML = (db.graveyard || []).slice(0, 10).map(g => `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">⚡️ ${truncate(g.title, 20)}</a>`).join('');
+                document.getElementById('grave-list').innerHTML = (db.graveyard || []).slice(0, 10).map(g => `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">⚡️ ${truncateStr(g.title, 20)}</a>`).join('');
                 document.getElementById('archive-links').innerHTML = (db.archiveList || []).slice(0,5).map(a => `<a href="archive/${a}.html" class="btn btn-outline" style="font-size:0.75rem; padding:10px;">📅 ${a} Archive</a>`).join('');
 
                 const trendContainer = document.getElementById('trend-list');
@@ -478,20 +480,18 @@
                         eqBars += `<div class="eq-bar" style="height: ${h}%; animation-delay: ${delay}s"></div>`;
                     }
 
-                    // 正しい引数順でtruncateを適用
-                    const safeTitle = truncate(t.title, 60);
-                    const safeDesc = truncate(t.desc, 150);
-                    const safeMemo = truncate(t.memo, 80);
-                    const safeSummary = truncate(t.aiSummary, 300);
+                    // truncateStr を使用して安全に文字数を制限
+                    const safeTitle = truncateStr(t.title, 60);
+                    const safeDesc = truncateStr(t.desc, 150);
+                    const safeMemo = truncateStr(t.memo, 80);
+                    const safeSummary = truncateStr(t.aiSummary, 300);
 
                     htmlBuffer += `
                         <div class="trend-card-container" id="card-${idx}">
                             <div class="trend-card-inner">
                                 <div class="front">
                                     <div class="vibes-memo">“ ${safeMemo} ”</div>
-                                    <div class="eq-container">
-                                        ${eqBars}
-                                    </div>
+                                    <div class="eq-container">${eqBars}</div>
                                     <h2 class="trend-title">${safeTitle}</h2>
                                     <p class="trend-desc">${safeDesc}</p>
                                     <div class="btn-group">
