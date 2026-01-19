@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAL-INTEL | 世の中の「今」を, 最速でバイブス変換。</title>
+    <title>GAL-INTEL | 世の中の「今」を、最速でバイブス変換。</title>
     
-    <meta name="description" content="最新ニュースを最速バイブス変換。AI検索エンジン(Perplexity/SearchGPT)に特化した, 世界一速いトレンド要約サイト。">
+    <meta name="description" content="最新ニュースを最速バイブス変換。AI検索エンジン(Perplexity/SearchGPT)に特化した、世界一速いトレンド要約サイト。">
     <meta name="keywords" content="ギャル語, ニュース要約, トレンド, AI検索, バイブス">
     <meta property="og:title" content="GAL-INTEL | 今のトレンドをバイブスチェック">
     <meta property="og:description" content="今の爆アツ話題を最速チェック！">
@@ -450,11 +450,11 @@
             requestAnimationFrame(animate);
         }
 
-        // 文字数制限用：引数を正しく扱う
-        function truncateStr(input, max) {
-            if (!input) return "";
-            const str = String(input);
-            return str.length <= max ? str : str.substring(0, max) + "...";
+        // 文字数制限用：関数名を truncateStr に統一
+        function truncateStr(text, max) {
+            if (!text) return "";
+            const s = String(text);
+            return s.length <= max ? s : s.substring(0, max) + "...";
         }
 
         async function load() {
@@ -480,20 +480,20 @@
                         eqBars += `<div class="eq-bar" style="height: ${h}%; animation-delay: ${delay}s"></div>`;
                     }
 
-                    // truncateStr を使用して安全に文字数を制限
-                    const safeTitle = truncateStr(t.title, 60);
-                    const safeDesc = truncateStr(t.desc, 150);
-                    const safeMemo = truncateStr(t.memo, 80);
-                    const safeSummary = truncateStr(t.aiSummary, 300);
+                    // 文字制限を各項目に適用
+                    const sT = truncateStr(t.title, 60);
+                    const sD = truncateStr(t.desc, 150);
+                    const sM = truncateStr(t.memo, 80);
+                    const sA = truncateStr(t.aiSummary, 300);
 
                     htmlBuffer += `
                         <div class="trend-card-container" id="card-${idx}">
                             <div class="trend-card-inner">
                                 <div class="front">
-                                    <div class="vibes-memo">“ ${safeMemo} ”</div>
+                                    <div class="vibes-memo">“ ${sM} ”</div>
                                     <div class="eq-container">${eqBars}</div>
-                                    <h2 class="trend-title">${safeTitle}</h2>
-                                    <p class="trend-desc">${safeDesc}</p>
+                                    <h2 class="trend-title">${sT}</h2>
+                                    <p class="trend-desc">${sD}</p>
                                     <div class="btn-group">
                                         <a href="archive/${t.slug}.html" class="btn btn-pink">📖 DETAILS</a>
                                         <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(t.title)}&tag=YOUR_TAG" target="_blank" class="btn btn-amazon">🛒 Amazon</a>
@@ -504,7 +504,7 @@
                                     <div class="ai-image-wrap"><img src="${t.aiImage}" onerror="this.src='https://placehold.jp/24/7928ca/ffffff/800x450.png?text=VIBE_IMAGE...'"></div>
                                     <div class="summary-box">
                                         <div class="summary-label">AI_INSIGHT_SUMMARY</div>
-                                        <div class="summary-text">${safeSummary}</div>
+                                        <div class="summary-text">${sA}</div>
                                     </div>
                                     <div class="btn btn-dark" onclick="document.getElementById('card-${idx}').classList.remove('flipped')">🔙 戻る</div>
                                 </div>
