@@ -1,7 +1,6 @@
 /**
- * GAL-INTEL generate.js v2.4 - BUG_FIX_EDITION
- * 役割: RSS取得、不適切ワードフィルタ、強力データクレンジング、AI画像生成、物理アーカイブ生成
- * 修正: 構文エラー(Unexpected token)を解消し、データの文字列変換を徹底。
+ * GAL-INTEL generate.js v2.5 - CLEAN_DATA_EDITION
+ * 変更点: 強力な本文クレンジングと文字数制限ギミックを追加
  */
 
 const fs = require('fs');
@@ -14,6 +13,7 @@ const DATA_FILE = './intelligence_db.json';
 const INDEX_PATH = './index.html';
 const ARCHIVE_DIR = './archive';
 const IMAGE_DIR = './images';
+const MAX_DESC_LENGTH = 150; // 本文の最大文字数
 
 if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR);
 if (!fs.existsSync(IMAGE_DIR)) fs.mkdirSync(IMAGE_DIR);
@@ -82,12 +82,35 @@ async function generateVibeImage(title, slug) {
     return `https://raw.githubusercontent.com/calro999/auto-site/main/images/${fileName}`;
 }
 
+// 強化されたクレンジング関数
 function cleanText(text) {
     let cleaned = ensureString(text);
+    
+    // 1. HTMLタグを完全に除去
     cleaned = cleaned.replace(/<[^>]*>?/gm, '');
+    
+    // 2. 特殊文字の変換
     cleaned = cleaned.replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-    const patterns = [/続きを読む.*/, /\(時事通信\).*/, /©.*/, /Copyright.*/, /…$/, /&hellip;$/];
-    patterns.forEach(p => cleaned = cleaned.replace(p, ''));
+    
+    // 3. 他記事へのリンク集（関連ニュース、あわせて読みたい等）を排除するためのパターン
+    const trashPatterns = [
+        /続きを読む.*/s,
+        /（時事通信）.*/s,
+        /©.*/s,
+        /Copyright.*/s,
+        /【関連ニュース】.*/s,
+        /あわせて読みたい.*/s,
+        /▼おすすめ記事.*/s,
+        /外部サイトへ.*/s,
+        /関連記事:.*/s
+    ];
+    trashPatterns.forEach(p => cleaned = cleaned.replace(p, ''));
+
+    // 4. 文字数制限（ギミック追加）
+    if (cleaned.length > MAX_DESC_LENGTH) {
+        cleaned = cleaned.substring(0, MAX_DESC_LENGTH) + '...';
+    }
+
     return cleaned.trim();
 }
 
@@ -106,7 +129,7 @@ const fetchRSS = (url) => new Promise((resolve, reject) => {
 });
 
 async function main() {
-    console.log("🚀 Starting GAL-INTEL v2.4...");
+    console.log("🚀 Starting GAL-INTEL v2.5 (Clean Edition)...");
     try {
         let db = { current: [], graveyard: [], tags: [], archiveList: [], dictionary: [] };
         if (fs.existsSync(DATA_FILE)) db = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
@@ -123,8 +146,10 @@ async function main() {
             for (const item of items) {
                 let title = cleanText(item.split('<title>')[1]?.split('</title>')[0] || "");
                 let desc = cleanText(item.split('<description>')[1]?.split('</description>')[0] || "");
+                
                 if (!title || FORBIDDEN_WORDS.some(w => title.includes(w))) continue;
                 if (fetchedTrends.some(t => t.title === title)) continue;
+                
                 fetchedTrends.push({ title, desc, genre: s.genre });
             }
         }
@@ -140,7 +165,7 @@ async function main() {
             const memos = VIBES_MEMOS[t.genre] || VIBES_MEMOS.GENERAL;
             const item = {
                 title: ensureString(t.title),
-                desc: ensureString(t.desc),
+                desc: ensureString(t.desc), // ここでクリーン済みの本文が入る
                 slug: ensureString(slug),
                 aiImage: ensureString(aiImage),
                 memo: ensureString(memos[Math.floor(Math.random() * memos.length)]),
@@ -162,7 +187,7 @@ async function main() {
 
         fs.writeFileSync(path.join(ARCHIVE_DIR, `${dateKey}.html`), templateHTML.replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json'));
         fs.writeFileSync(DATA_FILE, JSON.stringify(finalDb, null, 2), 'utf8');
-        console.log("✅ Build Complete!");
+        console.log("✅ Build Complete with Clean Content!");
     } catch (e) { console.error("❌ Error:", e); process.exit(1); }
 }
 
