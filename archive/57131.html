@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAL-INTEL | v2 VIBE_CHECK</title>
+    <title>GAL-INTEL | 今のトレンドをバイブスチェック</title>
     <style>
         :root { 
             --bg: #F8F9FA; --text: #1A202C; --accent-pink: #FF0080; --accent-blue: #7928CA; 
@@ -12,11 +12,11 @@
 
         * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         body { 
-            background: var(--bg); color: var(--text); font-family: 'Helvetica Neue', sans-serif; 
-            margin: 0; padding: 0; overflow-x: hidden;
+            background: var(--bg); color: var(--text); font-family: 'Helvetica Neue', Arial, 'Hiragino Sans', sans-serif; 
+            margin: 0; padding: 0; overflow-x: hidden; line-height: 1.6;
         }
 
-        /* 背景アニメ：復活 */
+        /* 背景アニメーション：トレンド単語が接続される演出 */
         #connect-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.8; }
 
         .layout { 
@@ -24,109 +24,112 @@
             max-width: 1500px; margin: 0 auto; padding: 30px;
         }
 
-        /* サイドバー */
+        /* サイドバー共通 */
         .sidebar { position: sticky; top: 30px; height: calc(100vh - 60px); display: flex; flex-direction: column; gap: 20px; }
+        .scroll-area { flex-grow: 1; overflow-y: auto; padding-right: 8px; display: flex; flex-direction: column; gap: 20px; }
+        .scroll-area::-webkit-scrollbar { width: 4px; }
+        .scroll-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        
         .glass-box { 
             background: var(--glass); backdrop-filter: blur(15px); border-radius: 25px; 
             padding: 25px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.03);
         }
-        .box-title { font-size: 0.75rem; font-weight: 900; color: #A0AEC0; letter-spacing: 2px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
 
-        /* メインヘッダー */
+        .box-title { 
+            font-size: 0.75rem; font-weight: 900; color: #A0AEC0; text-transform: uppercase; 
+            margin-bottom: 15px; letter-spacing: 2px; display: flex; align-items: center; gap: 8px;
+        }
+
+        /* メインフィード */
         header { text-align: center; margin-bottom: 40px; }
         .hero-title { 
-            font-size: 4rem; font-weight: 900; margin: 0; letter-spacing: -3px;
+            font-size: 4rem; font-weight: 900; margin: 0; letter-spacing: -3px; 
             background: linear-gradient(135deg, var(--accent-pink), var(--accent-blue));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
-        /* 3Dカード：完全復元 */
-        .trend-card-container { perspective: 2000px; margin-bottom: 30px; width: 100%; min-height: 550px; }
-        .trend-card-inner { 
-            position: relative; width: 100%; height: 100%; min-height: 550px;
-            transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .trend-card-container.flipped .trend-card-inner { transform: rotateY(180deg); }
-
-        .front, .back { 
-            position: absolute; inset: 0; backface-visibility: hidden; 
-            background: var(--card-bg); border-radius: 40px; padding: 45px; 
+        .trend-card { 
+            background: var(--card-bg); border-radius: 40px; padding: 45px; margin-bottom: 30px; 
             border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.04);
-            display: flex; flex-direction: column;
+            position: relative; overflow: hidden;
         }
-        .back { transform: rotateY(180deg); background: #fafafa; overflow-y: auto; }
 
-        /* イコライザー：リッチ版復活 */
-        .eq-container { display: flex; gap: 5px; height: 50px; align-items: flex-end; margin-bottom: 25px; }
+        .vibes-memo { 
+            background: #F7FAFC; border-left: 8px solid var(--accent-pink);
+            padding: 20px 25px; border-radius: 15px; font-size: 1.2rem;
+            font-weight: 800; margin-bottom: 25px; font-style: italic; color: #2D3748;
+        }
+
+        /* V1の魂：リッチなイコライザー */
+        .eq-container { display: flex; gap: 6px; height: 50px; align-items: flex-end; margin-bottom: 25px; }
         .eq-bar { 
             width: 7px; border-radius: 10px; 
             background: linear-gradient(to top, var(--accent-blue), var(--accent-pink));
             animation: eq-wave 0.6s infinite alternate ease-in-out;
         }
-
         @keyframes eq-wave { from { height: 10%; } to { height: 100%; } }
 
-        /* 装飾 */
-        .vibes-memo { 
-            background: #F7FAFC; border-left: 8px solid var(--accent-pink); padding: 20px 25px;
-            border-radius: 15px; font-weight: 800; font-size: 1.2rem; font-style: italic; margin-bottom: 25px;
-        }
+        .trend-title { font-size: 2rem; font-weight: 900; margin: 0 0 15px 0; color: var(--text); line-height: 1.2; }
+        .trend-desc { font-size: 1.1rem; color: #4A5568; margin-bottom: 30px; }
 
-        .ai-image-wrap { 
-            width: 100%; height: 250px; background: #000; border-radius: 25px; 
-            margin-bottom: 20px; display: flex; align-items: center; justify-content: center; overflow: hidden;
-        }
-        .ai-image-wrap img { width: 100%; height: 100%; object-fit: contain; }
-
-        /* ボタン */
-        .btn-group { display: flex; gap: 15px; margin-top: auto; }
         .btn { 
-            padding: 16px 28px; border-radius: 18px; font-weight: 900; text-decoration: none;
-            display: inline-flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; border: none; flex: 1;
+            padding: 16px 30px; border-radius: 18px; text-decoration: none; 
+            font-weight: 900; font-size: 1rem; transition: 0.3s; 
+            display: inline-flex; align-items: center; gap: 10px;
         }
-        .btn-pink { background: var(--accent-pink); color: white; box-shadow: 0 10px 20px rgba(255,0,128,0.2); }
-        .btn-dark { background: var(--text); color: white; }
+        .btn-pink { background: var(--accent-pink); color: #fff; box-shadow: 0 10px 20px rgba(255,0,128,0.2); }
+        .btn-pink:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(255,0,128,0.3); }
 
-        /* モバイル対応：バグ修正版 */
+        /* タグ装飾 */
+        .tag-item { font-size: 0.8rem; background: #fff; border: 1px solid var(--border); padding: 8px 15px; border-radius: 12px; font-weight: 700; color: #718096; }
+
+        /* モバイル対応 */
         @media (max-width: 1100px) {
             .layout { grid-template-columns: 1fr; padding: 15px; }
             .sidebar { display: none; }
-            .hero-title { font-size: 2.8rem; }
-            .trend-card-container { min-height: 650px; }
-            .front, .back { padding: 30px; }
+            .hero-title { font-size: 3rem; }
+            .trend-card { padding: 30px; border-radius: 30px; }
         }
+
+        #loading { position: fixed; inset: 0; background: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--accent-pink); z-index: 2000; }
     </style>
 </head>
 <body>
     <canvas id="connect-bg"></canvas>
+    <div id="loading">VIBE CONNECTING...</div>
+
     <div class="layout">
         <aside class="sidebar">
-            <div class="glass-box">
-                <div class="box-title">🔥 HOT_TAGS</div>
-                <div id="word-ranking" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
-            </div>
-            <div class="glass-box">
-                <div class="box-title">📖 VIBE_DICTIONARY</div>
-                <div id="vibes-dict"></div>
+            <div class="scroll-area">
+                <div class="glass-box">
+                    <div class="box-title">🔥 TRENDING_NOW</div>
+                    <div id="word-ranking" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+                </div>
+                <div class="glass-box">
+                    <div class="box-title">📖 VIBES_DICT</div>
+                    <div id="vibes-dict" style="font-size:0.9rem;"></div>
+                </div>
             </div>
         </aside>
 
         <main>
             <header>
                 <h1 class="hero-title">GAL-INTEL</h1>
-                <p style="font-weight:900; color:var(--accent-blue); letter-spacing:5px;">AI-SEARCH_ENGINE_OPTIMIZED</p>
+                <div style="font-size:0.8rem; font-weight:900; color:var(--accent-blue); letter-spacing:5px;">REALTIME_VIBE_CHECK</div>
             </header>
             <div id="trend-list"></div>
         </main>
 
         <aside class="sidebar">
-            <div class="glass-box">
-                <div class="box-title">🔄 SYNC_STATUS</div>
-                <div id="sync-info" style="font-weight:900; font-size:0.9rem;"></div>
-            </div>
-            <div class="glass-box">
-                <div class="box-title">💀 GRAVEYARD</div>
-                <div id="grave-list"></div>
+            <div class="scroll-area">
+                <div class="glass-box">
+                    <div class="box-title">🔄 STATUS</div>
+                    <div id="sync-info" style="font-size: 0.9rem; font-weight: 900;"></div>
+                </div>
+                <div class="glass-box">
+                    <div class="box-title">💀 GRAVEYARD</div>
+                    <div id="grave-list" style="font-size:0.8rem; display:flex; flex-direction:column; gap:10px;"></div>
+                </div>
             </div>
         </aside>
     </div>
@@ -141,7 +144,7 @@
             canvas.width = window.innerWidth; canvas.height = window.innerHeight;
             dots = (tags || []).map(t => ({
                 x: Math.random() * canvas.width, y: Math.random() * canvas.height, 
-                text: '#' + t, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5
+                text: '#' + t, vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4
             }));
             animate();
         }
@@ -159,42 +162,29 @@
         }
 
         async function load() {
-            const res = await fetch(DB_URL + '?t=' + Date.now());
-            const db = await res.json();
-            document.getElementById('sync-info').innerText = 'LAST_UPDATE: ' + db.lastUpdate;
-            initBg(db.tags);
+            try {
+                const res = await fetch(DB_URL + '?t=' + Date.now());
+                const db = await res.json();
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('sync-info').innerText = db.lastUpdate;
+                initBg(db.tags);
 
-            document.getElementById('word-ranking').innerHTML = (db.tags || []).map(t => `<span style="background:#edf2f7; padding:6px 12px; border-radius:12px; font-size:0.75rem; font-weight:700;">#${t}</span>`).join('');
-            document.getElementById('grave-list').innerHTML = (db.graveyard || []).map(g => `<div style="font-size:0.8rem; border-bottom:1px solid #f0f0f0; padding:8px 0; color:#718096;">⚡️ ${g.title.substring(0,25)}...</div>`).join('');
-            
-            document.getElementById('trend-list').innerHTML = (db.current || []).map((t, idx) => {
-                const eqBars = Array.from({length: 12}, (_, i) => `<div class="eq-bar" style="animation-delay:${i*0.05}s; height:${10+Math.random()*90}%"></div>`).join('');
-                return `
-                <div class="trend-card-container" id="c-${idx}">
-                    <div class="trend-card-inner">
-                        <div class="front">
+                document.getElementById('word-ranking').innerHTML = (db.tags || []).map(t => `<span class="tag-item">#${t}</span>`).join('');
+                document.getElementById('vibes-dict').innerHTML = (db.dictionary || []).map(d => `<div style="margin-bottom:12px;"><strong style="color:var(--accent-pink)">${d.word}</strong>: ${d.mean}</div>`).join('');
+                document.getElementById('grave-list').innerHTML = (db.graveyard || []).map(g => `<div style="border-bottom:1px solid #eee; padding-bottom:5px;">${g.title.substring(0,35)}...</div>`).join('');
+
+                document.getElementById('trend-list').innerHTML = (db.current || []).map((t, idx) => {
+                    const eqBars = Array.from({length: 12}, (_, i) => `<div class="eq-bar" style="animation-delay:${i*0.05}s; height:${15+Math.random()*85}%"></div>`).join('');
+                    return `
+                        <div class="trend-card">
                             <div class="vibes-memo">“ ${t.memo} ”</div>
                             <div class="eq-container">${eqBars}</div>
-                            <h2 style="font-size:1.8rem; font-weight:900; margin:0 0 15px 0; line-height:1.2;">${t.title}</h2>
-                            <p style="color:#4A5568; font-size:1rem; flex-grow:1; line-height:1.6;">${t.desc}</p>
-                            <div class="btn-group">
-                                <div class="btn btn-pink" onclick="document.getElementById('c-${idx}').classList.toggle('flipped')">🔄 裏面をチェック</div>
-                            </div>
-                        </div>
-                        <div class="back">
-                            <div class="ai-image-wrap"><img src="${t.aiImage}"></div>
-                            <div style="background:#fff; border:1px solid #eee; padding:20px; border-radius:20px; margin-bottom:20px; box-shadow:inset 0 2px 4px rgba(0,0,0,0.02);">
-                                <strong style="color:var(--accent-pink); font-size:0.8rem;">AI_INSIGHT:</strong><br>
-                                <p style="font-size:0.95rem; color:#2D3748; margin:5px 0 0 0; font-weight:600;">${t.aiSummary}</p>
-                            </div>
-                            <div class="btn-group">
-                                <a href="archive/${t.slug}.html" class="btn btn-pink">📖 特設ページ</a>
-                                <div class="btn btn-dark" onclick="document.getElementById('c-${idx}').classList.toggle('flipped')">🔙 戻る</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-            }).join('');
+                            <h2 class="trend-title">${t.title}</h2>
+                            <p class="trend-desc">${t.desc}</p>
+                            <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="btn btn-pink">🔗 VIBE_CHECK_MORE</a>
+                        </div>`;
+                }).join('');
+            } catch (e) { console.error(e); }
         }
         load();
         window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
