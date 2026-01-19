@@ -41,7 +41,6 @@
             opacity: 0.5; 
         }
 
-        /* 全体レイアウト：PC */
         .layout { 
             display: grid; 
             grid-template-columns: 260px 1fr 260px; 
@@ -72,7 +71,6 @@
         .scroll-area::-webkit-scrollbar { width: 5px; }
         .scroll-area::-webkit-scrollbar-thumb { background: #CBD5E0; border-radius: 10px; }
 
-        /* ガラス風ボックス */
         .glass-box { 
             background: var(--glass); 
             backdrop-filter: blur(12px); 
@@ -94,7 +92,6 @@
             gap: 8px;
         }
 
-        /* ヘッダー：PC余白詰め */
         header { 
             text-align: center; 
             margin-bottom: 30px; 
@@ -107,6 +104,7 @@
             letter-spacing: -3px; 
             background: linear-gradient(to right, #FF0080, #7928CA);
             -webkit-background-clip: text;
+            background-clip: text; /* 修正：標準プロパティを追加 */
             -webkit-text-fill-color: transparent;
         }
         .hero-title a { text-decoration: none; color: inherit; }
@@ -114,7 +112,6 @@
 
         .main-feed { display: flex; flex-direction: column; gap: 25px; }
         
-        /* 記事カード：高級感の追加 */
         .trend-card { 
             background: var(--card-bg); 
             border-radius: 35px; 
@@ -154,7 +151,6 @@
         .eq-bar { width: 6px; background: linear-gradient(to top, var(--accent-pink), var(--accent-blue)); border-radius: 4px; }
         .eq-active { animation: eq-pulse 0.7s ease-in-out infinite alternate; }
 
-        /* ボタンデザインの強化 */
         .btn-group { display: flex; gap: 20px; width: 100%; justify-content: center; }
         .btn { 
             padding: 18px 35px; 
@@ -183,7 +179,6 @@
             display: block; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
         }
 
-        /* モバイル巨大ナビ */
         .mobile-nav-btn {
             display: none; 
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
@@ -194,7 +189,6 @@
             text-decoration: none; border: 4px solid #fff;
         }
 
-        /* モバイル表示 */
         @media (max-width: 1000px) { 
             .layout { grid-template-columns: 1fr; padding: 15px 10px; } 
             .sidebar:last-child { display: none; }
