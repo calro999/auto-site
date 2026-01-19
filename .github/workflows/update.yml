@@ -9,28 +9,41 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
-          npm install canvas
-          
-      - uses: actions/checkout@v3
+      # 1. まずリポジトリのファイルを展開する（これが一番先！）
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # 2. Node.js環境のセットアップ
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
+      # 3. Canvasを動かすためのシステムライブラリをインストール
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+
+      # 4. プロジェクト内で canvas をインストール
+      - name: Install Node Modules
+        run: |
+          npm init -y
+          npm install canvas
+
+      # 5. 生成スクリプトを実行
       - name: Run Sync
         run: node generate.js
+        env:
+          NODE_PATH: ./node_modules
 
+      # 6. 結果をコミットしてプッシュ
       - name: Commit and Push
         run: |
           git config --global user.name "Intelligence-Bot"
           git config --global user.email "bot@example.com"
-          git add intelligence_db.json
-          # 差分がある場合のみコミットし、強制的にPushする
+          git add .
+          # 差分がある場合のみコミット
           git diff --quiet && git diff --staged --quiet || (git commit -m "Intelligence Sync: $(date)" && git push origin main --force)
