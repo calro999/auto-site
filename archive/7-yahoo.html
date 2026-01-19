@@ -2,12 +2,17 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GAL-INTEL | 今のトレンドをバイブスチェック</title>
     
+    <meta name="description" content="最新ニュースを最速バイブス変換。AI検索エンジン(Perplexity/SearchGPT)に特化した、世界一速いトレンド要約サイト。">
+    <meta property="og:title" content="GAL-INTEL | 今のトレンドをバイブスチェック">
+    <meta property="og:image" content="https://raw.githubusercontent.com/calro999/auto-site/main/ogp-banner.png">
+    <meta name="twitter:card" content="summary_large_image">
+
     <style>
         /* ============================================================
-           CORE DESIGN SYSTEM - MOBILE FIRST & RICH DESKTOP
+           CORE DESIGN SYSTEM - V1 RICH SPEC (NO OMISSION)
            ============================================================ */
         :root { 
             --bg: #F8F9FA; 
@@ -17,203 +22,410 @@
             --card-bg: #FFFFFF; 
             --border: #E2E8F0;
             --glass: rgba(255, 255, 255, 0.95);
-            --shadow-lg: 0 30px 60px rgba(0,0,0,0.1);
+            --shadow-md: 0 15px 35px rgba(0,0,0,0.05);
+            --shadow-lg: 0 30px 60px rgba(0,0,0,0.08);
+            --font-main: 'Helvetica Neue', Arial, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif;
         }
 
         * { box-sizing: border-box; }
         
         body { 
-            background: var(--bg); color: var(--text); font-family: 'Helvetica Neue', Arial, sans-serif; 
-            margin: 0; padding: 0; overflow-x: hidden; line-height: 1.6;
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: var(--font-main); 
+            margin: 0; 
+            padding: 0; 
+            overflow-x: hidden; 
+            line-height: 1.6;
             -webkit-font-smoothing: antialiased;
         }
 
-        #connect-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.6; pointer-events: none; }
+        /* BACKGROUND CONNECT ANIMATION */
+        #connect-bg { 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            z-index: -1; 
+            opacity: 0.8; 
+            pointer-events: none;
+        }
 
-        /* LAYOUT - スマホでは1列、PCでは3列 */
+        /* LAYOUT STRUCTURE (Responsive Grid) */
         .layout { 
             display: grid; 
-            grid-template-columns: 1fr; /* デフォルトはスマホ(1列) */
-            gap: 20px; 
-            max-width: 1650px; 
+            grid-template-columns: 1fr; /* スマホデフォルト */
+            gap: 30px; 
+            max-width: 1600px; 
             margin: 0 auto; 
             padding: 20px;
         }
 
-        @media (min-width: 1100px) {
+        @media (min-width: 1200px) {
             .layout { 
-                grid-template-columns: 300px 1fr 300px; 
-                gap: 40px; 
-                padding: 60px 25px;
+                grid-template-columns: 320px 1fr 320px; 
+                padding: 50px 30px;
+                gap: 40px;
             }
         }
 
-        /* SIDEBARS - スマホでは下部に配置されるか非表示 */
-        .sidebar { display: flex; flex-direction: column; gap: 20px; }
-        @media (min-width: 1100px) {
-            .sidebar { position: sticky; top: 60px; height: calc(100vh - 120px); }
+        /* SIDEBARS */
+        .sidebar { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 30px; 
         }
+
+        @media (min-width: 1200px) {
+            .sidebar {
+                position: sticky; 
+                top: 50px; 
+                height: calc(100vh - 100px); 
+            }
+        }
+
+        .scroll-area { 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            padding-right: 10px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 30px; 
+        }
+
+        .scroll-area::-webkit-scrollbar { width: 6px; }
+        .scroll-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 
         .glass-box { 
-            background: var(--glass); backdrop-filter: blur(20px); border-radius: 30px; 
-            padding: 25px; border: 1px solid var(--border); box-shadow: 0 15px 35px rgba(0,0,0,0.05); 
+            background: var(--glass); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 35px; 
+            padding: 30px; 
+            border: 1px solid var(--border); 
+            box-shadow: var(--shadow-md);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+        .glass-box:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
 
-        /* HEADER */
-        header { text-align: center; margin-bottom: 40px; }
+        .box-title { 
+            font-size: 0.85rem; 
+            font-weight: 900; 
+            color: #A0AEC0; 
+            text-transform: uppercase; 
+            margin-bottom: 25px; 
+            letter-spacing: 3px; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px;
+        }
+        .box-title::before { content: ''; width: 10px; height: 10px; background: var(--accent-pink); border-radius: 50%; display: inline-block; }
+
+        /* MAIN FEED & HERO */
+        header { text-align: center; margin-bottom: 50px; }
         .hero-title { 
-            font-size: 3rem; font-weight: 900; margin: 0; letter-spacing: -3px; 
-            background: linear-gradient(135deg, var(--accent-pink), var(--accent-blue));
-            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            font-size: 3.5rem; 
+            font-weight: 900; 
+            margin: 0; 
+            letter-spacing: -3px; 
+            background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-blue) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 15px 30px rgba(255, 0, 128, 0.2));
         }
-        @media (min-width: 1100px) { .hero-title { font-size: 5.5rem; letter-spacing: -6px; } }
+        @media (min-width: 1200px) { .hero-title { font-size: 5.5rem; letter-spacing: -5px; } }
 
-        /* TREND CARD SYSTEM - スマホでの高さを自動に */
-        .trend-card-container { 
-            perspective: 2500px; 
-            min-height: 600px; /* PCでの基本高さ */
-            width: 100%; 
-            margin-bottom: 30px; 
-        }
+        .hero-subtitle { font-size: 0.8rem; font-weight: 900; color: var(--accent-blue); letter-spacing: 6px; margin-top: 15px; text-transform: uppercase; }
 
+        .main-feed { display: flex; flex-direction: column; gap: 40px; }
+
+        /* 3D TREND CARD SYSTEM (Complete Specs) */
+        .trend-card-container { perspective: 2500px; min-height: 650px; width: 100%; margin-bottom: 20px; }
         .trend-card-inner { 
-            position: relative; width: 100%; height: 100%; 
-            min-height: 600px;
-            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            position: relative; 
+            width: 100%; height: 100%; 
+            min-height: 650px;
+            transition: transform 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             transform-style: preserve-3d; 
         }
-        .flipped .trend-card-inner { transform: rotateY(180deg); }
+        .trend-card-container.flipped .trend-card-inner { transform: rotateY(180deg); }
 
         .front, .back { 
-            position: absolute; inset: 0; backface-visibility: hidden; background: var(--card-bg); 
-            border-radius: 45px; padding: 30px; border: 1px solid var(--border); box-shadow: var(--shadow-lg);
-            display: flex; flex-direction: column; align-items: center; text-align: center;
-            overflow: hidden;
+            position: absolute; 
+            inset: 0; 
+            backface-visibility: hidden; 
+            background: var(--card-bg); 
+            border-radius: 50px; 
+            padding: 30px; 
+            border: 1px solid var(--border); 
+            box-shadow: var(--shadow-lg);
+            display: flex; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            text-align: center;
         }
-        @media (min-width: 1100px) { .front, .back { padding: 60px; } }
+        @media (min-width: 1200px) { .front, .back { padding: 60px; } }
 
-        .back { transform: rotateY(180deg); background: #FAFAFA; align-items: flex-start; text-align: left; overflow-y: auto; }
+        .back { transform: rotateY(180deg); background: #FAFAFA; overflow-y: auto; display: block; text-align: left; }
 
-        /* VIBES & EQ */
+        /* VIBES & EQ ELEMENTS */
         .vibes-memo { 
-            background: #F7FAFC; border-left: 8px solid var(--accent-pink); padding: 20px; 
-            border-radius: 20px; font-size: 1.1rem; font-weight: 800; margin-bottom: 25px; width: 100%; 
+            background: #F7FAFC; 
+            border-left: 12px solid var(--accent-pink);
+            padding: 25px; 
+            border-radius: 25px; 
+            font-size: 1.2rem;
+            font-weight: 800; 
+            margin-bottom: 30px; 
+            font-style: italic; 
+            color: #2D3748;
+            width: 100%;
         }
-        @media (min-width: 1100px) { .vibes-memo { font-size: 1.4rem; padding: 30px; } }
+        @media (min-width: 1200px) { .vibes-memo { font-size: 1.5rem; padding: 35px; } }
 
-        .eq-container { display: flex; gap: 6px; height: 50px; align-items: flex-end; justify-content: center; margin-bottom: 30px; }
-        .eq-bar { width: 8px; background: linear-gradient(to top, var(--accent-blue), var(--accent-pink)); border-radius: 10px; animation: eq-pulse 0.6s ease-in-out infinite alternate; }
+        .eq-container { 
+            display: flex; 
+            gap: 6px; 
+            height: 60px; 
+            align-items: flex-end; 
+            justify-content: center; /* 完全中央配置 */
+            margin-bottom: 35px; 
+            width: 100%;
+        }
+        .eq-bar { 
+            width: 8px; 
+            background: linear-gradient(to top, var(--accent-blue), var(--accent-pink)); 
+            border-radius: 15px; 
+            animation: eq-pulse 0.6s ease-in-out infinite alternate;
+        }
 
-        .trend-title { font-size: 1.6rem; font-weight: 900; margin: 0 0 15px 0; line-height: 1.2; }
-        @media (min-width: 1100px) { .trend-title { font-size: 2.6rem; } }
+        .trend-title { 
+            font-size: 1.8rem; 
+            font-weight: 900; 
+            margin: 0 0 20px 0; 
+            color: var(--text); 
+            line-height: 1.1; 
+            letter-spacing: -1px;
+        }
+        @media (min-width: 1200px) { .trend-title { font-size: 2.8rem; } }
 
-        /* 詳細文の表示設定 */
         .trend-desc { 
-            font-size: 1rem; color: #4A5568; line-height: 1.6; margin-bottom: 30px; 
-            display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden;
-            text-align: left; width: 100%;
+            font-size: 1.1rem; 
+            color: #4A5568; 
+            margin-bottom: 40px; 
+            line-height: 1.7;
+            max-width: 850px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 6; /* 詳細をしっかり表示 */
+            line-clamp: 6;
+            -webkit-box-orient: vertical;
         }
-        @media (min-width: 1100px) { .trend-desc { font-size: 1.2rem; -webkit-line-clamp: 5; } }
+
+        /* BACK SIDE VISUALS */
+        .ai-image-wrap { 
+            width: 100%; 
+            height: 250px; 
+            background: #000; 
+            border-radius: 35px; 
+            margin-bottom: 30px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        @media (min-width: 1200px) { .ai-image-wrap { height: 350px; } }
+        .ai-image-wrap img { width: 100%; height: 100%; object-fit: contain; }
+
+        .summary-box { 
+            background: #FFFFFF; 
+            border: 1px solid var(--border); 
+            padding: 30px; 
+            border-radius: 30px; 
+            margin-bottom: 30px; 
+        }
+        .summary-label { font-size: 0.75rem; font-weight: 900; color: var(--accent-pink); letter-spacing: 3px; margin-bottom: 15px; text-transform: uppercase; }
+        .summary-text { font-size: 1.1rem; color: #2D3748; font-weight: 600; line-height: 1.8; }
 
         /* BUTTONS */
-        .btn-group { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: auto; }
-        @media (min-width: 1100px) { .btn-group { flex-direction: row; gap: 20px; } }
+        .btn-group { display: flex; flex-direction: column; gap: 15px; width: 100%; margin-top: auto; }
+        @media (min-width: 1200px) { .btn-group { flex-direction: row; gap: 20px; } }
 
         .btn { 
-            padding: 18px 25px; border-radius: 20px; font-weight: 900; font-size: 1rem; 
-            cursor: pointer; border: none; flex: 1; text-decoration: none; 
-            display: flex; align-items: center; justify-content: center; gap: 10px; 
+            padding: 20px 30px; 
+            border-radius: 25px; 
+            text-decoration: none; 
+            font-weight: 900; 
+            font-size: 1.1rem; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 15px;
+            cursor: pointer; 
+            border: none;
+            flex: 1;
         }
-        .btn-pink { background: var(--accent-pink); color: #fff; box-shadow: 0 10px 20px rgba(255,0,128,0.2); }
+        .btn-pink { background: var(--accent-pink); color: #fff; box-shadow: 0 15px 30px rgba(255,0,128,0.2); }
+        .btn-pink:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(255,0,128,0.35); }
         .btn-outline { background: #EDF2F7; color: #4A5568; }
         .btn-dark { background: var(--text); color: #fff; width: 100%; }
 
-        /* AI VISUALS IN BACK */
-        .ai-image-wrap { width: 100%; height: 200px; background: #000; border-radius: 25px; margin-bottom: 20px; overflow: hidden; }
-        @media (min-width: 1100px) { .ai-image-wrap { height: 300px; } }
-        .ai-image-wrap img { width: 100%; height: 100%; object-fit: contain; }
+        /* SIDEBAR ITEMS */
+        .tag-item { font-size: 0.85rem; background: #fff; border: 1px solid var(--border); padding: 10px 18px; border-radius: 18px; font-weight: 800; color: #718096; transition: 0.3s; margin: 4px; display: inline-block; }
+        .tag-item:hover { border-color: var(--accent-pink); color: var(--accent-pink); transform: scale(1.05); }
+        
+        .dict-item { padding: 15px; margin-bottom: 15px; background: rgba(255,255,255,0.5); border-radius: 20px; border: 1px solid transparent; }
+        .dict-word { display: block; color: var(--accent-pink); font-weight: 900; font-size: 1.1rem; margin-bottom: 5px; }
+        
+        .grave-item { font-size: 0.9rem; padding: 15px; color: #718096; text-decoration: none; display: block; border-bottom: 1px solid #F1F5F9; transition: 0.3s; }
+        .grave-item:hover { color: var(--accent-blue); padding-left: 20px; }
 
+        /* ANIMATIONS */
         @keyframes eq-pulse { from { height: 20%; } to { height: 100%; } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-40px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* SIDEBAR TAGS & DICT */
-        .tag-item { font-size: 0.8rem; background: #fff; border: 1px solid var(--border); padding: 8px 15px; border-radius: 12px; margin: 4px; display: inline-block; font-weight: 800; }
-        .dict-item { margin-bottom: 15px; border-bottom: 1px solid #F1F5F9; padding-bottom: 10px; }
-        .dict-word { color: var(--accent-pink); font-weight: 900; display: block; }
+        /* LOADING SCREEN */
+        #loading { position: fixed; inset: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
+        .loading-text { font-size: 2rem; font-weight: 900; background: linear-gradient(to right, var(--accent-pink), var(--accent-blue)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 10px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.95); } }
     </style>
 </head>
 <body>
     <canvas id="connect-bg"></canvas>
+    <div id="loading"><div class="loading-text">GAL_INTEL_CONNECTING</div></div>
+
     <div class="layout">
         <aside class="sidebar">
-            <div class="glass-box"><h3>🔥 HOT_TAGS</h3><div id="word-ranking"></div></div>
-            <div class="glass-box"><h3>📖 DICT</h3><div id="vibes-dict"></div></div>
+            <div class="scroll-area">
+                <div class="glass-box">
+                    <div class="box-title">🔥 HOT_TAGS</div>
+                    <div id="word-ranking"></div>
+                </div>
+                <div class="glass-box">
+                    <div class="box-title">📖 VIBES_DICT</div>
+                    <div id="vibes-dict"></div>
+                </div>
+            </div>
         </aside>
 
         <main>
-            <header><h1 class="hero-title">GAL-INTEL</h1></header>
-            <div id="trend-list"></div>
+            <header>
+                <h1 class="hero-title">GAL-INTEL</h1>
+                <div class="hero-subtitle">v2 / Realtime Intelligence Feed</div>
+            </header>
+            
+            <div class="main-feed" id="trend-list">
+                </div>
         </main>
 
         <aside class="sidebar">
-            <div class="glass-box"><h3>📅 ARCHIVE</h3><div id="archive-links"></div></div>
-            <div class="glass-box"><h3>💀 GRAVEYARD</h3><div id="grave-list"></div></div>
+            <div class="scroll-area">
+                <div class="glass-box">
+                    <div class="box-title">🔄 SYNC_STATUS</div>
+                    <div id="sync-info" style="font-size: 1.1rem; font-weight: 900; color: var(--accent-blue);"></div>
+                    <div id="archive-links" style="margin-top:20px; display:flex; flex-direction:column; gap:12px;"></div>
+                </div>
+                <div class="glass-box">
+                    <div class="box-title">💀 GRAVEYARD</div>
+                    <div id="grave-list"></div>
+                </div>
+            </div>
         </aside>
     </div>
 
     <script>
+        /* ============================================================
+           CORE SCRIPTING - NO OMISSION
+           ============================================================ */
+        const canvas = document.getElementById('connect-bg');
+        const ctx = canvas.getContext('2d');
         const DB_URL = '../intelligence_db.json';
-        
+        let dots = [];
+
+        function initBg(tags) {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            dots = (tags || []).map(t => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height, 
+                text: '#' + t,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4,
+                size: Math.random() * 8 + 14
+            }));
+            animate();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            dots.forEach(d => {
+                d.x += d.vx; d.y += d.vy;
+                if (d.x < 0 || d.x > canvas.width) d.vx *= -1; 
+                if (d.y < 0 || d.y > canvas.height) d.vy *= -1;
+                ctx.font = `bold ${d.size}px sans-serif`;
+                ctx.fillStyle = 'rgba(121, 40, 202, 0.15)';
+                ctx.fillText(d.text, d.x, d.y);
+            });
+            requestAnimationFrame(animate);
+        }
+
         async function load() {
             try {
                 const res = await fetch(DB_URL + '?t=' + Date.now());
                 const db = await res.json();
                 
-                // 記事フィード生成
-                document.getElementById('trend-list').innerHTML = (db.current || []).map((t, idx) => `
-                    <div class="trend-card-container" id="card-${idx}">
-                        <div class="trend-card-inner">
-                            <div class="front">
-                                <div class="vibes-memo">“ ${t.memo} ”</div>
-                                <div class="eq-container">
-                                    ${Array.from({length:12}, (_,i)=>`<div class="eq-bar" style="animation-delay:${i*0.05}s; height:${20+Math.random()*80}%"></div>`).join('')}
-                                </div>
-                                <h2 class="trend-title">${t.title}</h2>
-                                <p class="trend-desc">${t.desc || '詳細を読み込み中...'}</p>
-                                <div class="btn-group">
-                                    <a href="archive/${t.slug}.html" class="btn btn-pink">📖 特設ページ</a>
-                                    <div class="btn btn-outline" onclick="document.getElementById('card-${idx}').classList.toggle('flipped')">🔄 AI_VIBE_CHECK</div>
-                                </div>
-                            </div>
-                            <div class="back">
-                                <div class="ai-image-wrap"><img src="${t.aiImage}" alt="Trend Visual"></div>
-                                <div class="vibes-memo" style="font-size:1rem; margin-bottom:20px;">
-                                    <strong>AI_SUMMARY:</strong><br>${t.aiSummary}
-                                </div>
-                                <div class="btn btn-dark" onclick="document.getElementById('card-${idx}').classList.toggle('flipped')">🔙 戻る</div>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
+                document.getElementById('loading').style.opacity = '0';
+                setTimeout(() => document.getElementById('loading').style.display = 'none', 500);
 
-                // サイドバー更新
+                document.getElementById('sync-info').innerText = 'UPDT: ' + db.lastUpdate;
+                initBg(db.tags);
+
+                // Sidebar Injection
                 document.getElementById('word-ranking').innerHTML = (db.tags || []).map(t => `<span class="tag-item">#${t}</span>`).join('');
-                document.getElementById('vibes-dict').innerHTML = (db.dictionary || []).map(d => `<div class="dict-item"><span class="dict-word">${d.word}</span><span style="font-size:0.8rem">${d.mean}</span></div>`).join('');
-                document.getElementById('archive-links').innerHTML = (db.archiveList || []).slice(0,5).map(a => `<a href="archive/${a}.html" class="btn btn-outline" style="margin-bottom:10px; font-size:0.8rem;">📅 ${a}</a>`).join('');
-                document.getElementById('grave-list').innerHTML = (db.graveyard || []).slice(0,8).map(g => `<div style="font-size:0.8rem; margin-bottom:5px; color:#718096;">⚡️ ${g.title.substring(0,20)}...</div>`).join('');
+                document.getElementById('vibes-dict').innerHTML = (db.dictionary || []).map(d => `<div class="dict-item"><span class="dict-word">${d.word}</span><span style="color:#718096; font-size: 0.9rem;">${d.mean}</span></div>`).join('');
+                document.getElementById('grave-list').innerHTML = (db.graveyard || []).slice(0, 10).map(g => `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">⚡️ ${g.title.substring(0,30)}...</a>`).join('');
+                document.getElementById('archive-links').innerHTML = (db.archiveList || []).slice(0,5).map(a => `<a href="archive/${a}.html" class="btn btn-outline" style="font-size:0.85rem; padding:12px;">📅 ${a} Archive</a>`).join('');
 
-            } catch (e) { console.error("Load Error:", e); }
+                // Main Feed Injection
+                document.getElementById('trend-list').innerHTML = (db.current || []).map((t, idx) => {
+                    const eqBars = Array.from({length: 16}, (_, i) => `<div class="eq-bar" style="height: ${20 + Math.random() * 80}%; animation-delay: ${i * 0.06}s"></div>`).join('');
+                    
+                    return `
+                        <div class="trend-card-container" id="card-${idx}">
+                            <div class="trend-card-inner">
+                                <div class="front">
+                                    <div class="vibes-memo">“ ${t.memo} ”</div>
+                                    <div class="eq-container">${eqBars}</div>
+                                    <h2 class="trend-title">${t.title}</h2>
+                                    <p class="trend-desc">${t.desc}</p>
+                                    <div class="btn-group">
+                                        <a href="archive/${t.slug}.html" class="btn btn-pink">📖 DETAILS (特設ページ)</a>
+                                        <div class="btn btn-outline" onclick="document.getElementById('card-${idx}').classList.toggle('flipped')">🔄 AI_VIBE_CHECK (裏面)</div>
+                                    </div>
+                                </div>
+                                <div class="back">
+                                    <div class="ai-image-wrap">
+                                        <img src="${t.aiImage}" alt="Trend Visual" onerror="this.src='https://placehold.jp/24/7928ca/ffffff/800x450.png?text=IMAGE_LOADING...'">
+                                    </div>
+                                    <div class="summary-box">
+                                        <div class="summary-label">AI_INSIGHT_SUMMARY</div>
+                                        <div class="summary-text">${t.aiSummary}</div>
+                                    </div>
+                                    <div class="btn-group">
+                                        <div class="btn btn-dark" onclick="document.getElementById('card-${idx}').classList.toggle('flipped')">🔙 戻る</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                }).join('');
+
+            } catch (e) { console.error("GAL-INTEL Load Error:", e); }
         }
 
-        // 背景アニメーション
-        const canvas = document.getElementById('connect-bg');
-        const ctx = canvas.getContext('2d');
-        function initCanvas() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            ctx.fillStyle = 'rgba(121, 40, 202, 0.1)';
-            ctx.fillRect(0,0,canvas.width, canvas.height);
-        }
-        window.addEventListener('resize', initCanvas);
-        initCanvas();
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
         load();
     </script>
 </body>
