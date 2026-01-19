@@ -184,14 +184,17 @@
             align-items: center; 
             text-align: center;
             overflow: hidden; 
+            min-height: 520px;
+            width: 100%;
         }
 
         .back { 
             transform: rotateY(180deg); 
             background: #FAFAFA; 
             overflow-y: auto; 
-            align-items: center; /* 裏面も中央揃えで崩れ防止 */
-            text-align: center;
+            align-items: flex-start;
+            text-align: left;
+            padding: 30px;
         }
 
         .vibes-memo { 
@@ -340,6 +343,7 @@
             border-radius: 20px;
             width: 100%;
             text-align: left;
+            margin-bottom: 20px;
         }
 
         .summary-label {
@@ -429,7 +433,7 @@
             canvas.width = window.innerWidth; canvas.height = window.innerHeight;
             dots = (tags || []).map(t => ({
                 x: Math.random() * canvas.width, y: Math.random() * canvas.height, 
-                text: '#' + t, vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4, size: Math.random() * 6 + 10
+                text: '#' + String(t), vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4, size: Math.random() * 6 + 10
             }));
             animate();
         }
@@ -446,29 +450,29 @@
             requestAnimationFrame(animate);
         }
 
-        // 文字数制限用ヘルパー関数（安全に緩和）
-        function truncate(str, len) {
-            if (!str) return "";
-            return str.length <= len ? str : str.substr(0, len) + "...";
+        // 文字数制限用：入力を強制的にString化してエラーを防止
+        function truncateStr(input, max) {
+            if (input === undefined || input === null) return "";
+            const s = String(input); 
+            return s.length <= max ? s : s.substring(0, max) + "...";
         }
 
         async function load() {
             try {
                 const res = await fetch(DB_URL + '?t=' + Date.now());
                 const db = await res.json();
-                document.getElementById('sync-info').innerText = 'UPDT: ' + db.lastUpdate;
+                document.getElementById('sync-info').innerText = 'UPDT: ' + String(db.lastUpdate);
                 initBg(db.tags);
 
-                document.getElementById('word-ranking').innerHTML = (db.tags || []).map(t => `<span class="tag-item">#${t}</span>`).join('');
-                document.getElementById('vibes-dict').innerHTML = (db.dictionary || []).map(d => `<div class="dict-item"><span class="dict-word">${d.word}</span><span style="color:#718096; font-size:0.8rem;">${d.mean}</span></div>`).join('');
-                document.getElementById('grave-list').innerHTML = (db.graveyard || []).slice(0, 10).map(g => `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">⚡️ ${truncate(g.title, 20)}</a>`).join('');
-                document.getElementById('archive-links').innerHTML = (db.archiveList || []).slice(0,5).map(a => `<a href="archive/${a}.html" class="btn btn-outline" style="font-size:0.75rem; padding:10px;">📅 ${a} Archive</a>`).join('');
+                document.getElementById('word-ranking').innerHTML = (db.tags || []).map(t => `<span class="tag-item">#${String(t)}</span>`).join('');
+                document.getElementById('vibes-dict').innerHTML = (db.dictionary || []).map(d => `<div class="dict-item"><span class="dict-word">${String(d.word)}</span><span style="color:#718096; font-size:0.8rem;">${String(d.mean)}</span></div>`).join('');
+                document.getElementById('grave-list').innerHTML = (db.graveyard || []).slice(0, 10).map(g => `<a href="https://www.google.com/search?q=${encodeURIComponent(String(g.title))}" target="_blank" class="grave-item">⚡️ ${truncateStr(g.title, 20)}</a>`).join('');
+                document.getElementById('archive-links').innerHTML = (db.archiveList || []).slice(0,5).map(a => `<a href="archive/${String(a)}.html" class="btn btn-outline" style="font-size:0.75rem; padding:10px;">📅 ${String(a)} Archive</a>`).join('');
 
                 const trendContainer = document.getElementById('trend-list');
                 let htmlBuffer = "";
 
                 (db.current || []).forEach((t, idx) => {
-                    // 各記事ごとにイコライザーバーを生成
                     let eqBars = "";
                     for (let i = 0; i < 15; i++) {
                         const h = Math.floor(Math.random() * 70) + 20;
@@ -476,33 +480,31 @@
                         eqBars += `<div class="eq-bar" style="height: ${h}%; animation-delay: ${delay}s"></div>`;
                     }
 
-                    // 文字数制限を適切に設定（はみ出し防止）
-                    const safeTitle = truncate(t.title, 60);
-                    const safeDesc = truncate(t.desc, 150);
-                    const safeMemo = truncate(t.memo, 100);
-                    const safeSummary = truncate(t.aiSummary, 250);
+                    // 強力な文字列化を伴うデータ取得
+                    const sT = truncateStr(t.title, 60);
+                    const sD = truncateStr(t.desc, 150);
+                    const sM = truncateStr(t.memo, 80);
+                    const sA = truncateStr(t.aiSummary, 300);
 
                     htmlBuffer += `
                         <div class="trend-card-container" id="card-${idx}">
                             <div class="trend-card-inner">
                                 <div class="front">
-                                    <div class="vibes-memo">“ ${safeMemo} ”</div>
-                                    <div class="eq-container">
-                                        ${eqBars}
-                                    </div>
-                                    <h2 class="trend-title">${safeTitle}</h2>
-                                    <p class="trend-desc">${safeDesc}</p>
+                                    <div class="vibes-memo">“ ${sM} ”</div>
+                                    <div class="eq-container">${eqBars}</div>
+                                    <h2 class="trend-title">${sT}</h2>
+                                    <p class="trend-desc">${sD}</p>
                                     <div class="btn-group">
-                                        <a href="archive/${t.slug}.html" class="btn btn-pink">📖 DETAILS</a>
-                                        <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(t.title)}&tag=YOUR_TAG" target="_blank" class="btn btn-amazon">🛒 Amazon</a>
+                                        <a href="archive/${String(t.slug)}.html" class="btn btn-pink">📖 DETAILS</a>
+                                        <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(String(t.title))}&tag=YOUR_TAG" target="_blank" class="btn btn-amazon">🛒 Amazon</a>
                                         <div class="btn btn-outline" onclick="document.getElementById('card-${idx}').classList.add('flipped')">🔄 VIBE</div>
                                     </div>
                                 </div>
                                 <div class="back">
-                                    <div class="ai-image-wrap"><img src="${t.aiImage}" onerror="this.src='https://placehold.jp/24/7928ca/ffffff/800x450.png?text=VIBE_IMAGE...'"></div>
+                                    <div class="ai-image-wrap"><img src="${String(t.aiImage)}" onerror="this.src='https://placehold.jp/24/7928ca/ffffff/800x450.png?text=VIBE_IMAGE...'"></div>
                                     <div class="summary-box">
                                         <div class="summary-label">AI_INSIGHT_SUMMARY</div>
-                                        <div class="summary-text">${safeSummary}</div>
+                                        <div class="summary-text">${sA}</div>
                                     </div>
                                     <div class="btn btn-dark" onclick="document.getElementById('card-${idx}').classList.remove('flipped')">🔙 戻る</div>
                                 </div>
