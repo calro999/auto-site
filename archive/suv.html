@@ -6,7 +6,6 @@
     <title>GAL-INTEL // Realtime Intelligence Feed</title>
     <style>
         :root {
-            /* 背景を白と薄いピンクのグラデーションに設定 */
             --bg-main: linear-gradient(135deg, #ffffff 0%, #fff5f7 100%);
             --accent-pink: #ff8fc5;
             --accent-blue: #00d1df;
@@ -26,10 +25,10 @@
             min-height: 100vh;
         }
 
-        /* 背景演出用キャンバス */
+        /* 背景演出用キャンバス：透明度を上げ、ハッシュタグを見やすく調整 */
         #connect-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; opacity: 0.4;
+            z-index: -1; opacity: 0.6; 
         }
 
         .layout { 
@@ -82,14 +81,9 @@
         .back { background: linear-gradient(135deg, #fff5f7 0%, #fff 100%); transform: rotateY(180deg); }
 
         .vibes-memo { 
-            font-style: italic; 
-            color: #444; 
-            font-size: 1.1rem; 
-            margin-bottom: 20px; 
+            font-style: italic; color: #444; font-size: 1.1rem; margin-bottom: 20px; 
             background: linear-gradient(90deg, rgba(255, 143, 197, 0.2) 0%, rgba(201, 148, 255, 0.1) 100%); 
-            padding: 12px 18px; 
-            border-radius: 8px; 
-            border-left: 4px solid var(--accent-pink);
+            padding: 12px 18px; border-radius: 8px; border-left: 4px solid var(--accent-pink);
         }
 
         .trend-title { font-size: 2.5rem; font-weight: 900; margin-bottom: 10px; line-height: 1.1; color: #111; }
@@ -114,21 +108,22 @@
         .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 
         .tag-item { background: rgba(255,0,122,0.05); color: var(--accent-pink); padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; border: 1px solid rgba(255,0,122,0.1); }
-        .dict-item { margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; }
-        .dict-word { display: block; color: var(--accent-blue); font-weight: 900; font-size: 1.1rem; }
         .grave-item { display: block; padding: 10px; color: #718096; text-decoration: none; font-size: 0.85rem; border-radius: 8px; transition: 0.2s; }
         .grave-item:hover { background: rgba(0,0,0,0.02); color: var(--accent-pink); }
 
-        /* モバイル時表示バグ修正 */
+        /* モバイルレイアウト修正：文字サイズをさらに最適化 */
         @media (max-width: 1200px) {
             .layout { grid-template-columns: 1fr; padding: 15px; }
             .sidebar { display: none; }
             header { margin-bottom: 20px; }
-            .hero-title { font-size: 2.5rem; }
+            .hero-title { font-size: 2.2rem; } /* 少し小さく */
+            .hero-subtitle { font-size: 0.8rem; }
             .trend-card-container { height: auto; min-height: 600px; margin-bottom: 20px; }
-            .front, .back { position: relative; width: 100%; height: auto; min-height: 600px; }
+            .front, .back { position: relative; width: 100%; height: auto; min-height: 600px; padding: 20px; }
             .back { position: absolute; top: 0; left: 0; height: 100%; }
-            .trend-title { font-size: 1.8rem; }
+            .trend-title { font-size: 1.6rem; } /* 少し小さく */
+            .trend-desc { font-size: 0.9rem; }
+            .vibes-memo { font-size: 0.95rem; }
             .btn-group { flex-direction: column; }
             .btn { width: 100%; }
         }
@@ -181,16 +176,14 @@
         const DB_URL = '../intelligence_db.json';
         let dots = [];
 
-        // 背景タグが動き回る演出の初期化
         function initBg(tags) {
             canvas.width = window.innerWidth; canvas.height = window.innerHeight;
             dots = (tags || []).map(t => ({
                 x: Math.random() * canvas.width, 
                 y: Math.random() * canvas.height, 
                 text: '#' + t, 
-                // 動き回るように速度を少し上げる
-                vx: (Math.random() - 0.5) * 1.2, 
-                vy: (Math.random() - 0.5) * 1.2, 
+                vx: (Math.random() - 0.5) * 1.5, 
+                vy: (Math.random() - 0.5) * 1.5, 
                 size: Math.random() * 8 + 14
             }));
             animate();
@@ -200,11 +193,11 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             dots.forEach(d => {
                 d.x += d.vx; d.y += d.vy;
-                // 壁に跳ね返る演出
                 if (d.x < 0 || d.x > canvas.width) d.vx *= -1; 
                 if (d.y < 0 || d.y > canvas.height) d.vy *= -1;
                 ctx.font = `bold ${d.size}px Arial`; 
-                ctx.fillStyle = 'rgba(255, 143, 197, 0.25)';
+                // 色を濃く修正
+                ctx.fillStyle = 'rgba(255, 143, 197, 0.5)';
                 ctx.fillText(d.text, d.x, d.y);
             });
             requestAnimationFrame(animate);
@@ -218,11 +211,9 @@
                 initBg(db.tags);
 
                 document.getElementById('word-ranking').innerHTML = (db.tags || []).map(t => `<span class="tag-item">#${t}</span>`).join('');
-                document.getElementById('vibes-dict').innerHTML = (db.dictionary || []).map(d => `<div class="dict-item"><span class="dict-word">${d.word}</span><span style="color:#718096; font-size:0.9rem;">${d.mean}</span></div>`).join('');
+                document.getElementById('vibes-dict').innerHTML = (db.dictionary || []).map(d => `<div class="dict-item"><span style="display:block; color:var(--accent-blue); font-weight:900; font-size:1.1rem;">${d.word}</span><span style="color:#718096; font-size:0.9rem;">${d.mean}</span></div>`).join('');
                 
-                // GRAVEYARDを当サイトの記事への回遊リンクに変更
                 document.getElementById('grave-list').innerHTML = (db.graveyard || []).slice(0, 10).map(g => {
-                    // slugが存在する場合はそれを使用、なければ生成
                     const link = g.slug ? `archive/${g.slug}.html` : `archive/${g.title}.html`;
                     return `<a href="${link}" class="grave-item">⚡️ ${g.title.substring(0,30)}...</a>`;
                 }).join('');
