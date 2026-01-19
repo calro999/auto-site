@@ -1,5 +1,5 @@
 /**
- * GAL-INTEL generate.js v2.1 - DESIGN_RESTORE_EDITION
+ * GAL-INTEL generate.js v2.2 - NO_OMISSION_EDITION
  * 役割: RSS取得、不適切ワードフィルタ、強力データクレンジング、AI画像生成、物理アーカイブ生成
  */
 
@@ -14,11 +14,11 @@ const INDEX_PATH = './index.html';
 const ARCHIVE_DIR = './archive';
 const IMAGE_DIR = './images';
 
-// 必要なディレクトリの作成
+// ディレクトリチェックと作成
 if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR);
 if (!fs.existsSync(IMAGE_DIR)) fs.mkdirSync(IMAGE_DIR);
 
-// ネガティブ・不祥事ワードフィルタ（V1からの魂）
+// 不適切ワードフィルタ
 const FORBIDDEN_WORDS = [
     '事故','事件','死','亡','逮捕','火災','地震','不倫','容疑','被害','遺体','衝突','殺','判決','震災','訃報','黙とう',
     '犠牲','重体','負傷','強盗','窃盗','摘発','送検','被疑','不祥事','倒産','破産','解雇','ミサイル','爆発','テロ',
@@ -26,7 +26,7 @@ const FORBIDDEN_WORDS = [
     '津波','噴火','豪雨','土砂崩れ','浸水','竜巻','雷雨','デモ','暴動','紛争','戦争','空爆','侵攻','核','被爆'
 ];
 
-// バイブスメモのバリエーション
+// バイブスメモ
 const VIBES_MEMOS = {
     GENERAL: [
         "これ知らんとマジで時代遅れ感あるよね✨",
@@ -45,104 +45,88 @@ const VIBES_MEMOS = {
 };
 
 /**
- * 強力テキストクレンジング関数
- * HTMLタグの除去に加え、RSS特有のゴミ（続きを読む... 等）を排除
+ * 画像内テキストの改行処理 (12文字ルール)
  */
-function cleanText(text) {
-    if (!text) return "";
-    
-    // 1. HTMLタグを完全に除去
-    let cleaned = text.replace(/<[^>]*>?/gm, '');
-    
-    // 2. 特殊文字の復元
-    cleaned = cleaned.replace(/&amp;/g, '&')
-                     .replace(/&nbsp;/g, ' ')
-                     .replace(/&quot;/g, '"')
-                     .replace(/&lt;/g, '<')
-                     .replace(/&gt;/g, '>')
-                     .replace(/&copy;/g, '©');
-    
-    // 3. ニュースソース特有の末尾ゴミをカット
-    const junkPatterns = [
-        /続きを読む.*/,
-        /\(時事通信\).*/,
-        /©.*/,
-        /Copyright.*/,
-        /…$/,
-        /&hellip;$/
-    ];
-    
-    junkPatterns.forEach(p => {
-        cleaned = cleaned.replace(p, '');
-    });
-
-    // 4. 改行をスペースに変換して1行にまとめる
-    return cleaned.replace(/\s+/g, ' ').trim();
+function wrapText(text, maxLen = 12) {
+    let lines = [];
+    for (let i = 0; i < text.length; i += maxLen) {
+        lines.push(text.substring(i, i + maxLen));
+    }
+    return lines.slice(0, 3);
 }
 
 /**
- * URL用スラッグ生成
- */
-function createSlug(text) {
-    return text.replace(/[^\w\s]/gi, '')
-               .split(/\s+/)
-               .filter(w => w.length > 0)
-               .slice(0, 5)
-               .join('-')
-               .toLowerCase() || Date.now().toString();
-}
-
-/**
- * AI Vibe Image 生成ロジック
- * Canvasを使用し、V1のデザインに合うリッチな画像を生成
+ * AI Vibe Image 生成 (12文字改行ルール適用)
  */
 async function generateVibeImage(title, slug) {
     const width = 1200;
     const height = 630;
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
-
-    // 背景グラデーション
+    
     const grad = ctx.createLinearGradient(0, 0, width, height);
-    grad.addColorStop(0, '#FF0080');
-    grad.addColorStop(1, '#7928CA');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, width, height);
+    grad.addColorStop(0, '#FF0080'); grad.addColorStop(1, '#7928CA');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, width, height);
 
-    // V1スタイルのグリッド装飾
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
     ctx.lineWidth = 1;
-    for (let i = 0; i < width; i += 60) {
-        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, height); ctx.stroke();
-    }
-    for (let j = 0; j < height; j += 60) {
-        ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(width, j); ctx.stroke();
-    }
+    for (let i = 0; i < width; i += 60) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, height); ctx.stroke(); }
+    for (let j = 0; j < height; j += 60) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(width, j); ctx.stroke(); }
 
-    // テキスト描画
     ctx.fillStyle = '#FFFFFF';
     ctx.textAlign = 'center';
-    ctx.font = 'bold 50px sans-serif';
-    
-    const displayTitle = title.length > 25 ? title.substring(0, 25) + '...' : title;
-    ctx.fillText(displayTitle, width / 2, height / 2);
+    ctx.font = 'bold 75px sans-serif';
 
-    ctx.font = 'bold 18px monospace';
-    ctx.fillText(`GAL-INTEL v2 // VIBE_ID: ${slug.toUpperCase()}`, width / 2, height - 60);
+    const lines = wrapText(title, 12);
+    lines.forEach((line, i) => {
+        ctx.fillText(line, width / 2, 250 + (i * 100));
+    });
+
+    ctx.font = 'bold 20px monospace';
+    ctx.fillText(`GAL-INTEL v2 // VIBE_ID: ${slug.toUpperCase()}`, width / 2, height - 50);
 
     const buffer = canvas.toBuffer('image/png');
     const fileName = `${slug}.png`;
-    const filePath = path.join(IMAGE_DIR, fileName);
-    fs.writeFileSync(filePath, buffer);
-    
+    fs.writeFileSync(path.join(IMAGE_DIR, fileName), buffer);
     return `https://raw.githubusercontent.com/calro999/auto-site/main/images/${fileName}`;
 }
 
 /**
- * メインビルドプロセス
+ * テキストクレンジング
+ */
+function cleanText(text) {
+    if (!text) return "";
+    let cleaned = text.replace(/<[^>]*>?/gm, '');
+    cleaned = cleaned.replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+    const patterns = [/続きを読む.*/, /\(時事通信\).*/, /©.*/, /Copyright.*/, /…$/, /&hellip;$/];
+    patterns.forEach(p => cleaned = cleaned.replace(p, ''));
+    return cleaned.trim();
+}
+
+/**
+ * スラッグ作成
+ */
+function createSlug(text) {
+    let slug = text.replace(/[^\w\s]/gi, '').split(/\s+/).filter(w => w.length > 0).slice(0, 5).join('-').toLowerCase();
+    return slug || Date.now().toString();
+}
+
+/**
+ * RSS取得プロミス
+ */
+const fetchRSS = (url) => new Promise((resolve, reject) => {
+    https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (res) => {
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => resolve(data));
+    }).on('error', (e) => reject(e));
+});
+
+/**
+ * メインプロセス (一切の省略なし)
  */
 async function main() {
-    console.log("GAL-INTEL Build System v2.1 Starting...");
+    console.log("🚀 Starting GAL-INTEL v2.2 Build...");
 
     try {
         let db = { current: [], graveyard: [], tags: [], archiveList: [], dictionary: [] };
@@ -157,25 +141,14 @@ async function main() {
 
         let fetchedTrends = [];
 
-        const fetchRSS = (url) => new Promise((resolve, reject) => {
-            https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (res) => {
-                let data = '';
-                res.on('data', chunk => data += chunk);
-                res.on('end', () => resolve(data));
-            }).on('error', reject);
-        });
-
         for (const s of SOURCES) {
+            console.log(`📡 Fetching ${s.name}...`);
             const xml = await fetchRSS(s.url);
-            // RSSのパース（簡易）
-            const items = xml.split('<item>').slice(1, 15);
+            const items = xml.split('<item>').slice(1, 12); // 各ソースから最大11件
 
             for (const item of items) {
-                let rawTitle = item.split('<title>')[1]?.split('</title>')[0] || "";
-                let rawDesc = item.split('<description>')[1]?.split('</description>')[0] || "";
-                
-                let title = cleanText(rawTitle);
-                let desc = cleanText(rawDesc);
+                let title = cleanText(item.split('<title>')[1]?.split('</title>')[0] || "");
+                let desc = cleanText(item.split('<description>')[1]?.split('</description>')[0] || "");
                 
                 if (!title || FORBIDDEN_WORDS.some(w => title.includes(w))) continue;
                 if (fetchedTrends.some(t => t.title === title)) continue;
@@ -190,8 +163,9 @@ async function main() {
         let processedCurrent = [];
         const templateHTML = fs.readFileSync(INDEX_PATH, 'utf8');
 
-        // 上位10件を処理
+        // 上位10件を処理 (画像生成 & アーカイブ作成)
         for (let t of fetchedTrends.slice(0, 10)) {
+            console.log(`💎 Processing: ${t.title.substring(0, 15)}...`);
             const slug = createSlug(t.title);
             const aiImage = await generateVibeImage(t.title, slug);
             
@@ -203,49 +177,42 @@ async function main() {
                 slug,
                 aiImage,
                 memo,
-                aiSummary: `AIによる解析の結果、このトレンドは現在最高潮のバイブスに達しています。${t.title}に関する議論は、SNSを中心に今後も拡大が予想されます。`
+                aiSummary: `「${t.title}」に関するバイブス解析が完了しました。このトレンドは現在爆上がり中で、SNSでの反応も非常にポジティブです。今後の展開から目が離せません。`
             };
             processedCurrent.push(item);
 
-            // 【特設ページ生成】
-            // JSONのパスを親ディレクトリ階層に修正して保存
-            const singlePageHTML = templateHTML.replace(
-                'https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', 
-                '../intelligence_db.json'
-            );
+            // 【物理特設ページ生成】
+            const singlePageHTML = templateHTML.replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json');
             fs.writeFileSync(path.join(ARCHIVE_DIR, `${slug}.html`), singlePageHTML);
         }
 
-        // 墓場・タグ・用語集の更新
-        const newGraveyard = [...db.current, ...db.graveyard].slice(0, 60);
-        const newTags = Array.from(new Set(processedCurrent.map(p => p.title.split(/[ 　]/)[0]))).slice(0, 20);
-        const newDict = processedCurrent.slice(0, 10).map(p => ({
-            word: p.title.split(/[ 　]/)[0] || "不明",
-            mean: "今この瞬間にバイブスが高まっている注目のパワーワード。"
-        }));
+        // DB更新ロジック
+        const newGraveyard = [...db.current, ...db.graveyard].slice(0, 100);
+        const newTags = Array.from(new Set(processedCurrent.map(p => p.title.split(/[ 　]/)[0]))).slice(0, 25);
+        const newDict = processedCurrent.map(p => ({
+            word: p.title.split(/[ 　]/)[0] || "トレンド",
+            mean: "今この瞬間にバイブスが最大化している注目ワード。"
+        })).slice(0, 15);
 
         const finalDb = {
             current: processedCurrent,
             graveyard: newGraveyard,
             tags: newTags,
             dictionary: newDict,
-            archiveList: Array.from(new Set([dateKey, ...(db.archiveList || [])])).slice(0, 30),
+            archiveList: Array.from(new Set([dateKey, ...(db.archiveList || [])])).slice(0, 31),
             lastUpdate: now.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) + ' JST'
         };
 
-        // 【日次アーカイブ生成】
-        fs.writeFileSync(
-            path.join(ARCHIVE_DIR, `${dateKey}.html`), 
-            templateHTML.replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json')
-        );
+        // 【日次まとめアーカイブ生成】
+        fs.writeFileSync(path.join(ARCHIVE_DIR, `${dateKey}.html`), templateHTML.replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json'));
 
-        // ファイル書き出し
+        // JSON保存
         fs.writeFileSync(DATA_FILE, JSON.stringify(finalDb, null, 2), 'utf8');
         
-        console.log(`Build Success! ${processedCurrent.length} trends alive.`);
+        console.log(`✅ Build Complete! ${processedCurrent.length} articles, ${processedCurrent.length} images, and physical archives generated.`);
 
     } catch (error) {
-        console.error("Build Failed:", error);
+        console.error("❌ Fatal Error:", error);
         process.exit(1);
     }
 }
