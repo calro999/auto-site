@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GAL-INTEL | 世の中の「今」を、最速でバイブス変換。</title>
     
-    <meta name="description" content="最新ニュースを最速バイブス変換。AI検索エンジン(Perplexity/SearchGPT)に特化した、世界一速いトレンド要約サイト。">
+    <meta name="description" content="最新ニュースを最速バイブス変換。AI検索エンジン(Perplexity/SearchGPT)に特化した, 世界一速いトレンド要約サイト。">
     <meta name="keywords" content="ギャル語, ニュース要約, トレンド, AI検索, バイブス">
     <meta property="og:title" content="GAL-INTEL | 今のトレンドをバイブスチェック">
     <meta property="og:description" content="今の爆アツ話題を最速チェック！">
@@ -153,7 +153,7 @@
 
         .trend-card-container { 
             perspective: 2500px; 
-            min-height: 650px; 
+            min-height: 580px; /* 記事枠サイズ調整 */
             width: 100%;
         }
 
@@ -161,7 +161,7 @@
             position: relative; 
             width: 100%; 
             height: 100%; 
-            min-height: 650px;
+            min-height: 580px; /* 記事枠サイズ調整 */
             transition: transform 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             transform-style: preserve-3d; 
         }
@@ -176,7 +176,7 @@
             backface-visibility: hidden; 
             background: var(--card-bg); 
             border-radius: 50px; 
-            padding: 60px; 
+            padding: 50px; /* 少しパディング調整 */
             border: 1px solid var(--border); 
             box-shadow: var(--shadow-lg);
             display: flex; 
@@ -196,11 +196,11 @@
         .vibes-memo { 
             background: #F7FAFC; 
             border-left: 12px solid var(--accent-pink);
-            padding: 30px 40px; 
-            border-radius: 25px; 
-            font-size: 1.5rem;
+            padding: 20px 30px; 
+            border-radius: 20px; 
+            font-size: 1.3rem; /* サイズ縮小 */
             font-weight: 800; 
-            margin-bottom: 40px; 
+            margin-bottom: 30px; 
             font-style: italic; 
             color: #2D3748;
             width: 100%;
@@ -210,34 +210,34 @@
         .eq-container { 
             display: flex; 
             gap: 8px; 
-            height: 65px; 
+            height: 50px; /* 少し低く調整 */
             align-items: flex-end; 
             justify-content: center;
-            margin-bottom: 45px; 
+            margin-bottom: 35px; 
             width: 100%;
         }
 
         .eq-bar { 
-            width: 10px; 
+            width: 8px; 
             background: linear-gradient(to top, var(--accent-blue), var(--accent-pink)); 
-            border-radius: 15px; 
+            border-radius: 10px; 
             animation: eq-pulse 0.6s ease-in-out infinite alternate;
         }
 
         .trend-title { 
-            font-size: 2.8rem; 
+            font-size: 2.2rem; /* サイズ縮小 */
             font-weight: 900; 
-            margin: 0 0 25px 0; 
+            margin: 0 0 20px 0; 
             color: var(--text); 
             line-height: 1.1; 
-            letter-spacing: -1.5px;
+            letter-spacing: -1px;
         }
 
         .trend-desc { 
-            font-size: 1.25rem; 
+            font-size: 1.1rem; /* サイズ縮小 */
             color: #4A5568; 
-            margin-bottom: 45px; 
-            line-height: 1.8;
+            margin-bottom: 35px; 
+            line-height: 1.7;
             max-width: 900px;
         }
 
@@ -250,16 +250,16 @@
         }
 
         .btn { 
-            padding: 22px 35px; 
-            border-radius: 25px; 
+            padding: 18px 25px; /* サイズ縮小 */
+            border-radius: 22px; 
             text-decoration: none; 
             font-weight: 900; 
-            font-size: 1.1rem; 
+            font-size: 1rem; 
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             display: inline-flex; 
             align-items: center; 
             justify-content: center; 
-            gap: 15px;
+            gap: 12px;
             cursor: pointer; 
             border: none;
             flex: 1;
@@ -301,10 +301,10 @@
         /* ELEMENTS */
         .ai-image-wrap { 
             width: 100%; 
-            height: 320px; 
+            height: 300px; 
             background: #000; 
             border-radius: 35px; 
-            margin-bottom: 35px; 
+            margin-bottom: 30px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
@@ -321,35 +321,35 @@
         .summary-box {
             background: #FFFFFF;
             border: 1px solid var(--border);
-            padding: 35px;
-            border-radius: 30px;
-            margin-bottom: 35px;
+            padding: 30px;
+            border-radius: 25px;
+            margin-bottom: 30px;
             width: 100%;
         }
 
         .summary-label {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 900;
             color: var(--accent-pink);
             text-transform: uppercase;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             letter-spacing: 3px;
         }
 
         .summary-text {
-            font-size: 1.15rem;
+            font-size: 1.05rem;
             color: #2D3748;
             font-weight: 600;
-            line-height: 1.8;
+            line-height: 1.7;
         }
 
-        .tag-item { font-size: 0.9rem; background: #fff; border: 1px solid var(--border); padding: 10px 20px; border-radius: 18px; font-weight: 800; color: #718096; }
+        .tag-item { font-size: 0.8rem; /* サイズ縮小 */ background: #fff; border: 1px solid var(--border); padding: 8px 16px; border-radius: 15px; font-weight: 800; color: #718096; }
         .tag-item:hover { border-color: var(--accent-pink); color: var(--accent-pink); transform: scale(1.1); }
         
-        .dict-item { padding: 20px; margin-bottom: 15px; border-bottom: 1px solid #F1F5F9; }
-        .dict-word { display: block; color: var(--accent-pink); font-weight: 900; font-size: 1.1rem; margin-bottom: 8px; }
+        .dict-item { padding: 15px; margin-bottom: 12px; border-bottom: 1px solid #F1F5F9; }
+        .dict-word { display: block; color: var(--accent-pink); font-weight: 900; font-size: 1rem; margin-bottom: 5px; }
 
-        .grave-item { display: block; padding: 12px 0; color: #718096; text-decoration: none; font-size: 0.9rem; border-bottom: 1px solid #EDF2F7; }
+        .grave-item { display: block; padding: 10px 0; color: #718096; text-decoration: none; font-size: 0.85rem; border-bottom: 1px solid #EDF2F7; }
 
         /* ANIMATIONS */
         @keyframes eq-pulse { from { height: 20%; } to { height: 100%; } }
@@ -360,7 +360,7 @@
             .layout { grid-template-columns: 1fr; padding: 25px; gap: 40px; } 
             .sidebar { display: none; }
             .hero-title { font-size: 3.5rem; letter-spacing: -3px; }
-            .trend-card-container { min-height: 700px; }
+            .trend-card-container { min-height: 600px; }
         }
     </style>
 </head>
@@ -372,7 +372,7 @@
             <div class="scroll-area">
                 <div class="glass-box">
                     <div class="box-title">HOT_TAGS</div>
-                    <div id="word-ranking" style="display:flex; flex-wrap:wrap; gap:12px;"></div>
+                    <div id="word-ranking" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
                 </div>
                 <div class="glass-box">
                     <div class="box-title">VIBES_DICT</div>
@@ -394,7 +394,7 @@
                 <div class="glass-box">
                     <div class="box-title">SYNC_STATUS</div>
                     <div id="sync-info" style="font-weight: 900; color: var(--accent-blue);"></div>
-                    <div id="archive-links" style="margin-top:25px; display:flex; flex-direction:column; gap:12px;"></div>
+                    <div id="archive-links" style="margin-top:25px; display:flex; flex-direction:column; gap:10px;"></div>
                 </div>
                 <div class="glass-box">
                     <div class="box-title">GRAVEYARD</div>
@@ -439,17 +439,18 @@
                 initBg(db.tags);
 
                 document.getElementById('word-ranking').innerHTML = (db.tags || []).map(t => `<span class="tag-item">#${t}</span>`).join('');
-                document.getElementById('vibes-dict').innerHTML = (db.dictionary || []).map(d => `<div class="dict-item"><span class="dict-word">${d.word}</span><span style="color:#718096; font-size:0.9rem;">${d.mean}</span></div>`).join('');
+                document.getElementById('vibes-dict').innerHTML = (db.dictionary || []).map(d => `<div class="dict-item"><span class="dict-word">${d.word}</span><span style="color:#718096; font-size:0.85rem;">${d.mean}</span></div>`).join('');
                 document.getElementById('grave-list').innerHTML = (db.graveyard || []).slice(0, 10).map(g => `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">⚡️ ${g.title.substring(0,30)}...</a>`).join('');
                 document.getElementById('archive-links').innerHTML = (db.archiveList || []).slice(0,5).map(a => `<a href="archive/${a}.html" class="btn btn-outline" style="font-size:0.85rem; padding:12px;">📅 ${a} Archive</a>`).join('');
 
+                // メインフィードの生成
                 document.getElementById('trend-list').innerHTML = (db.current || []).map((t, idx) => {
-                    // イコライザーバーのHTMLを確実に作成
+                    // 各カードごとにイコライザーバーを15本確実に生成
                     let barsHtml = '';
                     for (let i = 0; i < 15; i++) {
                         const randomDelay = (i * 0.05).toFixed(2);
-                        const randomHeight = Math.floor(Math.random() * 60) + 20;
-                        barsHtml += `<div class="eq-bar" style="animation-delay: ${randomDelay}s; height: ${randomHeight}%"></div>`;
+                        const initialHeight = Math.floor(Math.random() * 70) + 20;
+                        barsHtml += `<div class="eq-bar" style="animation-delay: ${randomDelay}s; height: ${initialHeight}%"></div>`;
                     }
 
                     return `
@@ -461,9 +462,9 @@
                                     <h2 class="trend-title">${t.title}</h2>
                                     <p class="trend-desc">${t.desc}</p>
                                     <div class="btn-group">
-                                        <a href="archive/${t.slug}.html" class="btn btn-pink">📖 DETAILS (特設)</a>
+                                        <a href="archive/${t.slug}.html" class="btn btn-pink">📖 DETAILS</a>
                                         <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(t.title)}&tag=YOUR_TAG" target="_blank" class="btn btn-amazon">🛒 Amazon</a>
-                                        <div class="btn btn-outline" onclick="document.getElementById('card-${idx}').classList.toggle('flipped')">🔄 AI_VIBE</div>
+                                        <div class="btn btn-outline" onclick="document.getElementById('card-${idx}').classList.toggle('flipped')">🔄 VIBE</div>
                                     </div>
                                 </div>
                                 <div class="back">
