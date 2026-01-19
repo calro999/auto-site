@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAL-INTEL | 世の中の「今」を, 最速でバイブス変換。</title>
+    <title>GAL-INTEL | 世の中の「今」を、最速でバイブス変換。</title>
     
     <meta name="description" content="最新ニュースを最速バイブス変換。AI検索エンジン(Perplexity/SearchGPT)に特化した、世界一速いトレンド要約サイト。">
     <meta name="keywords" content="ギャル語, ニュース要約, トレンド, AI検索, バイブス">
@@ -206,6 +206,7 @@
             width: 100%;
         }
 
+        /* EQ DEFINITION */
         .eq-container { 
             display: flex; 
             gap: 8px; 
@@ -443,10 +444,12 @@
                 document.getElementById('archive-links').innerHTML = (db.archiveList || []).slice(0,5).map(a => `<a href="archive/${a}.html" class="btn btn-outline" style="font-size:0.85rem; padding:12px;">📅 ${a} Archive</a>`).join('');
 
                 document.getElementById('trend-list').innerHTML = (db.current || []).map((t, idx) => {
-                    // イコライザーのバーを15本生成
-                    let bars = '';
-                    for(let i=0; i<15; i++) {
-                        bars += `<div class="eq-bar" style="animation-delay: ${i * 0.05}s; height: ${Math.random() * 80 + 20}%"></div>`;
+                    // イコライザーバーのHTMLを確実に作成
+                    let barsHtml = '';
+                    for (let i = 0; i < 15; i++) {
+                        const randomDelay = (i * 0.05).toFixed(2);
+                        const randomHeight = Math.floor(Math.random() * 60) + 20;
+                        barsHtml += `<div class="eq-bar" style="animation-delay: ${randomDelay}s; height: ${randomHeight}%"></div>`;
                     }
 
                     return `
@@ -454,9 +457,7 @@
                             <div class="trend-card-inner">
                                 <div class="front">
                                     <div class="vibes-memo">“ ${t.memo} ”</div>
-                                    <div class="eq-container">
-                                        ${bars}
-                                    </div>
+                                    <div class="eq-container">${barsHtml}</div>
                                     <h2 class="trend-title">${t.title}</h2>
                                     <p class="trend-desc">${t.desc}</p>
                                     <div class="btn-group">
