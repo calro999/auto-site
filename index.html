@@ -46,6 +46,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        /* BACKGROUND ANIMATION (Connect Logic) */
         #connect-bg { 
             position: fixed; 
             top: 0; left: 0; 
@@ -65,6 +66,7 @@
             padding: 40px 20px;
         }
 
+        /* SIDEBAR STYLING */
         .sidebar { 
             position: sticky; 
             top: 40px; 
@@ -84,11 +86,13 @@
         }
 
         .scroll-area::-webkit-scrollbar { width: 5px; }
+        .scroll-area::-webkit-scrollbar-track { background: transparent; }
         .scroll-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 
         .glass-box { 
             background: var(--glass); 
             backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
             border-radius: 25px; 
             padding: 20px; 
             border: 1px solid var(--border); 
@@ -120,6 +124,7 @@
         header { 
             text-align: center; 
             margin-bottom: 40px; 
+            animation: fadeInDown 0.8s ease-out;
         }
 
         .hero-title { 
@@ -131,6 +136,7 @@
             -webkit-background-clip: text; 
             background-clip: text;
             -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 15px 30px rgba(255, 0, 128, 0.2));
         }
 
         .hero-subtitle {
@@ -142,12 +148,12 @@
             text-transform: uppercase;
         }
 
-        /* TREND CARDS - 大幅にサイズ調整 */
+        /* TREND CARDS */
         .main-feed { display: flex; flex-direction: column; gap: 30px; }
 
         .trend-card-container { 
             perspective: 2500px; 
-            min-height: 480px; /* 580pxからさらに縮小 */
+            min-height: 520px; 
             width: 100%;
         }
 
@@ -155,7 +161,7 @@
             position: relative; 
             width: 100%; 
             height: 100%; 
-            min-height: 480px;
+            min-height: 520px;
             transition: transform 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             transform-style: preserve-3d; 
         }
@@ -170,13 +176,14 @@
             backface-visibility: hidden; 
             background: var(--card-bg); 
             border-radius: 40px; 
-            padding: 40px; 
+            padding: 35px; 
             border: 1px solid var(--border); 
             box-shadow: var(--shadow-lg);
             display: flex; 
             flex-direction: column;
             align-items: center; 
             text-align: center;
+            overflow: hidden; /* はみ出し防止 */
         }
 
         .back { 
@@ -192,47 +199,62 @@
             border-left: 8px solid var(--accent-pink);
             padding: 15px 20px; 
             border-radius: 15px; 
-            font-size: 1.1rem; /* 1.3remから縮小 */
+            font-size: 1.1rem; 
             font-weight: 800; 
             margin-bottom: 20px; 
             font-style: italic; 
             color: #2D3748;
             width: 100%;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* メモも最大2行制限 */
+            -webkit-box-orient: vertical;
         }
 
         .eq-container { 
             display: flex; 
             gap: 6px; 
-            height: 40px; /* 50pxから縮小 */
+            height: 45px; 
             align-items: flex-end; 
             justify-content: center;
-            margin-bottom: 25px; 
+            margin-bottom: 20px; 
             width: 100%;
         }
 
         .eq-bar { 
-            width: 7px; 
+            width: 8px; 
             background: linear-gradient(to top, var(--accent-blue), var(--accent-pink)); 
             border-radius: 10px; 
             animation: eq-pulse 0.6s ease-in-out infinite alternate;
         }
 
         .trend-title { 
-            font-size: 1.6rem; /* 2.2remから大幅に縮小 */
+            font-size: 1.6rem; 
             font-weight: 900; 
             margin: 0 0 15px 0; 
             color: var(--text); 
             line-height: 1.2; 
             letter-spacing: -0.5px;
+            width: 100%;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* タイトル最大2行 */
+            -webkit-box-orient: vertical;
         }
 
         .trend-desc { 
-            font-size: 0.95rem; /* 1.1remから縮小 */
+            font-size: 0.95rem; 
             color: #4A5568; 
-            margin-bottom: 30px; 
+            margin-bottom: 25px; 
             line-height: 1.6;
+            width: 100%;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3; /* 説明文最大3行 */
+            -webkit-box-orient: vertical;
         }
 
+        /* AMAZON & BUTTONS */
         .btn-group { 
             display: flex; 
             gap: 15px; 
@@ -241,11 +263,12 @@
         }
 
         .btn { 
-            padding: 15px 20px; 
+            padding: 15px 10px; 
             border-radius: 18px; 
             text-decoration: none; 
             font-weight: 900; 
-            font-size: 0.85rem; /* さらに縮小 */
+            font-size: 0.85rem; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             display: inline-flex; 
             align-items: center; 
             justify-content: center; 
@@ -253,13 +276,43 @@
             cursor: pointer; 
             border: none;
             flex: 1;
+            white-space: nowrap; /* ボタン内の改行防止 */
         }
 
-        .btn-pink { background: var(--accent-pink); color: #fff; }
-        .btn-amazon { background: #FF9900; color: #fff; }
-        .btn-outline { background: #EDF2F7; color: #4A5568; }
-        .btn-dark { background: var(--text); color: #fff; width: 100%; }
+        .btn-pink { 
+            background: var(--accent-pink); 
+            color: #fff; 
+            box-shadow: 0 10px 20px rgba(255,0,128,0.2); 
+        }
 
+        .btn-pink:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 15px 30px rgba(255,0,128,0.3); 
+        }
+
+        .btn-amazon {
+            background: #FF9900;
+            color: #fff;
+            box-shadow: 0 10px 20px rgba(255,153,0,0.2);
+        }
+
+        .btn-amazon:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(255,153,0,0.3);
+        }
+
+        .btn-outline { 
+            background: #EDF2F7; 
+            color: #4A5568; 
+        }
+
+        .btn-dark {
+            background: var(--text);
+            color: #fff;
+            width: 100%;
+        }
+
+        /* ELEMENTS */
         .ai-image-wrap { 
             width: 100%; 
             height: 250px; 
@@ -270,9 +323,14 @@
             align-items: center; 
             justify-content: center; 
             overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
         }
 
-        .ai-image-wrap img { width: 100%; height: 100%; object-fit: contain; }
+        .ai-image-wrap img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain; 
+        }
 
         .summary-box {
             background: #FFFFFF;
@@ -283,21 +341,37 @@
             width: 100%;
         }
 
-        .summary-label { font-size: 0.65rem; font-weight: 900; color: var(--accent-pink); letter-spacing: 2px; margin-bottom: 10px; }
-        .summary-text { font-size: 0.95rem; color: #2D3748; font-weight: 600; line-height: 1.6; }
+        .summary-label {
+            font-size: 0.65rem;
+            font-weight: 900;
+            color: var(--accent-pink);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
 
-        /* TAGS縮小 */
+        .summary-text {
+            font-size: 0.95rem;
+            color: #2D3748;
+            font-weight: 600;
+            line-height: 1.6;
+        }
+
         .tag-item { font-size: 0.7rem; background: #fff; border: 1px solid var(--border); padding: 6px 12px; border-radius: 12px; font-weight: 800; color: #718096; }
+        .tag-item:hover { border-color: var(--accent-pink); color: var(--accent-pink); transform: scale(1.1); }
         
         .dict-item { padding: 12px; margin-bottom: 10px; border-bottom: 1px solid #F1F5F9; }
         .dict-word { display: block; color: var(--accent-pink); font-weight: 900; font-size: 0.9rem; margin-bottom: 4px; }
+
         .grave-item { display: block; padding: 8px 0; color: #718096; text-decoration: none; font-size: 0.75rem; border-bottom: 1px solid #EDF2F7; }
 
+        /* ANIMATIONS */
         @keyframes eq-pulse { from { height: 20%; } to { height: 100%; } }
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-40px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* MOBILE OPTIMIZATION */
         @media (max-width: 1100px) { 
-            .layout { grid-template-columns: 1fr; padding: 20px; } 
+            .layout { grid-template-columns: 1fr; padding: 20px; gap: 30px; } 
             .sidebar { display: none; }
             .hero-title { font-size: 2.8rem; }
             .trend-card-container { min-height: 520px; }
@@ -371,6 +445,11 @@
             requestAnimationFrame(animate);
         }
 
+        // 文字数制限用ヘルパー関数
+        function truncate(str, len) {
+            return str.length <= len ? str : str.substr(0, len) + "...";
+        }
+
         async function load() {
             try {
                 const res = await fetch(DB_URL + '?t=' + Date.now());
@@ -380,25 +459,37 @@
 
                 document.getElementById('word-ranking').innerHTML = (db.tags || []).map(t => `<span class="tag-item">#${t}</span>`).join('');
                 document.getElementById('vibes-dict').innerHTML = (db.dictionary || []).map(d => `<div class="dict-item"><span class="dict-word">${d.word}</span><span style="color:#718096; font-size:0.8rem;">${d.mean}</span></div>`).join('');
-                document.getElementById('grave-list').innerHTML = (db.graveyard || []).slice(0, 10).map(g => `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">⚡️ ${g.title.substring(0,25)}...</a>`).join('');
+                document.getElementById('grave-list').innerHTML = (db.graveyard || []).slice(0, 10).map(g => `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">⚡️ ${truncate(g.title, 20)}</a>`).join('');
                 document.getElementById('archive-links').innerHTML = (db.archiveList || []).slice(0,5).map(a => `<a href="archive/${a}.html" class="btn btn-outline" style="font-size:0.75rem; padding:10px;">📅 ${a} Archive</a>`).join('');
 
-                document.getElementById('trend-list').innerHTML = (db.current || []).map((t, idx) => {
-                    // 各カードごとにイコライザーバーを生成
-                    let eqBarsHtml = '';
+                // メインフィード生成のループを確実に実行
+                const trendContainer = document.getElementById('trend-list');
+                let htmlBuffer = "";
+
+                (db.current || []).forEach((t, idx) => {
+                    // 15本のイコライザーバーを各記事で個別に生成
+                    let eqBars = "";
                     for (let i = 0; i < 15; i++) {
                         const h = Math.floor(Math.random() * 70) + 20;
-                        eqBarsHtml += `<div class="eq-bar" style="height: ${h}%; animation-delay: ${i * 0.05}s"></div>`;
+                        const delay = (i * 0.05).toFixed(2);
+                        eqBars += `<div class="eq-bar" style="height: ${h}%; animation-delay: ${delay}s"></div>`;
                     }
 
-                    return `
+                    // 文字数制限を適用（はみ出し防止の二重策）
+                    const safeTitle = truncate(t.title, 40);
+                    const safeDesc = truncate(t.desc, 100);
+                    const safeMemo = truncate(t.memo, 60);
+
+                    htmlBuffer += `
                         <div class="trend-card-container" id="card-${idx}">
                             <div class="trend-card-inner">
                                 <div class="front">
-                                    <div class="vibes-memo">“ ${t.memo} ”</div>
-                                    <div class="eq-container">${eqBarsHtml}</div>
-                                    <h2 class="trend-title">${t.title}</h2>
-                                    <p class="trend-desc">${t.desc}</p>
+                                    <div class="vibes-memo">“ ${safeMemo} ”</div>
+                                    <div class="eq-container">
+                                        ${eqBars}
+                                    </div>
+                                    <h2 class="trend-title">${safeTitle}</h2>
+                                    <p class="trend-desc">${safeDesc}</p>
                                     <div class="btn-group">
                                         <a href="archive/${t.slug}.html" class="btn btn-pink">📖 DETAILS</a>
                                         <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(t.title)}&tag=YOUR_TAG" target="_blank" class="btn btn-amazon">🛒 Amazon</a>
@@ -417,8 +508,13 @@
                                 </div>
                             </div>
                         </div>`;
-                }).join('');
-            } catch (e) { console.error(e); }
+                });
+
+                trendContainer.innerHTML = htmlBuffer;
+
+            } catch (e) { 
+                console.error("Critical Load Error:", e); 
+            }
         }
         window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
         load();
