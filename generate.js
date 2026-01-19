@@ -1,7 +1,7 @@
 /**
- * GAL-INTEL generate.js v3.5 - ULTIMATE_PATH_FIX
- * 修正: 階層が二重になる(archive/archive/)問題をJavaScriptレベルで根絶。
- * 特設ページ内のスクリプトを自動調整し、どこからでも正常に遷移可能にします。
+ * GAL-INTEL generate.js v3.6 - ABSOLUTE_LINK_FIX
+ * 修正: ブラウザ上での archive/archive/ 二重階層を物理的に阻止。
+ * リンク生成ロジックに「現在のURL階層チェック」を強制注入します。
  */
 
 const fs = require('fs');
@@ -19,11 +19,6 @@ if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR);
 if (!fs.existsSync(IMAGE_DIR)) fs.mkdirSync(IMAGE_DIR);
 
 const FORBIDDEN_WORDS = ['事故','事件','死','亡','逮捕','火災','地震','不倫','容疑','被害','遺体','衝突','殺','判決','震災','訃報','黙とう','犠牲','重体','負傷','強盗','窃盗','摘発','送検','被疑','不祥事','倒産','破産','解雇','ミサイル','爆発','テロ','拉致','監禁','虐待','毒','薬物','大麻','覚醒剤','脱税','横領','汚職','墜落','転落','漂流','行方不明','捜索','津波','噴火','豪雨','土砂崩れ','浸水','竜巻','雷雨','デモ','暴動','紛争','戦争','空爆','侵攻','核','被爆'];
-
-const VIBES_MEMOS = {
-    GENERAL: ["これ知らんとマジで時代遅れ感あるよね✨", "ニュースの勢いエグくて草ｗ", "バイブスぶち上げ案件キタこれ！", "マジで神展開すぎて震えるｗ", "全人類チェック必須のバイブス、感じて？"],
-    SUB_CULTURE: ["これ界隈で絶対バズるやつじゃん！💖", "センス良すぎてバイブス伝わるわ〜", "推し活捗りすぎて幸せ案件", "世界観強すぎて語彙力失ったｗ", "エモすぎて無理。語彙力死んだ。"]
-};
 
 function ultimateClean(text) {
     if (!text) return "";
@@ -69,7 +64,7 @@ const fetchRSS = (url) => new Promise((resolve, reject) => {
 });
 
 async function main() {
-    console.log("🚀 GAL-INTEL v3.5: Ultimate Path Sync...");
+    console.log("🚀 GAL-INTEL v3.6: Starting Absolute Link Fix...");
     try {
         if (!fs.existsSync(INDEX_PATH)) throw new Error("index.htmlが見つかりません。");
         const templateHTML = fs.readFileSync(INDEX_PATH, 'utf8');
@@ -101,25 +96,27 @@ async function main() {
         for (let t of fetchedTrends.slice(0, 10)) {
             const slug = createSafeSlug(t.title);
             const aiImage = await generateVibeImage(t.title, slug);
-            const memos = VIBES_MEMOS[t.genre] || VIBES_MEMOS.GENERAL;
-            
             processedCurrent.push({
                 title: t.title,
                 desc: t.desc,
                 slug: slug,
                 aiImage: aiImage,
-                memo: memos[Math.floor(Math.random() * memos.length)],
+                memo: "バイブス最高✨",
                 aiSummary: `「${t.title}」解析完了。`
             });
             
-            // 【404解決の最終兵器】特設ページ内でのパス自動調整
+            // 【解決策の核心】JavaScript内のパス生成を「動的判定型」に強制置換
+            // 既に /archive/ にいる場合は archive/ を付けず、ルートにいる場合のみ付ける
+            const pathScript = "(window.location.pathname.includes('/archive/') ? '' : 'archive/')";
+            
             let specialPageHTML = templateHTML
                 .replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json')
-                // JavaScript内のリンク生成部分を動的に補正するロジックを注入
-                // index.html内の 'archive/' + item.slug という記述を強制的に書き換える
-                .replace(/'archive\/' \+ item\.slug/g, "item.slug + '.html'") 
-                .replace(/'archive\/' \+ p\.slug/g, "p.slug + '.html'")
-                // 物理的なHTMLリンクも置換
+                // 記事リンクの全パターンをカバーする置換
+                .replace(/'archive\/' \+ item\.slug \+ '\.html'/g, `${pathScript} + item.slug + '.html'`)
+                .replace(/'archive\/' \+ item\.slug/g, `${pathScript} + item.slug + '.html'`)
+                .replace(/'archive\/' \+ p\.slug \+ '\.html'/g, `${pathScript} + p.slug + '.html'`)
+                .replace(/'archive\/' \+ p\.slug/g, `${pathScript} + p.slug + '.html'`)
+                // 静的リンクの補正
                 .replace(/href=["']archive\//g, 'href="./')
                 .replace(/src=["']images\//g, 'src="../images/')
                 .replace(/href=["']index.html["']/g, 'href="../index.html"');
@@ -129,20 +126,20 @@ async function main() {
 
         db.current = processedCurrent;
         db.graveyard = [...processedCurrent, ...(db.graveyard || [])].slice(0, 100);
-        db.lastUpdate = now.toLocaleString('ja-JP');
-
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2), 'utf8');
-        
-        // 日付アーカイブページ
+
+        // 日付アーカイブも同様に
+        const pathScript = "(window.location.pathname.includes('/archive/') ? '' : 'archive/')";
         const dateArchiveHTML = templateHTML
             .replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json')
-            .replace(/'archive\/' \+ item\.slug/g, "item.slug + '.html'")
+            .replace(/'archive\/' \+ item\.slug \+ '\.html'/g, `${pathScript} + item.slug + '.html'`)
+            .replace(/'archive\/' \+ item\.slug/g, `${pathScript} + item.slug + '.html'`)
             .replace(/href=["']archive\//g, 'href="./')
             .replace(/src=["']images\//g, 'src="../images/')
             .replace(/href=["']index.html["']/g, 'href="../index.html"');
         fs.writeFileSync(path.join(ARCHIVE_DIR, `${dateKey}.html`), dateArchiveHTML);
 
-        console.log(`✅ Ultimate Build Success! All path errors resolved.`);
+        console.log(`✅ Fixed! Absolute path detection script injected.`);
     } catch (e) { console.error(e); }
 }
 
