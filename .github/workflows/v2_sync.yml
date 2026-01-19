@@ -1,7 +1,7 @@
 name: v2_VIBE_SYNC
 on:
   schedule:
-    - cron: '*/5 * * * *' # 5分おき
+    - cron: '0 */6 * * *' # 6時間おき（毎日 0:00, 6:00, 12:00, 18:00 に実行）
   workflow_dispatch:
 
 jobs:
