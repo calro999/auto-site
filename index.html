@@ -6,6 +6,7 @@
     <title>GAL-INTEL // Realtime Intelligence Feed</title>
     <style>
         :root {
+            /* 背景：白から薄いピンクへのグラデーション */
             --bg-main: linear-gradient(135deg, #ffffff 0%, #fff5f7 100%);
             --accent-pink: #ff8fc5;
             --accent-blue: #00d1df;
@@ -25,6 +26,7 @@
             min-height: 100vh;
         }
 
+        /* 背景演出：ハッシュタグが元気に動き回る（濃度アップ） */
         #connect-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1; opacity: 0.8; 
@@ -61,10 +63,17 @@
             background-clip: text;
             -webkit-text-fill-color: transparent; 
         }
+        /* タイトルのリンク用スタイル */
+        .hero-title a {
+            text-decoration: none;
+            color: inherit;
+            display: inline-block;
+        }
         .hero-subtitle { color: var(--accent-blue); font-family: monospace; letter-spacing: 0.3em; font-weight: bold; }
 
         .main-feed { display: flex; flex-direction: column; gap: 30px; }
 
+        /* Card System (3D Flip) */
         .trend-card-container { perspective: 1500px; height: 500px; }
         .trend-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
         .trend-card-container.flipped .trend-card-inner { transform: rotateY(180deg); }
@@ -107,14 +116,16 @@
 
         .tag-item { background: rgba(255,0,122,0.05); color: var(--accent-pink); padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; border: 1px solid rgba(255,0,122,0.1); }
         .grave-item { display: block; padding: 10px; color: #718096; text-decoration: none; font-size: 0.85rem; border-radius: 8px; transition: 0.2s; }
+        .grave-item:hover { background: rgba(0,0,0,0.02); color: var(--accent-pink); }
 
-        /* モバイルレイアウト修正：文字サイズを最低16px以上に統一 */
+        /* モバイル最適化：文字サイズ16px以上、枠の縮小 */
         @media (max-width: 1200px) {
             .layout { grid-template-columns: 1fr; padding: 10px; }
             .sidebar { display: none; }
             
+            header { margin-bottom: 20px; }
             .hero-title { font-size: 2.8rem; } 
-            .hero-subtitle { font-size: 1rem; } /* 16px相当 */
+            .hero-subtitle { font-size: 1rem; }
             
             .trend-card-container { height: auto; min-height: 650px; margin-bottom: 15px; }
             .front, .back { 
@@ -126,14 +137,14 @@
             
             .vibes-memo { font-size: 1.1rem; line-height: 1.5; } 
             .trend-title { font-size: 2.2rem; } 
-            .trend-desc { font-size: 1.1rem; line-height: 1.6; } /* 16px以上 */
+            .trend-desc { font-size: 1.1rem; line-height: 1.6; }
             
-            .summary-label { font-size: 1rem; } /* 16px */
-            .summary-text { font-size: 1.05rem; line-height: 1.7; } /* 約17px */
+            .summary-label { font-size: 1rem; } 
+            .summary-text { font-size: 1.05rem; line-height: 1.7; } 
             
-            .btn { width: 100%; padding: 16px; font-size: 1.1rem; } /* 16px以上 */
-            .tag-item { font-size: 1rem; padding: 6px 12px; } /* 16px */
-            .grave-item { font-size: 1rem; } /* 16px */
+            .btn { width: 100%; padding: 16px; font-size: 1.1rem; }
+            .tag-item { font-size: 1rem; padding: 6px 12px; }
+            .grave-item { font-size: 1rem; }
         }
 
         @media (max-width: 480px) {
@@ -162,7 +173,7 @@
 
         <main>
             <header>
-                <h1 class="hero-title">GAL-INTEL</h1>
+                <h1 class="hero-title"><a href="index.html">GAL-INTEL</a></h1>
                 <div class="hero-subtitle">v2 / Realtime Intelligence Feed</div>
             </header>
             <div class="main-feed" id="trend-list"></div>
@@ -189,6 +200,7 @@
         const DB_URL = 'https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json';
         let dots = [];
 
+        // 背景タグ演出の初期化
         function initBg(tags) {
             canvas.width = window.innerWidth; canvas.height = window.innerHeight;
             dots = (tags || []).map(t => ({
@@ -197,7 +209,7 @@
                 text: '#' + t, 
                 vx: (Math.random() - 0.5) * 1.5, 
                 vy: (Math.random() - 0.5) * 1.5, 
-                size: Math.random() * 8 + 18 // タグも少し大きく
+                size: Math.random() * 8 + 18
             }));
             animate();
         }
@@ -222,9 +234,11 @@
                 document.getElementById('sync-info').innerText = 'UPDT: ' + db.lastUpdate;
                 initBg(db.tags);
 
+                // タグ・辞書の反映
                 document.getElementById('word-ranking').innerHTML = (db.tags || []).map(t => `<span class="tag-item">#${t}</span>`).join('');
                 document.getElementById('vibes-dict').innerHTML = (db.dictionary || []).map(d => `<div class="dict-item"><span style="display:block; color:var(--accent-blue); font-weight:900; font-size:1.15rem;">${d.word}</span><span style="color:#718096; font-size:1rem;">${d.mean}</span></div>`).join('');
                 
+                // GRAVEYARDを当サイト内回遊リンクへ
                 document.getElementById('grave-list').innerHTML = (db.graveyard || []).slice(0, 10).map(g => {
                     const link = g.slug ? `archive/${g.slug}.html` : `archive/${g.title}.html`;
                     return `<a href="${link}" class="grave-item">⚡️ ${g.title.substring(0,30)}...</a>`;
@@ -232,6 +246,7 @@
 
                 document.getElementById('archive-links').innerHTML = (db.archiveList || []).slice(0,5).map(a => `<a href="archive/${a}.html" class="btn btn-outline" style="font-size:1rem; padding:14px;">📅 ${a} Archive</a>`).join('');
 
+                // メインフィード生成
                 document.getElementById('trend-list').innerHTML = (db.current || []).map((t, idx) => {
                     let bars = '';
                     for(let i=0; i<15; i++) {
@@ -249,18 +264,18 @@
                                     <p class="trend-desc">${t.desc}</p>
                                     <div class="btn-group">
                                         <a href="archive/${t.slug}.html" class="btn btn-pink">📖 DETAILS (特設)</a>
-                                        <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(t.title)}&tag=mattan0290c-22" target="_blank" class="btn btn-amazon">🛒 Amazon</a>
-                                        <div class="btn btn-outline" onclick="document.getElementById('card-${idx}').classList.toggle('flipped')">🔄 AI_VIBE</div>
+                                        <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(t.title)}&tag=mattan0290c-22" target=\"_blank\" class=\"btn btn-amazon\">🛒 Amazon</a>
+                                        <div class=\"btn btn-outline\" onclick=\"document.getElementById('card-${idx}').classList.toggle('flipped')\">🔄 AI_VIBE</div>
                                     </div>
                                 </div>
-                                <div class="back">
-                                    <div class="ai-image-wrap"><img src="${t.aiImage}" onerror="this.src='https://placehold.jp/24/ff8fc5/ffffff/800x450.png?text=VIBE_IMAGE...'"></div>
-                                    <div class="summary-box">
-                                        <div class="summary-label">AI_INSIGHT_SUMMARY</div>
-                                        <div class="summary-text">${t.aiSummary}</div>
+                                <div class=\"back\">
+                                    <div class=\"ai-image-wrap\"><img src=\"${t.aiImage}\" onerror=\"this.src='https://placehold.jp/24/ff8fc5/ffffff/800x450.png?text=VIBE_IMAGE...'\"></div>
+                                    <div class=\"summary-box\">
+                                        <div class=\"summary-label\">AI_INSIGHT_SUMMARY</div>
+                                        <div class=\"summary-text\">${t.aiSummary}</div>
                                     </div>
-                                    <div class="btn-group">
-                                        <div class="btn btn-dark" onclick="document.getElementById('card-${idx}').classList.toggle('flipped')">🔙 戻る</div>
+                                    <div class=\"btn-group\">
+                                        <div class=\"btn btn-dark\" onclick=\"document.getElementById('card-${idx}').classList.toggle('flipped')\">🔙 戻る</div>
                                     </div>
                                 </div>
                             </div>
