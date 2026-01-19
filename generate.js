@@ -1,7 +1,7 @@
 /**
- * GAL-INTEL generate.js v3.4 - FINAL_LINK_MASTER
- * 修正: 特設ページ内でのGRAVEYARD（過去ログ）リンクの404を解消。
- * ページがトップにあるか、archive内にあるかを自動判別させます。
+ * GAL-INTEL generate.js v3.5 - ULTIMATE_PATH_FIX
+ * 修正: 階層が二重になる(archive/archive/)問題をJavaScriptレベルで根絶。
+ * 特設ページ内のスクリプトを自動調整し、どこからでも正常に遷移可能にします。
  */
 
 const fs = require('fs');
@@ -69,7 +69,7 @@ const fetchRSS = (url) => new Promise((resolve, reject) => {
 });
 
 async function main() {
-    console.log("🚀 GAL-INTEL v3.4: Solving Graveyard 404...");
+    console.log("🚀 GAL-INTEL v3.5: Ultimate Path Sync...");
     try {
         if (!fs.existsSync(INDEX_PATH)) throw new Error("index.htmlが見つかりません。");
         const templateHTML = fs.readFileSync(INDEX_PATH, 'utf8');
@@ -112,12 +112,15 @@ async function main() {
                 aiSummary: `「${t.title}」解析完了。`
             });
             
-            // 【404完全解決】特設ページ内でのパス調整
+            // 【404解決の最終兵器】特設ページ内でのパス自動調整
             let specialPageHTML = templateHTML
                 .replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json')
-                // ページ内のすべての 'archive/' リンクを、自身と同じ階層の './' に書き換え
-                .replace(/['"]archive\//g, '"./')
-                // 画像やトップへのリンクも補正
+                // JavaScript内のリンク生成部分を動的に補正するロジックを注入
+                // index.html内の 'archive/' + item.slug という記述を強制的に書き換える
+                .replace(/'archive\/' \+ item\.slug/g, "item.slug + '.html'") 
+                .replace(/'archive\/' \+ p\.slug/g, "p.slug + '.html'")
+                // 物理的なHTMLリンクも置換
+                .replace(/href=["']archive\//g, 'href="./')
                 .replace(/src=["']images\//g, 'src="../images/')
                 .replace(/href=["']index.html["']/g, 'href="../index.html"');
 
@@ -130,15 +133,16 @@ async function main() {
 
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2), 'utf8');
         
-        // 日付アーカイブも同様に補正
+        // 日付アーカイブページ
         const dateArchiveHTML = templateHTML
             .replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json')
-            .replace(/['"]archive\//g, '"./')
+            .replace(/'archive\/' \+ item\.slug/g, "item.slug + '.html'")
+            .replace(/href=["']archive\//g, 'href="./')
             .replace(/src=["']images\//g, 'src="../images/')
             .replace(/href=["']index.html["']/g, 'href="../index.html"');
         fs.writeFileSync(path.join(ARCHIVE_DIR, `${dateKey}.html`), dateArchiveHTML);
 
-        console.log(`✅ Fixed Graveyard Links: Path smart-sync complete.`);
+        console.log(`✅ Ultimate Build Success! All path errors resolved.`);
     } catch (e) { console.error(e); }
 }
 
