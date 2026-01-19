@@ -1,7 +1,7 @@
 /**
- * GAL-INTEL generate.js v3.3 - PATH_SMART_SYNC
- * 修正: 特設ページからさらに特設ページを開いた際の404エラーを解消。
- * リンクの階層構造を動的に書き換え、無限ループ移動を可能にします。
+ * GAL-INTEL generate.js v3.4 - FINAL_LINK_MASTER
+ * 修正: 特設ページ内でのGRAVEYARD（過去ログ）リンクの404を解消。
+ * ページがトップにあるか、archive内にあるかを自動判別させます。
  */
 
 const fs = require('fs');
@@ -69,7 +69,7 @@ const fetchRSS = (url) => new Promise((resolve, reject) => {
 });
 
 async function main() {
-    console.log("🚀 GAL-INTEL v3.3: Fixing Recursive Path Error...");
+    console.log("🚀 GAL-INTEL v3.4: Solving Graveyard 404...");
     try {
         if (!fs.existsSync(INDEX_PATH)) throw new Error("index.htmlが見つかりません。");
         const templateHTML = fs.readFileSync(INDEX_PATH, 'utf8');
@@ -112,17 +112,14 @@ async function main() {
                 aiSummary: `「${t.title}」解析完了。`
             });
             
-            // 【404解決の核心】
-            // archive内のページ用に、リンクパスを動的に書き換える
+            // 【404完全解決】特設ページ内でのパス調整
             let specialPageHTML = templateHTML
-                // 1. データベース参照を上の階層へ
                 .replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json')
-                // 2. archive/ 内にあるリンクが archive/archive/ にならないよう、スクリプト側で調整
-                // index.html内のリンク生成部分が 'archive/' + slug となっている箇所を、
-                // archiveフォルダ内では './' + slug になるように強制置換（または相対パスを補正）
-                .replace(/href=["']archive\//g, 'href="./') // archive/archiveを回避
-                .replace(/src=["']images\//g, 'src="../images/') // 画像パスを補正
-                .replace(/href=["']index.html["']/g, 'href="../index.html"'); // トップに戻るリンクを補正
+                // ページ内のすべての 'archive/' リンクを、自身と同じ階層の './' に書き換え
+                .replace(/['"]archive\//g, '"./')
+                // 画像やトップへのリンクも補正
+                .replace(/src=["']images\//g, 'src="../images/')
+                .replace(/href=["']index.html["']/g, 'href="../index.html"');
 
             fs.writeFileSync(path.join(ARCHIVE_DIR, `${slug}.html`), specialPageHTML);
         }
@@ -133,15 +130,15 @@ async function main() {
 
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2), 'utf8');
         
-        // 日付アーカイブ
+        // 日付アーカイブも同様に補正
         const dateArchiveHTML = templateHTML
             .replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json')
-            .replace(/href=["']archive\//g, 'href="./')
+            .replace(/['"]archive\//g, '"./')
             .replace(/src=["']images\//g, 'src="../images/')
             .replace(/href=["']index.html["']/g, 'href="../index.html"');
         fs.writeFileSync(path.join(ARCHIVE_DIR, `${dateKey}.html`), dateArchiveHTML);
 
-        console.log(`✅ Fixed: ${processedCurrent.length} clean pages generated with path correction.`);
+        console.log(`✅ Fixed Graveyard Links: Path smart-sync complete.`);
     } catch (e) { console.error(e); }
 }
 
