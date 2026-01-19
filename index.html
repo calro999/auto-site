@@ -450,10 +450,20 @@
             requestAnimationFrame(animate);
         }
 
-        // 文字数制限用：入力を強制的にString化してエラーを防止
-        function truncateStr(input, max) {
+        /**
+         * 究極の文字制限関数
+         * 配列、数字、オブジェクト、null、すべてを強制的に「文字列」にフラット化してから制限をかける
+         */
+        function safeTruncate(input, max) {
             if (input === undefined || input === null) return "";
-            const s = String(input); 
+            
+            // もしデータが配列 [ "text" ] だったら中身を取り出す
+            let val = Array.isArray(input) ? input[0] : input;
+            
+            // 文字列に強制変換
+            const s = String(val);
+            
+            // 制限
             return s.length <= max ? s : s.substring(0, max) + "...";
         }
 
@@ -466,7 +476,7 @@
 
                 document.getElementById('word-ranking').innerHTML = (db.tags || []).map(t => `<span class="tag-item">#${String(t)}</span>`).join('');
                 document.getElementById('vibes-dict').innerHTML = (db.dictionary || []).map(d => `<div class="dict-item"><span class="dict-word">${String(d.word)}</span><span style="color:#718096; font-size:0.8rem;">${String(d.mean)}</span></div>`).join('');
-                document.getElementById('grave-list').innerHTML = (db.graveyard || []).slice(0, 10).map(g => `<a href="https://www.google.com/search?q=${encodeURIComponent(String(g.title))}" target="_blank" class="grave-item">⚡️ ${truncateStr(g.title, 20)}</a>`).join('');
+                document.getElementById('grave-list').innerHTML = (db.graveyard || []).slice(0, 10).map(g => `<a href="https://www.google.com/search?q=${encodeURIComponent(String(g.title))}" target="_blank" class="grave-item">⚡️ ${safeTruncate(g.title, 20)}</a>`).join('');
                 document.getElementById('archive-links').innerHTML = (db.archiveList || []).slice(0,5).map(a => `<a href="archive/${String(a)}.html" class="btn btn-outline" style="font-size:0.75rem; padding:10px;">📅 ${String(a)} Archive</a>`).join('');
 
                 const trendContainer = document.getElementById('trend-list');
@@ -480,11 +490,16 @@
                         eqBars += `<div class="eq-bar" style="height: ${h}%; animation-delay: ${delay}s"></div>`;
                     }
 
-                    // 強力な文字列化を伴うデータ取得
-                    const sT = truncateStr(t.title, 60);
-                    const sD = truncateStr(t.desc, 150);
-                    const sM = truncateStr(t.memo, 80);
-                    const sA = truncateStr(t.aiSummary, 300);
+                    // すべての項目に safeTruncate を適用し、配列であっても中身を確実に取得
+                    const sT = safeTruncate(t.title, 60);
+                    const sD = safeTruncate(t.desc, 150);
+                    const sM = safeTruncate(t.memo, 80);
+                    const sA = safeTruncate(t.aiSummary, 500); // 制限を少し緩和
+
+                    // slug, aiImage, title も安全に取得
+                    const safeSlug = String(Array.isArray(t.slug) ? t.slug[0] : t.slug);
+                    const safeImage = String(Array.isArray(t.aiImage) ? t.aiImage[0] : t.aiImage);
+                    const rawTitle = String(Array.isArray(t.title) ? t.title[0] : t.title);
 
                     htmlBuffer += `
                         <div class="trend-card-container" id="card-${idx}">
@@ -495,13 +510,13 @@
                                     <h2 class="trend-title">${sT}</h2>
                                     <p class="trend-desc">${sD}</p>
                                     <div class="btn-group">
-                                        <a href="archive/${String(t.slug)}.html" class="btn btn-pink">📖 DETAILS</a>
-                                        <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(String(t.title))}&tag=YOUR_TAG" target="_blank" class="btn btn-amazon">🛒 Amazon</a>
+                                        <a href="archive/${safeSlug}.html" class="btn btn-pink">📖 DETAILS</a>
+                                        <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(rawTitle)}&tag=YOUR_TAG" target="_blank" class="btn btn-amazon">🛒 Amazon</a>
                                         <div class="btn btn-outline" onclick="document.getElementById('card-${idx}').classList.add('flipped')">🔄 VIBE</div>
                                     </div>
                                 </div>
                                 <div class="back">
-                                    <div class="ai-image-wrap"><img src="${String(t.aiImage)}" onerror="this.src='https://placehold.jp/24/7928ca/ffffff/800x450.png?text=VIBE_IMAGE...'"></div>
+                                    <div class="ai-image-wrap"><img src="${safeImage}" onerror="this.src='https://placehold.jp/24/7928ca/ffffff/800x450.png?text=VIBE_IMAGE...'"></div>
                                     <div class="summary-box">
                                         <div class="summary-label">AI_INSIGHT_SUMMARY</div>
                                         <div class="summary-text">${sA}</div>
