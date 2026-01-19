@@ -19,7 +19,6 @@
             --card-bg: #FFFFFF; 
             --border: #E2E8F0;
             --shadow: 0 10px 30px rgba(0,0,0,0.03);
-            --header-h: 120px;
         }
 
         * { box-sizing: border-box; }
@@ -34,13 +33,10 @@
             line-height: 1.6;
         }
 
-        /* 背景アニメーション */
         #connect-bg { 
             position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
             z-index: -1; 
             opacity: 0.7; 
         }
@@ -48,91 +44,64 @@
         /* 全体レイアウト */
         .layout { 
             display: grid; 
-            grid-template-columns: 280px 1fr 280px; 
+            grid-template-columns: 260px 1fr 260px; 
             gap: 30px; 
             max-width: 1500px; 
             margin: 0 auto; 
             padding: 40px 20px;
         }
 
-        /* サイドバー：PC独立スクロール */
+        /* サイドバー独立スクロール */
         .sidebar { 
             position: sticky; 
             top: 40px; 
             height: calc(100vh - 80px); 
             display: flex; 
             flex-direction: column; 
-            gap: 25px; 
+            gap: 20px; 
         }
 
         .scroll-area {
             flex-grow: 1;
             overflow-y: auto;
-            padding-right: 12px;
+            padding-right: 10px;
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 20px;
         }
 
-        .scroll-area::-webkit-scrollbar { width: 5px; }
+        .scroll-area::-webkit-scrollbar { width: 4px; }
         .scroll-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 
         .glass-box { 
-            background: rgba(255,255,255,0.8); 
+            background: rgba(255,255,255,0.85); 
             backdrop-filter: blur(15px); 
-            border-radius: 28px; 
-            padding: 24px; 
+            border-radius: 24px; 
+            padding: 20px; 
             border: 1px solid var(--border); 
             box-shadow: var(--shadow); 
         }
 
         .box-title { 
-            font-size: 0.75rem; 
+            font-size: 0.7rem; 
             font-weight: 900; 
             color: #A0AEC0; 
             text-transform: uppercase; 
-            margin-bottom: 20px; 
+            margin-bottom: 15px; 
             letter-spacing: 1.5px; 
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
-        header { 
-            text-align: center; 
-            margin-bottom: 50px; 
-        }
-
-        .hero-title { 
-            font-size: 3.5rem; 
-            font-weight: 900; 
-            margin: 0; 
-            letter-spacing: -2px; 
-        }
-
-        .hero-title a {
-            text-decoration: none;
-            color: inherit;
-            transition: 0.4s;
-            display: inline-block;
-        }
-
+        header { text-align: center; margin-bottom: 40px; }
+        .hero-title { font-size: 3.5rem; font-weight: 900; margin: 0; letter-spacing: -2px; }
+        .hero-title a { text-decoration: none; color: inherit; transition: 0.3s; }
         .hero-title a:hover { color: var(--accent-pink); }
         .hero-title span { color: var(--accent-pink); }
+        .sub-title { font-size: 0.85rem; font-weight: bold; color: #718096; margin-top: 10px; letter-spacing: 1px; }
 
-        .sub-title { 
-            font-size: 0.9rem; 
-            font-weight: bold; 
-            color: #718096; 
-            margin-top: 12px; 
-            letter-spacing: 2px;
-        }
-
-        .main-feed { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 30px; 
-        }
+        .main-feed { display: flex; flex-direction: column; gap: 30px; }
         
         /* 記事カード */
         .trend-card { 
@@ -142,24 +111,8 @@
             border: 1px solid var(--border);
             box-shadow: var(--shadow); 
             transition: 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            text-align: center;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
         }
-
-        .trend-card:hover { transform: translateY(-10px); }
-
-        .label-badge { 
-            font-size: 0.7rem; 
-            font-weight: 900; 
-            padding: 6px 20px; 
-            border-radius: 50px; 
-            margin-bottom: 20px; 
-        }
-
-        .label-FLASH { background: #FFF5F7; color: #E53E3E; border: 1px solid #FED7E2; }
-        .label-ARCHIVE { background: #EDF2F7; color: #4A5568; border: 1px solid #E2E8F0; }
 
         .vibes-memo { 
             background: #F7FAFC; 
@@ -167,98 +120,81 @@
             padding: 18px 25px; 
             border-radius: 15px; 
             font-size: 1rem;
-            color: var(--text); 
             font-weight: 800; 
             margin-bottom: 25px; 
             font-style: italic;
             max-width: 85%;
         }
 
-        h3 { 
-            font-size: 1.8rem; 
-            margin: 0 0 15px 0; 
-            line-height: 1.3; 
-            font-weight: 900; 
-            color: #1A202C; 
-        }
+        h3 { font-size: 1.8rem; margin: 0 0 15px 0; font-weight: 900; color: #1A202C; }
+        .desc { font-size: 1.05rem; color: #4A5568; line-height: 1.8; margin-bottom: 25px; max-width: 600px; }
 
-        .desc { 
-            font-size: 1.05rem; 
-            color: #4A5568; 
-            line-height: 1.8;
-            margin-bottom: 25px; 
-            max-width: 600px;
-        }
-
-        .eq-container { display: flex; gap: 6px; height: 45px; align-items: flex-end; margin-bottom: 25px; }
+        .eq-container { display: flex; gap: 6px; height: 40px; align-items: flex-end; margin-bottom: 25px; }
         .eq-bar { width: 6px; background: linear-gradient(to top, var(--accent-blue), var(--accent-pink)); border-radius: 4px; }
         .eq-active { animation: eq-pulse 0.7s ease-in-out infinite alternate; }
         @keyframes eq-pulse { from { height: 15%; } to { height: 100%; } }
 
-        .btn-group { display: flex; gap: 20px; }
-        .btn { padding: 15px 35px; border-radius: 20px; text-decoration: none; font-weight: 900; font-size: 0.95rem; transition: 0.3s; display: inline-flex; align-items: center; gap: 10px; }
+        .btn-group { display: flex; gap: 15px; }
+        .btn { padding: 15px 30px; border-radius: 20px; text-decoration: none; font-weight: 900; font-size: 0.95rem; transition: 0.3s; display: inline-flex; align-items: center; gap: 10px; }
         .btn-analyze { background: var(--text); color: #fff; }
         .btn-shop { background: #FF9900; color: #fff; }
 
-        .tag-list { display: flex; flex-wrap: wrap; gap: 10px; }
-        .tag-item { font-size: 0.8rem; background: #EDF2F7; padding: 8px 16px; border-radius: 12px; color: #4A5568; text-decoration: none; font-weight: bold; }
-
-        /* 修正：THE_GRAVEYARDを常に1行で表示 */
-        .grave-item { 
-            font-size: 0.85rem; 
-            color: #718096; 
-            padding: 14px 0; 
-            border-bottom: 1px solid #F7FAFC; 
-            display: block; 
+        /* PC版タグサイズ調整 */
+        .tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        .tag-item { 
+            font-size: 0.75rem; 
+            background: #EDF2F7; 
+            padding: 6px 12px; 
+            border-radius: 10px; 
+            color: #4A5568; 
             text-decoration: none; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            width: 100%;
+            font-weight: bold; 
         }
-        .grave-item:hover { color: var(--accent-pink); padding-left: 10px; }
 
-        /* モバイル専用：アーカイブボタン（サイズアップ） */
+        .grave-item { 
+            font-size: 0.85rem; color: #718096; padding: 12px 0; border-bottom: 1px solid #F7FAFC; 
+            display: block; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;
+        }
+        .grave-item:hover { color: var(--accent-pink); padding-left: 8px; }
+
+        /* モバイル巨大ナビボタン */
         .mobile-nav-btn {
-            display: none;
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--accent-pink);
-            color: white;
-            padding: 22px 45px;
-            border-radius: 100px;
-            font-weight: 900;
-            font-size: 1.2rem;
-            box-shadow: 0 15px 40px rgba(255, 77, 173, 0.6);
-            z-index: 1000;
-            text-decoration: none;
-            border: 3px solid white;
-            width: 85%;
-            text-align: center;
+            display: none; 
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: var(--accent-pink); color: white; 
+            padding: 25px 0; width: 90%; border-radius: 100px; 
+            font-weight: 900; font-size: 1.4rem; text-align: center;
+            box-shadow: 0 15px 40px rgba(255, 77, 173, 0.6); z-index: 1000;
+            text-decoration: none; border: 4px solid white;
         }
 
         #loading { position: fixed; inset: 0; background: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--accent-pink); z-index: 2000; }
 
-        /* モバイル最適化 */
+        /* モバイル最適化メディアクエリ */
         @media (max-width: 1000px) { 
-            .layout { grid-template-columns: 1fr; padding: 20px 10px; gap: 20px; } 
-            .sidebar:last-child { display: none; }
-            .sidebar:first-child { position: static; height: auto; order: 2; margin-top: 30px; padding-bottom: 120px; } 
+            .layout { grid-template-columns: 1fr; padding: 15px 10px; gap: 15px; } 
+            .sidebar:last-child { display: none; } /* 墓場非表示 */
+            
+            .sidebar:first-child { 
+                position: static; height: auto; order: 2; 
+                margin-top: 20px; padding-bottom: 140px; 
+            } 
             .scroll-area { overflow-y: visible; padding-right: 0; }
             
-            /* 文字サイズの大幅アップ */
+            /* モバイル文字サイズ強化 */
             .hero-title { font-size: 2.8rem; }
-            .sub-title { font-size: 1rem; }
             h3 { font-size: 1.6rem; }
-            .vibes-memo { font-size: 1.1rem; padding: 22px; width: 100%; }
-            .desc { font-size: 1.1rem; line-height: 1.7; width: 100%; }
+            .vibes-memo { font-size: 1.2rem; padding: 25px; width: 100%; max-width: 100%; border-left-width: 8px; }
+            .desc { font-size: 1.2rem; line-height: 1.8; width: 100%; color: #2D3436; }
             
-            .trend-card { padding: 35px 20px; width: 95%; margin: 0 auto; }
+            .trend-card { padding: 40px 20px; width: 100%; border-radius: 30px; }
             .btn-group { flex-direction: column; width: 100%; gap: 15px; }
-            .btn { width: 100%; justify-content: center; padding: 20px; font-size: 1.1rem; }
+            .btn { width: 100%; justify-content: center; padding: 22px; font-size: 1.2rem; border-radius: 25px; }
             
+            /* モバイル用タグリスト：大きく押しやすく */
+            .tag-item { font-size: 1.1rem; padding: 12px 20px; width: 100%; display: block; text-align: center; margin-bottom: 5px; }
+            .grave-item { font-size: 1.1rem; padding: 20px 0; }
+
             .mobile-nav-btn { display: block; }
         }
     </style>
@@ -318,8 +254,8 @@
                 x: Math.random() * canvas.width, 
                 y: Math.random() * canvas.height, 
                 text: '#' + t,
-                vx: (Math.random() - 0.5) * 0.35, 
-                vy: (Math.random() - 0.5) * 0.35, 
+                vx: (Math.random() - 0.5) * 0.3, 
+                vy: (Math.random() - 0.5) * 0.3, 
                 size: 10
             }));
             animate();
@@ -334,10 +270,7 @@
                 ctx.font = `bold ${d.size}px Arial`; ctx.fillStyle = 'rgba(160, 174, 192, 0.35)'; ctx.fillText(d.text, d.x, d.y);
                 dots.slice(i + 1).forEach(d2 => {
                     const dist = Math.hypot(d.x - d2.x, d.y - d2.y);
-                    if (dist < 180) { 
-                        ctx.beginPath(); ctx.strokeStyle = `rgba(226, 232, 240, 0.4)`; 
-                        ctx.moveTo(d.x, d.y); ctx.lineTo(d2.x, d2.y); ctx.stroke(); 
-                    }
+                    if (dist < 180) { ctx.beginPath(); ctx.strokeStyle = `rgba(226, 232, 240, 0.4)`; ctx.moveTo(d.x, d.y); ctx.lineTo(d2.x, d2.y); ctx.stroke(); }
                 });
             });
             requestAnimationFrame(animate);
