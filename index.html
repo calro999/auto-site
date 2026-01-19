@@ -18,6 +18,7 @@
             --accent-blue: #00B4D8; 
             --card-bg: #FFFFFF; 
             --border: #E2E8F0;
+            --shadow: 0 10px 30px rgba(0,0,0,0.03);
         }
 
         * { box-sizing: border-box; }
@@ -29,6 +30,7 @@
             margin: 0; 
             padding: 0; 
             overflow-x: hidden;
+            line-height: 1.6;
         }
 
         #connect-bg { 
@@ -38,56 +40,70 @@
             width: 100%; 
             height: 100%; 
             z-index: -1; 
-            opacity: 0.6; 
+            opacity: 0.7; 
         }
 
-        /* レイアウト: PC */
+        /* レイアウト設計 */
         .layout { 
             display: grid; 
-            grid-template-columns: 240px 1fr 240px; 
-            gap: 20px; 
-            max-width: 1400px; 
+            grid-template-columns: 280px 1fr 280px; 
+            gap: 30px; 
+            max-width: 1500px; 
             margin: 0 auto; 
-            padding: 20px;
+            padding: 40px 20px;
         }
 
         .sidebar { 
             position: sticky; 
-            top: 20px; 
-            height: calc(100vh - 40px); 
+            top: 40px; 
+            height: calc(100vh - 80px); 
             display: flex; 
             flex-direction: column; 
-            gap: 15px; 
+            gap: 25px; 
         }
 
         .glass-box { 
-            background: rgba(255,255,255,0.85); 
-            backdrop-filter: blur(10px); 
-            border-radius: 20px; 
-            padding: 18px; 
+            background: rgba(255,255,255,0.8); 
+            backdrop-filter: blur(12px); 
+            border-radius: 24px; 
+            padding: 24px; 
             border: 1px solid var(--border); 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+            box-shadow: var(--shadow); 
+            transition: 0.3s ease;
         }
 
         .box-title { 
-            font-size: 0.7rem; 
+            font-size: 0.75rem; 
             font-weight: 900; 
             color: #A0AEC0; 
             text-transform: uppercase; 
-            margin-bottom: 12px; 
-            letter-spacing: 1px; 
+            margin-bottom: 20px; 
+            letter-spacing: 1.5px; 
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         header { 
             text-align: center; 
-            margin-bottom: 30px; 
+            margin-bottom: 50px; 
         }
 
         .hero-title { 
-            font-size: 2.2rem; 
+            font-size: 3rem; 
             font-weight: 900; 
             margin: 0; 
-            letter-spacing: -1px; 
+            letter-spacing: -2px; 
+        }
+
+        .hero-title a {
+            text-decoration: none;
+            color: inherit;
+            transition: 0.3s;
+        }
+
+        .hero-title a:hover {
+            opacity: 0.7;
         }
 
         .hero-title span { 
@@ -95,91 +111,97 @@
         }
 
         .sub-title { 
-            font-size: 0.75rem; 
+            font-size: 0.85rem; 
             font-weight: bold; 
             color: #718096; 
-            margin-top: 5px; 
+            margin-top: 10px; 
+            letter-spacing: 1px; 
         }
 
         .main-feed { 
             display: flex; 
             flex-direction: column; 
-            gap: 15px; 
+            gap: 25px; 
         }
         
-        /* 記事カード: PCサイズをコンパクトに */
+        /* 記事カード: PCサイズ適正化 */
         .trend-card { 
+            position: relative; 
             background: var(--card-bg); 
-            border-radius: 24px; 
-            padding: 25px 35px; 
+            border-radius: 30px; 
+            padding: 35px 45px; 
             border: 1px solid var(--border);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.02); 
-            transition: 0.3s;
+            box-shadow: var(--shadow); 
+            transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             text-align: center;
+            overflow: hidden;
         }
 
         .trend-card:hover { 
-            transform: translateY(-3px); 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.05); 
+            transform: translateY(-8px); 
+            box-shadow: 0 30px 60px rgba(0,0,0,0.08); 
         }
 
         .label-badge { 
-            font-size: 0.65rem; 
+            font-size: 0.7rem; 
             font-weight: 900; 
-            padding: 4px 12px; 
+            padding: 6px 16px; 
             border-radius: 50px; 
-            margin-bottom: 10px; 
+            margin-bottom: 15px; 
+            letter-spacing: 1px; 
+            text-transform: uppercase;
         }
 
-        .label-FLASH { background: #FFF5F7; color: #E53E3E; }
-        .label-ARCHIVE { background: #EDF2F7; color: #4A5568; }
-        .label-REAL { background: #FFFAF0; color: #DD6B20; }
+        .label-FLASH { background: #FFF5F7; color: #E53E3E; border: 1px solid #FED7E2; }
+        .label-ARCHIVE { background: #EDF2F7; color: #4A5568; border: 1px solid #E2E8F0; }
+        .label-REAL { background: #FFFAF0; color: #DD6B20; border: 1px solid #FEEBC8; }
 
         .vibes-memo { 
             background: #F8F9FA; 
-            border-left: 3px solid var(--accent-pink);
-            padding: 10px 15px; 
-            border-radius: 10px; 
-            font-size: 0.8rem;
+            border-left: 4px solid var(--accent-pink);
+            padding: 15px 20px; 
+            border-radius: 12px; 
+            font-size: 0.9rem;
             color: var(--text); 
             font-weight: bold; 
-            margin-bottom: 15px; 
-            line-height: 1.4;
+            margin-bottom: 20px; 
+            line-height: 1.5;
             max-width: 90%; 
             font-style: italic;
         }
 
         h3 { 
-            font-size: 1.35rem; 
-            margin: 0 0 10px 0; 
-            line-height: 1.3; 
+            font-size: 1.6rem; 
+            margin: 0 0 15px 0; 
+            line-height: 1.4; 
             font-weight: 900; 
             color: #1A202C; 
         }
 
         .desc { 
-            font-size: 0.9rem; 
+            font-size: 0.95rem; 
             color: #4A5568; 
-            line-height: 1.6; 
-            margin-bottom: 15px; 
+            line-height: 1.7; 
+            margin-bottom: 20px; 
+            max-width: 600px;
         }
 
-        /* イコライザー: サイズ維持 */
+        /* イコライザー演出 (触らず維持) */
         .eq-container { 
             display: flex; 
-            gap: 4px; 
+            gap: 5px; 
             height: 35px; 
             align-items: flex-end; 
-            margin-bottom: 15px; 
+            margin-bottom: 20px; 
         }
 
         .eq-bar { 
-            width: 4px; 
+            width: 5px; 
             background: linear-gradient(to top, var(--accent-blue), var(--accent-pink)); 
-            border-radius: 2px; 
+            border-radius: 3px; 
         }
 
         .eq-active { 
@@ -187,25 +209,28 @@
         }
 
         @keyframes eq-pulse { 
-            from { height: 30%; } 
+            from { height: 20%; } 
             to { height: 100%; } 
         }
 
         .btn-group {
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 15px;
+            margin-top: 15px;
             flex-wrap: wrap;
             justify-content: center;
         }
 
         .btn { 
-            padding: 10px 25px; 
-            border-radius: 14px; 
+            padding: 12px 30px; 
+            border-radius: 18px; 
             text-decoration: none; 
             font-weight: 900; 
-            font-size: 0.75rem; 
+            font-size: 0.85rem; 
             transition: 0.3s; 
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .btn-analyze { 
@@ -216,41 +241,58 @@
         .btn-shop {
             background: #FF9900;
             color: #fff;
+            box-shadow: 0 4px 15px rgba(255,153,0,0.3);
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
         }
 
         .tag-list { 
             display: flex; 
             flex-wrap: wrap; 
-            gap: 6px; 
+            gap: 8px; 
         }
 
         .tag-item { 
-            font-size: 0.65rem; 
+            font-size: 0.75rem; 
             background: #EDF2F7; 
-            padding: 5px 10px; 
-            border-radius: 8px; 
+            padding: 6px 14px; 
+            border-radius: 12px; 
             color: #4A5568; 
             text-decoration: none; 
             font-weight: bold; 
+            transition: 0.2s;
+        }
+
+        .tag-item:hover {
+            background: var(--accent-pink);
+            color: white;
         }
 
         .grave-item { 
-            font-size: 0.7rem; 
+            font-size: 0.75rem; 
             color: #718096; 
-            padding: 8px 0; 
+            padding: 12px 0; 
             border-bottom: 1px solid #F7FAFC; 
             display: block; 
             text-decoration: none; 
             transition: 0.2s;
         }
         
-        .grave-item:hover { color: var(--accent-pink); padding-left: 5px; }
+        .grave-item:hover { 
+            color: var(--accent-pink); 
+            padding-left: 8px;
+            background: rgba(255,77,173,0.05);
+        }
 
         .footer-info {
-            margin-top: 15px; 
-            font-size: 0.65rem; 
+            margin-top: 20px; 
+            font-size: 0.7rem; 
             color: #CBD5E0; 
-            font-weight: bold;
+            font-weight: 800;
+            text-transform: uppercase;
         }
 
         #loading { 
@@ -258,6 +300,7 @@
             inset: 0; 
             background: #fff; 
             display: flex; 
+            flex-direction: column;
             align-items: center; 
             justify-content: center; 
             font-weight: 900; 
@@ -265,53 +308,79 @@
             z-index: 2000; 
         }
 
-        /* モバイル最適化: サイドバーを下部にまとめず、コンテンツとして統合 */
-        @media (max-width: 850px) { 
+        /* モバイル最適化メディアクエリ */
+        @media (max-width: 1100px) { 
             .layout { 
                 grid-template-columns: 1fr; 
-                padding: 10px;
+                padding: 20px 15px;
             } 
             .sidebar { 
                 position: static; 
                 height: auto; 
-                order: 2; /* メイン記事の後に表示 */
-                margin-top: 20px;
                 display: grid;
-                grid-template-columns: 1fr 1fr; /* 横並びにして高さを抑える */
-                gap: 10px;
+                grid-template-columns: 1fr;
+                gap: 20px;
+                order: 2;
+                margin-top: 20px;
             } 
-            .hero-title { font-size: 1.8rem; }
-            .trend-card { padding: 20px; border-radius: 20px; }
-            h3 { font-size: 1.15rem; }
-            .desc { font-size: 0.85rem; }
-            .vibes-memo { font-size: 0.75rem; padding: 8px 12px; }
-            .btn { padding: 8px 18px; font-size: 0.7rem; }
-            .eq-container { height: 30px; }
-            
-            /* モバイルでは1列にする */
-            .sidebar { grid-template-columns: 1fr; }
+            .hero-title { font-size: 2.2rem; }
+            .trend-card { 
+                padding: 25px 20px; 
+                border-radius: 24px;
+            }
+            h3 { font-size: 1.3rem; }
+            .desc { font-size: 0.9rem; }
+            .btn-group {
+                flex-direction: column;
+                width: 100%;
+            }
+            .btn {
+                width: 100%;
+                justify-content: center;
+                padding: 15px;
+            }
+            .vibes-memo {
+                width: 100%;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* アーカイブ内のスクロールバー装飾 */
+        #archive-list::-webkit-scrollbar,
+        #grave-list-container::-webkit-scrollbar {
+            width: 4px;
+        }
+        #archive-list::-webkit-scrollbar-thumb,
+        #grave-list-container::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
     <canvas id="connect-bg"></canvas>
-    <div id="loading">CONNECTING VIBES...</div>
+    <div id="loading">
+        <div style="font-size: 2rem; margin-bottom: 10px;">🔥</div>
+        CONNECTING VIBES...
+    </div>
 
     <div class="layout">
         <aside class="sidebar">
             <div class="glass-box">
-                <div class="box-title"># TRENDING_TAGS</div>
+                <div class="box-title"><span>#</span> TRENDING_TAGS</div>
                 <div id="tag-list" class="tag-list"></div>
             </div>
             <div class="glass-box">
-                <div class="box-title">📅 PAST_ARCHIVES</div>
-                <div id="archive-list" style="max-height: 250px; overflow-y: auto;"></div>
+                <div class="box-title"><span>📅</span> PAST_ARCHIVES</div>
+                <div id="archive-list" style="max-height: 350px; overflow-y: auto; padding-right: 5px;"></div>
             </div>
         </aside>
 
         <main>
             <header>
-                <h1 class="hero-title">GAL<span>-</span>INTEL</h1>
+                <h1 class="hero-title">
+                    <a id="home-link" href="/">GAL<span>-</span>INTEL</a>
+                </h1>
                 <div class="sub-title">世の中の「今」を、最速でバイブス変換。</div>
             </header>
             <div class="main-feed" id="trend-list"></div>
@@ -319,12 +388,14 @@
 
         <aside class="sidebar">
             <div class="glass-box">
-                <div class="box-title">🔄 SYNC_STATUS</div>
-                <div id="sync-info" style="font-size: 0.65rem; color: #A0AEC0;"></div>
+                <div class="box-title"><span>🔄</span> SYNC_STATUS</div>
+                <div id="sync-info" style="font-size: 0.7rem; color: #A0AEC0; font-weight: bold;"></div>
             </div>
-            <div class="glass-box" style="overflow-y: auto; flex-grow: 1;">
-                <div class="box-title">💀 THE_GRAVEYARD</div>
-                <div id="grave-list"></div>
+            <div class="glass-box" style="flex-grow: 1; display: flex; flex-direction: column; min-height: 0;">
+                <div class="box-title"><span>💀</span> THE_GRAVEYARD</div>
+                <div id="grave-list-container" style="overflow-y: auto; flex-grow: 1; padding-right: 5px;">
+                    <div id="grave-list"></div>
+                </div>
             </div>
         </aside>
     </div>
@@ -335,6 +406,7 @@
         let dots = [];
         const DATA_SOURCE_URL = 'https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json';
 
+        // 背景のアニメーション設定
         function initBg(tags) {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -342,9 +414,9 @@
                 x: Math.random() * canvas.width, 
                 y: Math.random() * canvas.height, 
                 text: '#' + t,
-                vx: (Math.random() - 0.5) * 0.3, 
-                vy: (Math.random() - 0.5) * 0.3, 
-                size: 9
+                vx: (Math.random() - 0.5) * 0.35, 
+                vy: (Math.random() - 0.5) * 0.35, 
+                size: 10 + Math.random() * 4
             }));
             animate();
         }
@@ -355,14 +427,17 @@
                 d.x += d.vx; d.y += d.vy;
                 if (d.x < 0 || d.x > canvas.width) d.vx *= -1; 
                 if (d.y < 0 || d.y > canvas.height) d.vy *= -1;
+                
                 ctx.font = `bold ${d.size}px Arial`; 
-                ctx.fillStyle = 'rgba(160, 174, 192, 0.3)'; 
+                ctx.fillStyle = 'rgba(160, 174, 192, 0.35)'; 
                 ctx.fillText(d.text, d.x, d.y);
+                
                 dots.slice(i + 1).forEach(d2 => {
                     const dist = Math.hypot(d.x - d2.x, d.y - d2.y);
-                    if (dist < 150) { 
+                    if (dist < 160) { 
                         ctx.beginPath(); 
                         ctx.strokeStyle = `rgba(226, 232, 240, 0.4)`; 
+                        ctx.lineWidth = 1;
                         ctx.moveTo(d.x, d.y); 
                         ctx.lineTo(d2.x, d2.y); 
                         ctx.stroke(); 
@@ -376,26 +451,41 @@
             try {
                 const res = await fetch(DATA_SOURCE_URL + '?t=' + Date.now());
                 const db = await res.json();
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('sync-info').innerText = 'UPDATE: ' + db.lastUpdate;
+                
+                document.getElementById('loading').style.opacity = '0';
+                setTimeout(() => document.getElementById('loading').style.display = 'none', 500);
+                
+                document.getElementById('sync-info').innerText = 'LAST SYNC: ' + db.lastUpdate;
                 
                 initBg(db.tags);
 
-                document.getElementById('tag-list').innerHTML = (db.tags || []).map(tag => 
+                // タグの生成
+                document.getElementById('tag-list').innerHTML = (db.tags || []).slice(0, 20).map(tag => 
                     `<a href="https://www.google.com/search?q=${encodeURIComponent(tag)}" target="_blank" class="tag-item">#${tag}</a>`
                 ).join('');
 
+                // パス解決ロジック
                 const isArchivePage = window.location.pathname.includes('/archive/');
                 const prefix = isArchivePage ? './' : './archive/';
-                document.getElementById('archive-list').innerHTML = (db.archiveList || []).map(d => 
-                    `<a href="${prefix}${d}.html" class="grave-item">📄 ${d}</a>`
-                ).join('') || 'NO_DATA';
+                const homePath = isArchivePage ? '../index.html' : './index.html';
+                
+                document.getElementById('home-link').href = homePath;
 
+                // アーカイブリスト
+                document.getElementById('archive-list').innerHTML = (db.archiveList || []).map(d => 
+                    `<a href="${prefix}${d}.html" class="grave-item">📄 ${d.replace(/(\d{4})(\d{2})(\d{2})/, '$1/$2/$3')}</a>`
+                ).join('') || '<div style="font-size:0.7rem; color:#ccc;">NO ARCHIVE</div>';
+
+                // メインフィードの生成
                 document.getElementById('trend-list').innerHTML = (db.current || []).map(t => {
-                    const eqHtml = Array.from({length: 10}, (_, i) => 
-                        `<div class="eq-bar eq-active" style="height: ${30+Math.random()*70}%; animation-delay: ${i*0.1}s"></div>`
-                    ).join('');
-                    const kw = t.searchKey || t.title.substring(0, 5);
+                    // イコライザーバーの生成
+                    const eqHtml = Array.from({length: 12}, (_, i) => {
+                        const h = 30 + Math.random() * 70;
+                        return `<div class="eq-bar eq-active" style="height: ${h}%; animation-delay: ${i * 0.08}s"></div>`;
+                    }).join('');
+                    
+                    const searchKw = t.searchKey || t.title.substring(0, 8);
+
                     return `
                         <article class="trend-card">
                             <div class="label-badge label-${t.label}">${t.label}</div>
@@ -404,24 +494,38 @@
                             <h3>${t.vibesTitle || t.title}</h3>
                             <p class="desc">${t.desc}</p>
                             <div class="btn-group">
-                                <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="btn btn-analyze">詳細を見る</a>
-                                <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(kw)}&tag=mattan0290c-22" target="_blank" class="btn btn-shop">Shop ✨</a>
+                                <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="btn btn-analyze">
+                                    <span>🔍</span> 詳細をチェック
+                                </a>
+                                <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(searchKw)}&tag=mattan0290c-22" target="_blank" class="btn btn-shop">
+                                    <span>✨</span> 関連をShop
+                                </a>
                             </div>
-                            <div class="footer-info">HEAT: ${t.traffic}</div>
+                            <div class="footer-info">バイブス熱量: ${t.traffic} | 検出: ${t.firstSeen}</div>
                         </article>`;
                 }).join('');
 
+                // 墓場の生成
                 document.getElementById('grave-list').innerHTML = (db.graveyard || []).map(g => 
-                    `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">† ${g.title.substring(0, 18)}...</a>`
+                    `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">
+                        † ${g.title.substring(0, 22)}${g.title.length > 22 ? '...' : ''}
+                    </a>`
                 ).join('');
 
             } catch (e) { 
-                console.error(e); 
+                console.error('Vibes Load Error:', e);
+                document.getElementById('loading').innerText = 'ERROR: VIBES DISCONNECTED';
             }
         }
 
+        // リサイズ対応
+        window.addEventListener('resize', () => { 
+            canvas.width = window.innerWidth; 
+            canvas.height = window.innerHeight; 
+        });
+
+        // 実行
         load();
-        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
     </script>
 </body>
 </html>
