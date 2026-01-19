@@ -25,10 +25,10 @@
             min-height: 100vh;
         }
 
-        /* 背景演出用キャンバス：透明度を上げ、ハッシュタグを見やすく調整 */
+        /* 背景演出用キャンバス：ハッシュタグの色をさらに濃く設定 */
         #connect-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; opacity: 0.6; 
+            z-index: -1; opacity: 0.8; 
         }
 
         .layout { 
@@ -111,21 +111,34 @@
         .grave-item { display: block; padding: 10px; color: #718096; text-decoration: none; font-size: 0.85rem; border-radius: 8px; transition: 0.2s; }
         .grave-item:hover { background: rgba(0,0,0,0.02); color: var(--accent-pink); }
 
-        /* モバイルレイアウト修正：文字サイズをさらに最適化 */
+        /* モバイルレイアウト修正：文字サイズアップ & 枠（padding）を縮小 */
         @media (max-width: 1200px) {
-            .layout { grid-template-columns: 1fr; padding: 15px; }
+            .layout { grid-template-columns: 1fr; padding: 10px; } /* 余白削減 */
             .sidebar { display: none; }
             header { margin-bottom: 20px; }
-            .hero-title { font-size: 2.2rem; } /* 少し小さく */
-            .hero-subtitle { font-size: 0.8rem; }
-            .trend-card-container { height: auto; min-height: 600px; margin-bottom: 20px; }
-            .front, .back { position: relative; width: 100%; height: auto; min-height: 600px; padding: 20px; }
+            .hero-title { font-size: 2.8rem; } 
+            .hero-subtitle { font-size: 0.9rem; }
+            
+            .trend-card-container { height: auto; min-height: 620px; margin-bottom: 15px; }
+            .front, .back { 
+                position: relative; width: 100%; height: auto; min-height: 620px; 
+                padding: 15px; /* 枠を小さく */
+                border-radius: 16px; 
+            }
             .back { position: absolute; top: 0; left: 0; height: 100%; }
-            .trend-title { font-size: 1.6rem; } /* 少し小さく */
-            .trend-desc { font-size: 0.9rem; }
-            .vibes-memo { font-size: 0.95rem; }
-            .btn-group { flex-direction: column; }
-            .btn { width: 100%; }
+            
+            .trend-title { font-size: 2.0rem; } /* 文字を大きく */
+            .trend-desc { font-size: 1.05rem; } /* 文字を大きく */
+            .vibes-memo { font-size: 1.1rem; padding: 10px; } /* 文字を大きく */
+            .summary-text { font-size: 1.0rem; } /* 文字を大きく */
+            
+            .btn-group { flex-direction: column; gap: 8px; }
+            .btn { width: 100%; padding: 14px; font-size: 1.0rem; }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title { font-size: 2.4rem; }
+            .trend-title { font-size: 1.8rem; }
         }
     </style>
 </head>
@@ -184,7 +197,7 @@
                 text: '#' + t, 
                 vx: (Math.random() - 0.5) * 1.5, 
                 vy: (Math.random() - 0.5) * 1.5, 
-                size: Math.random() * 8 + 14
+                size: Math.random() * 8 + 16
             }));
             animate();
         }
@@ -196,8 +209,8 @@
                 if (d.x < 0 || d.x > canvas.width) d.vx *= -1; 
                 if (d.y < 0 || d.y > canvas.height) d.vy *= -1;
                 ctx.font = `bold ${d.size}px Arial`; 
-                // 色を濃く修正
-                ctx.fillStyle = 'rgba(255, 143, 197, 0.5)';
+                // 色の濃度をさらにアップ (不透明度 0.7)
+                ctx.fillStyle = 'rgba(255, 143, 197, 0.7)';
                 ctx.fillText(d.text, d.x, d.y);
             });
             requestAnimationFrame(animate);
