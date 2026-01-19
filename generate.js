@@ -92,12 +92,19 @@ async function main() {
             lastUpdate: displayTime
         };
 
-        // 修正：アーカイブページの生成（常に最新のindex.htmlのデザインを上書き適用）
-        const archivePath = path.join(ARCHIVE_DIR, `${dateKey}.html`);
+        // --- アーカイブ更新ロジック ---
         if (fs.existsSync(INDEX_PATH)) {
             const template = fs.readFileSync(INDEX_PATH, 'utf8');
-            fs.writeFileSync(archivePath, template, 'utf8');
-            console.log(`ARCHIVE UPDATED: ${dateKey}.html with latest design.`);
+            
+            // 1. 今日のアーカイブを作成
+            fs.writeFileSync(path.join(ARCHIVE_DIR, `${dateKey}.html`), template, 'utf8');
+
+            // 2. 【重要】過去の全アーカイブファイルも最新デザイン(template)で上書きする
+            const files = fs.readdirSync(ARCHIVE_DIR).filter(f => f.endsWith('.html'));
+            files.forEach(file => {
+                fs.writeFileSync(path.join(ARCHIVE_DIR, file), template, 'utf8');
+            });
+            console.log(`✅ All ${files.length} archives updated with latest design.`);
         }
 
         if (fs.existsSync(ARCHIVE_DIR)) {
@@ -105,7 +112,7 @@ async function main() {
         }
 
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2), 'utf8');
-        console.log(`SUCCESS: DB Updated & Archive generated for ${dateKey}`);
+        console.log(`SUCCESS: DB Updated & Architecture synced for ${dateKey}`);
     } catch (e) { console.error(e); }
 }
 main();
