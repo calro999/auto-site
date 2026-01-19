@@ -19,16 +19,22 @@ const VIBES_MEMOS = {
     FLASH: ["待って、速報すぎて思考停止したんだがｗ🚨", "今すぐチェックしないと置いてかれるよ！", "爆速すぎてバイブス追いつかないｗ"]
 };
 
+// 【重要】HTMLタグを完全に排除する関数
 function cleanText(text) {
     if (!text) return "";
+    // 1. タグを消す 2. 実体参照(amp等)を戻す 3. 複数の空白を1つに 4. ニュースソース名以降(RSSゴミ)をカット
     let cleaned = text.replace(/<[^>]*>?/gm, '');
     cleaned = cleaned.replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-    return cleaned.replace(/\s+/g, ' ').trim();
+    // ニュースリンクの残骸を消す（日経新聞などのソース名で切る工夫）
+    const sources = ["日本経済新聞", "Reuters", "AFPBB", "CNN", "WSJ", "Yahoo"];
+    sources.forEach(s => {
+        if(cleaned.includes(s)) cleaned = cleaned.split(s)[0];
+    });
+    return cleaned.trim();
 }
 
 function createSlug(text) {
-    let slug = text.replace(/[^\w\s]/gi, '').split(/\s+/).filter(w => w.length > 0).slice(0, 5).join('-').toLowerCase();
-    return slug || Date.now().toString();
+    return text.replace(/[^\w\s]/gi, '').split(/\s+/).filter(w => w.length > 0).slice(0, 5).join('-').toLowerCase() || Date.now().toString();
 }
 
 async function generateVibeImage(title, slug) {
@@ -38,83 +44,61 @@ async function generateVibeImage(title, slug) {
     grad.addColorStop(0, '#FF0080'); grad.addColorStop(1, '#7928CA');
     ctx.fillStyle = grad; ctx.fillRect(0, 0, 1200, 630);
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 50px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(title.substring(0, 20), 600, 315);
-    ctx.font = 'bold 25px sans-serif';
-    ctx.fillText('GAL-INTEL VERIFIED', 600, 560);
-    const buffer = canvas.toBuffer('image/png');
+    ctx.font = 'bold 50px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(title.substring(0, 22), 600, 315);
+    ctx.font = 'bold 25px sans-serif'; ctx.fillText('GAL-INTEL VERIFIED VIBE', 600, 560);
     const fileName = `${slug}.png`;
-    fs.writeFileSync(path.join(IMAGE_DIR, fileName), buffer);
+    fs.writeFileSync(path.join(IMAGE_DIR, fileName), canvas.toBuffer('image/png'));
     return `https://raw.githubusercontent.com/calro999/auto-site/main/images/${fileName}`;
 }
 
 async function main() {
     try {
         let oldDb = { current: [], graveyard: [], tags: [], archiveList: [], dictionary: [] };
-        if (fs.existsSync(DATA_FILE)) {
-            try { oldDb = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); } catch(e){}
-        }
+        if (fs.existsSync(DATA_FILE)) oldDb = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
 
         const SOURCES = [
             { name: 'GNews', url: 'https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja', genre: 'GENERAL' },
             { name: 'Gizmodo', url: 'https://www.gizmodo.jp/index.xml', genre: 'SUB_CULTURE' }
         ];
 
-        let allTrends = [];
-        const rssFetch = (url) => new Promise((res, rej) => {
-            https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (r) => {
-                let d = ''; r.on('data', chunk => d += chunk); r.on('end', () => res(d));
-            }).on('error', rej);
-        });
+        let trends = [];
+        const fetchRSS = (url) => new Promise((res) => https.get(url, (r) => { let d = ''; r.on('data', c => d += c); r.on('end', () => res(d)); }));
 
         for (const s of SOURCES) {
-            const rss = await rssFetch(s.url);
-            const items = rss.split('<item>').slice(1, 15);
+            const xml = await fetchRSS(s.url);
+            const items = xml.split('<item>').slice(1, 15);
             for (const item of items) {
                 let title = cleanText(item.split('<title>')[1]?.split('</title>')[0] || "");
                 let desc = cleanText(item.split('<description>')[1]?.split('</description>')[0] || "");
                 if (!title || FORBIDDEN_WORDS.some(w => title.includes(w))) continue;
-                allTrends.push({ title, desc, genre: s.genre });
+                trends.push({ title, desc, genre: s.genre });
             }
         }
 
         const now = new Date(new Date().getTime() + (9 * 60 * 60 * 1000));
-        const dateKey = now.toISOString().split('T')[0].replace(/-/g, '');
-        
         let processed = [];
-        const templateHTML = fs.readFileSync(INDEX_PATH, 'utf8');
+        const template = fs.readFileSync(INDEX_PATH, 'utf8');
 
-        for (let t of allTrends.slice(0, 10)) {
+        for (let t of trends.slice(0, 10)) {
             const slug = createSlug(t.title);
             const aiImage = await generateVibeImage(t.title, slug);
-            const memos = VIBES_MEMOS[t.genre] || VIBES_MEMOS.GENERAL;
-            const item = {
-                ...t, slug, aiImage,
-                memo: memos[Math.floor(Math.random() * memos.length)],
-                aiSummary: `${t.title}について。これは今マジで注目のトレンドだよ✨ AI検索も推奨するレベル。`,
-            };
+            const item = { ...t, slug, aiImage, memo: VIBES_MEMOS[t.genre][Math.floor(Math.random() * VIBES_MEMOS[t.genre].length)], aiSummary: `${t.title}のバイブスまとめ。今これを知らないのはマジでもったいないレベル。` };
             processed.push(item);
-
-            // 【特設ページ生成】
-            const singlePageHTML = templateHTML.replace('intelligence_db.json', '../intelligence_db.json');
-            fs.writeFileSync(path.join(ARCHIVE_DIR, `${slug}.html`), singlePageHTML);
+            // 物理特設ページの生成
+            fs.writeFileSync(path.join(ARCHIVE_DIR, `${slug}.html`), template.replace('intelligence_db.json', '../intelligence_db.json'));
         }
 
         const db = {
             current: processed,
-            graveyard: (oldDb.current || []).concat(oldDb.graveyard || []).slice(0, 40),
+            graveyard: (oldDb.current || []).concat(oldDb.graveyard || []).slice(0, 50),
             tags: Array.from(new Set(processed.map(p => p.title.split(/[ 　]/)[0]))).slice(0, 15),
-            dictionary: processed.slice(0, 8).map(p => ({ word: p.title.split(/[ 　]/)[0], mean: "今キテるアツい言葉。" })),
-            archiveList: Array.from(new Set([dateKey, ...(oldDb.archiveList || [])])).slice(0, 30),
+            dictionary: processed.slice(0, 8).map(p => ({ word: p.title.split(/[ 　]/)[0], mean: "今注目されている最先端ワード。" })),
             lastUpdate: now.toLocaleString('ja-JP')
         };
 
-        // 1日まとめページ
-        fs.writeFileSync(path.join(ARCHIVE_DIR, `${dateKey}.html`), templateHTML.replace('intelligence_db.json', '../intelligence_db.json'));
-
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2), 'utf8');
-        console.log("v2 DB, Images & Archive Pages Created.");
+        console.log("v2 COMPLETE_UPDATE: Designs, Images, and Archives ready.");
     } catch (e) { console.error(e); }
 }
 main();

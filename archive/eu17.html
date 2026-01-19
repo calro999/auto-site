@@ -3,59 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAL-INTEL v2</title>
+    <title>GAL-INTEL | v2 VIBE_CHECK</title>
     <style>
         :root { 
             --bg: #F8F9FA; --text: #1A202C; --accent-pink: #FF0080; --accent-blue: #7928CA; 
             --card-bg: #FFFFFF; --border: #E2E8F0; --glass: rgba(255, 255, 255, 0.9);
         }
-        * { box-sizing: border-box; }
-        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; padding: 0; }
+
+        * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        body { 
+            background: var(--bg); color: var(--text); font-family: 'Helvetica Neue', sans-serif; 
+            margin: 0; padding: 0; overflow-x: hidden;
+        }
+
+        /* 背景アニメ：復活 */
         #connect-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.8; }
-        
+
         .layout { 
-            display: grid; grid-template-columns: 260px 1fr 260px; gap: 20px; 
-            max-width: 1400px; margin: 0 auto; padding: 20px;
+            display: grid; grid-template-columns: 280px 1fr 280px; gap: 30px; 
+            max-width: 1500px; margin: 0 auto; padding: 30px;
         }
 
         /* サイドバー */
-        .sidebar { display: flex; flex-direction: column; gap: 20px; }
-        .glass-box { background: var(--glass); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; border: 1px solid var(--border); }
-        .box-title { font-size: 0.7rem; font-weight: 900; color: #718096; margin-bottom: 12px; }
+        .sidebar { position: sticky; top: 30px; height: calc(100vh - 60px); display: flex; flex-direction: column; gap: 20px; }
+        .glass-box { 
+            background: var(--glass); backdrop-filter: blur(15px); border-radius: 25px; 
+            padding: 25px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        }
+        .box-title { font-size: 0.75rem; font-weight: 900; color: #A0AEC0; letter-spacing: 2px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
 
-        /* カードの高さ問題を解決 */
-        .trend-card-container { perspective: 1000px; margin-bottom: 30px; width: 100%; height: auto; min-height: 500px; }
+        /* メインヘッダー */
+        header { text-align: center; margin-bottom: 40px; }
+        .hero-title { 
+            font-size: 4rem; font-weight: 900; margin: 0; letter-spacing: -3px;
+            background: linear-gradient(135deg, var(--accent-pink), var(--accent-blue));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        /* 3Dカード：完全復元 */
+        .trend-card-container { perspective: 2000px; margin-bottom: 30px; width: 100%; min-height: 550px; }
         .trend-card-inner { 
-            position: relative; width: 100%; height: 100%; min-height: 500px;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; 
+            position: relative; width: 100%; height: 100%; min-height: 550px;
+            transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .trend-card-container.flipped .trend-card-inner { transform: rotateY(180deg); }
 
         .front, .back { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; backface-visibility: hidden; 
-            background: var(--card-bg); border-radius: 30px; padding: 30px; border: 1px solid var(--border);
-            display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+            position: absolute; inset: 0; backface-visibility: hidden; 
+            background: var(--card-bg); border-radius: 40px; padding: 45px; 
+            border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.04);
+            display: flex; flex-direction: column;
         }
-        .back { transform: rotateY(180deg); overflow-y: auto; }
+        .back { transform: rotateY(180deg); background: #fafafa; overflow-y: auto; }
 
-        .ai-image-wrap { width: 100%; height: 220px; background: #000; border-radius: 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; }
-        .ai-image-wrap img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        /* イコライザー：リッチ版復活 */
+        .eq-container { display: flex; gap: 5px; height: 50px; align-items: flex-end; margin-bottom: 25px; }
+        .eq-bar { 
+            width: 7px; border-radius: 10px; 
+            background: linear-gradient(to top, var(--accent-blue), var(--accent-pink));
+            animation: eq-wave 0.6s infinite alternate ease-in-out;
+        }
 
-        /* モバイル対応 */
+        @keyframes eq-wave { from { height: 10%; } to { height: 100%; } }
+
+        /* 装飾 */
+        .vibes-memo { 
+            background: #F7FAFC; border-left: 8px solid var(--accent-pink); padding: 20px 25px;
+            border-radius: 15px; font-weight: 800; font-size: 1.2rem; font-style: italic; margin-bottom: 25px;
+        }
+
+        .ai-image-wrap { 
+            width: 100%; height: 250px; background: #000; border-radius: 25px; 
+            margin-bottom: 20px; display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+        .ai-image-wrap img { width: 100%; height: 100%; object-fit: contain; }
+
+        /* ボタン */
+        .btn-group { display: flex; gap: 15px; margin-top: auto; }
+        .btn { 
+            padding: 16px 28px; border-radius: 18px; font-weight: 900; text-decoration: none;
+            display: inline-flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; border: none; flex: 1;
+        }
+        .btn-pink { background: var(--accent-pink); color: white; box-shadow: 0 10px 20px rgba(255,0,128,0.2); }
+        .btn-dark { background: var(--text); color: white; }
+
+        /* モバイル対応：バグ修正版 */
         @media (max-width: 1100px) {
-            .layout { grid-template-columns: 1fr; }
+            .layout { grid-template-columns: 1fr; padding: 15px; }
             .sidebar { display: none; }
-            .trend-card-container { min-height: 600px; }
+            .hero-title { font-size: 2.8rem; }
+            .trend-card-container { min-height: 650px; }
+            .front, .back { padding: 30px; }
         }
-
-        .hero-title { font-size: 3rem; font-weight: 900; text-align: center; background: linear-gradient(to right, var(--accent-pink), var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .btn { padding: 15px; border-radius: 15px; font-weight: 900; text-decoration: none; display: block; text-align: center; margin-top: 10px; cursor: pointer; border: none; font-size: 0.9rem; }
-        .btn-blue { background: var(--accent-blue); color: white; }
-        .btn-outline { background: #f1f1f1; color: #333; }
-        
-        .vibes-memo { border-left: 6px solid var(--accent-pink); padding-left: 15px; margin-bottom: 15px; font-weight: 900; font-style: italic; font-size: 1.1rem; }
-        .eq-bar { width: 6px; background: var(--accent-pink); display: inline-block; margin-right: 3px; animation: eq 0.6s infinite alternate; }
-        @keyframes eq { from { height: 5px; } to { height: 30px; } }
     </style>
 </head>
 <body>
@@ -63,22 +102,27 @@
     <div class="layout">
         <aside class="sidebar">
             <div class="glass-box">
-                <div class="box-title">🔥 HOT_WORDS</div>
-                <div id="word-ranking"></div>
+                <div class="box-title">🔥 HOT_TAGS</div>
+                <div id="word-ranking" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
             </div>
             <div class="glass-box">
-                <div class="box-title">📖 DICT</div>
+                <div class="box-title">📖 VIBE_DICTIONARY</div>
                 <div id="vibes-dict"></div>
             </div>
         </aside>
+
         <main>
-            <h1 class="hero-title">GAL-INTEL</h1>
+            <header>
+                <h1 class="hero-title">GAL-INTEL</h1>
+                <p style="font-weight:900; color:var(--accent-blue); letter-spacing:5px;">AI-SEARCH_ENGINE_OPTIMIZED</p>
+            </header>
             <div id="trend-list"></div>
         </main>
+
         <aside class="sidebar">
             <div class="glass-box">
-                <div class="box-title">🔄 SYNC</div>
-                <div id="sync-info"></div>
+                <div class="box-title">🔄 SYNC_STATUS</div>
+                <div id="sync-info" style="font-weight:900; font-size:0.9rem;"></div>
             </div>
             <div class="glass-box">
                 <div class="box-title">💀 GRAVEYARD</div>
@@ -88,39 +132,72 @@
     </div>
 
     <script>
+        const canvas = document.getElementById('connect-bg');
+        const ctx = canvas.getContext('2d');
         const DB_URL = '../intelligence_db.json';
+        let dots = [];
+
+        function initBg(tags) {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            dots = (tags || []).map(t => ({
+                x: Math.random() * canvas.width, y: Math.random() * canvas.height, 
+                text: '#' + t, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5
+            }));
+            animate();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            dots.forEach(d => {
+                d.x += d.vx; d.y += d.vy;
+                if (d.x < 0 || d.x > canvas.width) d.vx *= -1; 
+                if (d.y < 0 || d.y > canvas.height) d.vy *= -1;
+                ctx.font = 'bold 14px Arial'; ctx.fillStyle = 'rgba(121, 40, 202, 0.2)';
+                ctx.fillText(d.text, d.x, d.y);
+            });
+            requestAnimationFrame(animate);
+        }
+
         async function load() {
             const res = await fetch(DB_URL + '?t=' + Date.now());
             const db = await res.json();
-            document.getElementById('sync-info').innerText = db.lastUpdate;
-            document.getElementById('word-ranking').innerHTML = (db.tags || []).map(t => `<span style="display:inline-block; background:#eee; padding:5px 10px; border-radius:10px; font-size:0.7rem; margin:2px;">#${t}</span>`).join('');
-            document.getElementById('grave-list').innerHTML = (db.graveyard || []).map(g => `<div style="font-size:0.8rem; border-bottom:1px solid #eee; padding:5px 0;">${g.title.substring(0,30)}...</div>`).join('');
+            document.getElementById('sync-info').innerText = 'LAST_UPDATE: ' + db.lastUpdate;
+            initBg(db.tags);
+
+            document.getElementById('word-ranking').innerHTML = (db.tags || []).map(t => `<span style="background:#edf2f7; padding:6px 12px; border-radius:12px; font-size:0.75rem; font-weight:700;">#${t}</span>`).join('');
+            document.getElementById('grave-list').innerHTML = (db.graveyard || []).map(g => `<div style="font-size:0.8rem; border-bottom:1px solid #f0f0f0; padding:8px 0; color:#718096;">⚡️ ${g.title.substring(0,25)}...</div>`).join('');
             
-            document.getElementById('trend-list').innerHTML = (db.current || []).map((t, idx) => `
-                <div class="trend-card-container" id="card-${idx}">
+            document.getElementById('trend-list').innerHTML = (db.current || []).map((t, idx) => {
+                const eqBars = Array.from({length: 12}, (_, i) => `<div class="eq-bar" style="animation-delay:${i*0.05}s; height:${10+Math.random()*90}%"></div>`).join('');
+                return `
+                <div class="trend-card-container" id="c-${idx}">
                     <div class="trend-card-inner">
                         <div class="front">
                             <div class="vibes-memo">“ ${t.memo} ”</div>
-                            <div style="margin-bottom:15px;"><div class="eq-bar"></div><div class="eq-bar" style="animation-delay:0.1s"></div><div class="eq-bar" style="animation-delay:0.2s"></div></div>
-                            <h3 style="margin:0 0 15px 0;">${t.title}</h3>
-                            <p style="color:#666; font-size:0.95rem; flex-grow:1;">${t.desc}</p>
-                            <div class="btn btn-blue" onclick="document.getElementById('card-${idx}').classList.toggle('flipped')">🔄 裏面をチェック</div>
+                            <div class="eq-container">${eqBars}</div>
+                            <h2 style="font-size:1.8rem; font-weight:900; margin:0 0 15px 0; line-height:1.2;">${t.title}</h2>
+                            <p style="color:#4A5568; font-size:1rem; flex-grow:1; line-height:1.6;">${t.desc}</p>
+                            <div class="btn-group">
+                                <div class="btn btn-pink" onclick="document.getElementById('c-${idx}').classList.toggle('flipped')">🔄 裏面をチェック</div>
+                            </div>
                         </div>
                         <div class="back">
                             <div class="ai-image-wrap"><img src="${t.aiImage}"></div>
-                            <div style="background:#f9f9f9; padding:15px; border-radius:15px; margin-bottom:15px;">
-                                <strong>【AI要約】</strong><br><span style="font-size:0.9rem;">${t.aiSummary}</span>
+                            <div style="background:#fff; border:1px solid #eee; padding:20px; border-radius:20px; margin-bottom:20px; box-shadow:inset 0 2px 4px rgba(0,0,0,0.02);">
+                                <strong style="color:var(--accent-pink); font-size:0.8rem;">AI_INSIGHT:</strong><br>
+                                <p style="font-size:0.95rem; color:#2D3748; margin:5px 0 0 0; font-weight:600;">${t.aiSummary}</p>
                             </div>
-                            <div style="display:flex; gap:10px;">
-                                <a href="archive/${t.slug}.html" class="btn btn-blue" style="flex:1">📖 特設ページ</a>
-                                <div class="btn btn-outline" style="flex:1" onclick="document.getElementById('card-${idx}').classList.toggle('flipped')">🔙 戻る</div>
+                            <div class="btn-group">
+                                <a href="archive/${t.slug}.html" class="btn btn-pink">📖 特設ページ</a>
+                                <div class="btn btn-dark" onclick="document.getElementById('c-${idx}').classList.toggle('flipped')">🔙 戻る</div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         }
         load();
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
     </script>
 </body>
 </html>
