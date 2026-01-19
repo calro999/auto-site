@@ -1,7 +1,7 @@
 /**
- * GAL-INTEL generate.js v2.6 - SYSTEM_SYNC_EDITION
- * 役割: RSS取得、不適切ワードフィルタ、AI画像生成、物理アーカイブ生成
- * 修正: index.htmlの「裏面ボタン」との連携を完全復旧し、本文の過剰削除を防止。
+ * GAL-INTEL generate.js v3.0 - ULTIMATE_CLEAN_SYNC
+ * 役割: RSS取得、不適切ワードフィルタ、完全HTML破壊ロジック
+ * 修正: index.htmlのカード裏面を復活させるため、desc内のあらゆるHTMLコードを物理的に排除。
  */
 
 const fs = require('fs');
@@ -14,7 +14,7 @@ const DATA_FILE = './intelligence_db.json';
 const INDEX_PATH = './index.html';
 const ARCHIVE_DIR = './archive';
 const IMAGE_DIR = './images';
-const MAX_DESC_LENGTH = 200; // 詳細が消えないよう、少し長めに確保
+const MAX_DESC_LENGTH = 150; 
 
 if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR);
 if (!fs.existsSync(IMAGE_DIR)) fs.mkdirSync(IMAGE_DIR);
@@ -27,26 +27,51 @@ const FORBIDDEN_WORDS = [
 ];
 
 const VIBES_MEMOS = {
-    GENERAL: [
-        "これ知らんとマジで時代遅れ感あるよね✨",
-        "ニュースの勢いエグくて草ｗ",
-        "バイブスぶち上げ案件キタこれ！",
-        "マジで神展開すぎて震えるｗ",
-        "全人類チェック必須のバイブス、感じて？"
-    ],
-    SUB_CULTURE: [
-        "これ界隈で絶対バズるやつじゃん！💖",
-        "センス良すぎてバイブス伝わるわ〜",
-        "推し活捗りすぎて幸せ案件",
-        "世界観強すぎて語彙力失ったｗ",
-        "エモすぎて無理。語彙力死んだ。"
-    ]
+    GENERAL: ["これ知らんとマジで時代遅れ感あるよね✨", "ニュースの勢いエグくて草ｗ", "バイブスぶち上げ案件キタこれ！", "マジで神展開すぎて震えるｗ", "全人類チェック必須のバイブス、感じて？"],
+    SUB_CULTURE: ["これ界隈で絶対バズるやつじゃん！💖", "センス良すぎてバイブス伝わるわ〜", "推し活捗りすぎて幸せ案件", "世界観強すぎて語彙力失ったｗ", "エモすぎて無理。語彙力死んだ。"]
 };
+
+/**
+ * 【最重要】あらゆるHTMLタグ・エンティティを破壊する関数
+ */
+function ultimateClean(text) {
+    if (!text) return "";
+    let cleaned = String(text);
+
+    // 1. CDATAセクションの除去
+    cleaned = cleaned.replace(/<!\[CDATA\[/g, '').replace(/\]\]>/g, '');
+
+    // 2. HTMLエンティティ（&lt; 等）を通常の記号（< 等）に一旦戻す
+    cleaned = cleaned.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&nbsp;/g, ' ');
+
+    // 3. 全てのHTMLタグ（<...属性...>）を削除し、空白に置き換える
+    // これにより <ol><li><a>タグがURLごと消滅します
+    cleaned = cleaned.replace(/<[^>]*>?/gm, ' ');
+
+    // 4. 残った特殊記号やURLの断片を掃除
+    cleaned = cleaned.replace(/https?:\/\/[\x21-\x7e]+/gi, ''); // URLそのものを削除
+    cleaned = cleaned.replace(/Google ニュースですべて表示/g, '');
+    cleaned = cleaned.replace(/続きを読む/g, '');
+
+    // 5. 連続する空白・改行を1つにまとめる
+    cleaned = cleaned.replace(/\s+/g, ' ').trim();
+
+    // 6. 文字数制限
+    if (cleaned.length > MAX_DESC_LENGTH) {
+        cleaned = cleaned.substring(0, MAX_DESC_LENGTH) + '...';
+    }
+
+    // 7. 最低限のテキスト担保（裏面が消えないように）
+    if (cleaned.length < 10) {
+        cleaned = "最新トレンドの詳細をチェック！バイブス上がる情報が盛りだくさん✨";
+    }
+
+    return cleaned;
+}
 
 function ensureString(input) {
     if (input === undefined || input === null) return "";
-    let val = Array.isArray(input) ? input[0] : input;
-    return String(val).trim();
+    return String(Array.isArray(input) ? input[0] : input).trim();
 }
 
 function wrapText(text, maxLen = 12) {
@@ -76,52 +101,15 @@ async function generateVibeImage(title, slug) {
     const lines = wrapText(title, 12);
     lines.forEach((line, i) => { ctx.fillText(line, width / 2, 250 + (i * 100)); });
     ctx.font = 'bold 20px monospace';
-    ctx.fillText(`GAL-INTEL v2 // VIBE_ID: ${ensureString(slug).toUpperCase()}`, width / 2, height - 50);
+    ctx.fillText(`GAL-INTEL v3 // VIBE_ID: ${ensureString(slug).toUpperCase()}`, width / 2, height - 50);
     const buffer = canvas.toBuffer('image/png');
     const fileName = `${ensureString(slug)}.png`;
     fs.writeFileSync(path.join(IMAGE_DIR, fileName), buffer);
     return `https://raw.githubusercontent.com/calro999/auto-site/main/images/${fileName}`;
 }
 
-// 修正されたクレンジング関数（必要な情報を残し、リンク集だけ消す）
-function cleanText(text) {
-    let cleaned = ensureString(text);
-    
-    // HTMLタグ除去
-    cleaned = cleaned.replace(/<[^>]*>?/gm, '');
-    
-    // 特殊文字置換
-    cleaned = cleaned.replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-    
-    // リンク集や不要な末尾のみを削除（本文が残るように調整）
-    const trashPatterns = [
-        /【関連記事】.*/s,
-        /関連記事:.*/s,
-        /▼おすすめ記事.*/s,
-        /あわせて読みたい.*/s,
-        /外部サイトへ.*/s,
-        /©.*/s,
-        /Copyright.*/s
-    ];
-    trashPatterns.forEach(p => cleaned = cleaned.replace(p, ''));
-
-    // 最低限の本文を担保（空になった場合のフォールバック）
-    if (cleaned.length < 5) {
-        cleaned = "詳細情報は公式サイトをチェック！トレンドの波に乗るしかない✨";
-    }
-
-    // 文字数制限
-    if (cleaned.length > MAX_DESC_LENGTH) {
-        cleaned = cleaned.substring(0, MAX_DESC_LENGTH) + '...';
-    }
-
-    return cleaned.trim();
-}
-
 function createSlug(text) {
-    const safeText = ensureString(text);
-    let slug = safeText.replace(/[^\w\s]/gi, '').split(/\s+/).filter(w => w.length > 0).slice(0, 5).join('-').toLowerCase();
-    return slug || Date.now().toString();
+    return ensureString(text).replace(/[^\w\s]/gi, '').split(/\s+/).filter(w => w.length > 0).slice(0, 5).join('-').toLowerCase() || Date.now().toString();
 }
 
 const fetchRSS = (url) => new Promise((resolve, reject) => {
@@ -133,7 +121,7 @@ const fetchRSS = (url) => new Promise((resolve, reject) => {
 });
 
 async function main() {
-    console.log("🚀 Starting GAL-INTEL v2.6 (Sync Edition)...");
+    console.log("🚀 Starting GAL-INTEL v3.0: ULTIMATE CLEAN BUILD...");
     try {
         let db = { current: [], graveyard: [], tags: [], archiveList: [], dictionary: [] };
         if (fs.existsSync(DATA_FILE)) db = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
@@ -148,8 +136,11 @@ async function main() {
             const xml = await fetchRSS(s.url);
             const items = xml.split('<item>').slice(1, 15);
             for (const item of items) {
-                let title = cleanText(item.split('<title>')[1]?.split('</title>')[0] || "");
-                let desc = cleanText(item.split('<description>')[1]?.split('</description>')[0] || "");
+                let rawTitle = item.split('<title>')[1]?.split('</title>')[0] || "";
+                let title = ultimateClean(rawTitle);
+
+                let rawDesc = item.split('<description>')[1]?.split('</description>')[0] || "";
+                let desc = ultimateClean(rawDesc); // descriptionを強制クリーン
                 
                 if (!title || FORBIDDEN_WORDS.some(w => title.includes(w))) continue;
                 if (fetchedTrends.some(t => t.title === title)) continue;
@@ -168,16 +159,14 @@ async function main() {
             const aiImage = await generateVibeImage(t.title, slug);
             const memos = VIBES_MEMOS[t.genre] || VIBES_MEMOS.GENERAL;
             
-            // index.htmlのカード裏面は「desc」フィールドを表示するため、ここを確実に作成
-            const item = {
-                title: ensureString(t.title),
-                desc: ensureString(t.desc),
-                slug: ensureString(slug),
-                aiImage: ensureString(aiImage),
-                memo: ensureString(memos[Math.floor(Math.random() * memos.length)]),
-                aiSummary: `「${ensureString(t.title)}」バイブス解析完了。トレンド爆上がり中。`
-            };
-            processedCurrent.push(item);
+            processedCurrent.push({
+                title: t.title,
+                desc: t.desc, // ここが100%プレーンテキストになる
+                slug: slug,
+                aiImage: aiImage,
+                memo: memos[Math.floor(Math.random() * memos.length)],
+                aiSummary: `「${t.title}」バイブス解析完了。トレンド爆上がり中。`
+            });
             
             const singleHTML = templateHTML.replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json');
             fs.writeFileSync(path.join(ARCHIVE_DIR, `${slug}.html`), singleHTML);
@@ -186,16 +175,20 @@ async function main() {
         const finalDb = {
             current: processedCurrent,
             graveyard: [...processedCurrent, ...(db.graveyard || [])].slice(0, 100),
-            tags: Array.from(new Set(processedCurrent.map(p => ensureString(p.title).split(/[ 　]/)[0]))).slice(0, 25),
-            dictionary: processedCurrent.map(p => ({ word: ensureString(p.title).split(/[ 　]/)[0], mean: "注目のトレンドワード。" })).slice(0, 15),
+            tags: Array.from(new Set(processedCurrent.map(p => p.title.split(/[ 　]/)[0]))).slice(0, 25),
+            dictionary: processedCurrent.map(p => ({ word: p.title.split(/[ 　]/)[0], mean: "注目のトレンドワード。" })),
             archiveList: Array.from(new Set([dateKey, ...(db.archiveList || [])])).slice(0, 31),
             lastUpdate: now.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) + ' JST'
         };
 
         fs.writeFileSync(path.join(ARCHIVE_DIR, `${dateKey}.html`), templateHTML.replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json'));
         fs.writeFileSync(DATA_FILE, JSON.stringify(finalDb, null, 2), 'utf8');
-        console.log("✅ Build Complete! Sync with index.html is OK.");
-    } catch (e) { console.error("❌ Error:", e); process.exit(1); }
+        
+        console.log("✅ Build Success! JSON is now ULTIMATE CLEAN.");
+    } catch (e) { 
+        console.error("❌ Fatal Build Error:", e); 
+        process.exit(1); 
+    }
 }
 
 main();
