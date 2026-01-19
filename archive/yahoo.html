@@ -3,541 +3,382 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAL-INTEL | 世の中の「今」を、最速でバイブス変換。</title>
-    
-    <meta name="description" content="最新ニュースを最速バイブス変換。AI検索エンジン(Perplexity/SearchGPT)に特化した、世界一速いトレンド要約サイト。">
-    <meta name="keywords" content="ギャル語, ニュース要約, トレンド, AI検索, バイブス">
-    <meta property="og:title" content="GAL-INTEL | 今のトレンドをバイブスチェック">
-    <meta property="og:description" content="今の爆アツ話題を最速チェック！">
-    <meta property="og:image" content="https://raw.githubusercontent.com/calro999/auto-site/main/ogp-banner.png">
-    <meta name="twitter:card" content="summary_large_image">
-
+    <title>GAL-INTEL // ギャルの熱狂インテリジェンス</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ============================================================
-           CORE DESIGN SYSTEM
-           ============================================================ */
-        :root { 
-            --bg: #F8F9FA; 
-            --text: #1A202C; 
-            --accent-pink: #FF0080; 
-            --accent-blue: #7928CA; 
-            --card-bg: #FFFFFF; 
-            --border: #E2E8F0;
-            --glass: rgba(255, 255, 255, 0.95);
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-            --shadow-md: 0 10px 30px rgba(0,0,0,0.02);
-            --shadow-lg: 0 20px 40px rgba(0,0,0,0.04);
-            --font-main: 'Helvetica Neue', Arial, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+        :root {
+            --primary: #FF0080;
+            --secondary: #7928CA;
+            --dark: #000000;
+            --light: #FFFFFF;
+            --gray: #1A1A1A;
+            --neon-pink: #FF0080;
+            --neon-purple: #7928CA;
         }
 
-        * { 
-            box-sizing: border-box; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-        
-        body { 
-            background: var(--bg); 
-            color: var(--text); 
-            font-family: var(--font-main); 
-            margin: 0; 
-            padding: 0; 
-            overflow-x: hidden; 
+
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            overflow-x: hidden;
             line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
         }
 
-        /* BACKGROUND ANIMATION (Connect Logic) */
-        #connect-bg { 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            z-index: -1; 
-            opacity: 0.8; 
+        /* --- 背景演出 --- */
+        .bg-grid {
+            fixed: top 0 left 0;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(121, 40, 202, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(121, 40, 202, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: 50%; left: 50%;
+            width: 80vw; height: 80vw;
+            background: radial-gradient(circle, rgba(255, 0, 128, 0.1) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            z-index: -1;
             pointer-events: none;
         }
 
-        /* LAYOUT STRUCTURE */
-        .layout { 
-            display: grid; 
-            grid-template-columns: 280px 1fr 280px; 
-            gap: 30px; 
-            max-width: 1500px; 
-            margin: 0 auto; 
+        /* --- ヘッダー --- */
+        header {
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            background: linear-gradient(90deg, var(--neon-pink), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .last-update {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+            font-family: monospace;
+        }
+
+        /* --- メインコンテンツ --- */
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 40px 20px;
         }
 
-        /* SIDEBAR STYLING */
-        .sidebar { 
-            position: sticky; 
-            top: 40px; 
-            height: calc(100vh - 80px); 
-            display: flex; 
-            flex-direction: column; 
-            gap: 20px; 
+        /* --- カードグリッド --- */
+        .trend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
         }
 
-        .scroll-area { 
-            flex-grow: 1; 
-            overflow-y: auto; 
-            padding-right: 10px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 20px; 
+        /* --- カード反転アニメーション --- */
+        .trend-card-container {
+            perspective: 1000px;
+            height: 480px;
         }
 
-        .scroll-area::-webkit-scrollbar { width: 5px; }
-        .scroll-area::-webkit-scrollbar-track { background: transparent; }
-        .scroll-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-
-        .glass-box { 
-            background: var(--glass); 
-            backdrop-filter: blur(20px); 
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 25px; 
-            padding: 20px; 
-            border: 1px solid var(--border); 
-            box-shadow: var(--shadow-md);
-        }
-
-        .box-title { 
-            font-size: 0.7rem; 
-            font-weight: 900; 
-            color: #A0AEC0; 
-            text-transform: uppercase; 
-            margin-bottom: 15px; 
-            letter-spacing: 2px; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px;
-        }
-
-        .box-title::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: var(--accent-pink);
-            border-radius: 50%;
-        }
-
-        /* MAIN CONTENT & HEADER */
-        header { 
-            text-align: center; 
-            margin-bottom: 40px; 
-            animation: fadeInDown 0.8s ease-out;
-        }
-
-        .hero-title { 
-            font-size: 3.5rem; 
-            font-weight: 900; 
-            margin: 0; 
-            letter-spacing: -3px; 
-            background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-blue) 100%);
-            -webkit-background-clip: text; 
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 15px 30px rgba(255, 0, 128, 0.2));
-        }
-
-        .hero-subtitle {
-            font-size: 0.75rem;
-            font-weight: 900;
-            color: var(--accent-blue);
-            letter-spacing: 5px;
-            margin-top: 10px;
-            text-transform: uppercase;
-        }
-
-        /* TREND CARDS */
-        .main-feed { display: flex; flex-direction: column; gap: 30px; }
-
-        .trend-card-container { 
-            perspective: 2500px; 
-            min-height: 520px; 
+        .trend-card-inner {
+            position: relative;
             width: 100%;
+            height: 100%;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
         }
 
-        .trend-card-inner { 
-            position: relative; 
-            width: 100%; 
-            height: 100%; 
-            min-height: 520px;
-            transition: transform 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            transform-style: preserve-3d; 
+        .trend-card-container.flipped .trend-card-inner {
+            transform: rotateY(180deg);
         }
 
-        .trend-card-container.flipped .trend-card-inner { 
-            transform: rotateY(180deg); 
-        }
-
-        .front, .back { 
-            position: absolute; 
-            inset: 0; 
-            backface-visibility: hidden; 
-            background: var(--card-bg); 
-            border-radius: 40px; 
-            padding: 35px; 
-            border: 1px solid var(--border); 
-            box-shadow: var(--shadow-lg);
-            display: flex; 
-            flex-direction: column;
-            align-items: center; 
-            text-align: center;
-            overflow: hidden; 
-            min-height: 520px;
+        .front, .back {
+            position: absolute;
             width: 100%;
-        }
-
-        .back { 
-            transform: rotateY(180deg); 
-            background: #FAFAFA; 
-            overflow-y: auto; 
-            align-items: flex-start;
-            text-align: left;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
             padding: 30px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .vibes-memo { 
-            background: #F7FAFC; 
-            border-left: 8px solid var(--accent-pink);
-            padding: 15px 20px; 
-            border-radius: 15px; 
-            font-size: 1.1rem; 
-            font-weight: 800; 
-            margin-bottom: 20px; 
-            font-style: italic; 
-            color: #2D3748;
-            width: 100%;
-            overflow: hidden;
+        .front {
+            background: var(--gray);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .back {
+            background: linear-gradient(135deg, #2D0E45 0%, #000000 100%);
+            transform: rotateY(180deg);
+            overflow-y: auto;
+        }
+
+        /* --- フロントデザイン --- */
+        .vibes-memo {
+            color: var(--neon-pink);
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
-            line-clamp: 2; /* 標準プロパティ追加 */ 
+            line-clamp: 2;
             -webkit-box-orient: vertical;
-        }
-
-        .eq-container { 
-            display: flex; 
-            gap: 6px; 
-            height: 45px; 
-            align-items: flex-end; 
-            justify-content: center;
-            margin-bottom: 20px; 
-            width: 100%;
-        }
-
-        .eq-bar { 
-            width: 8px; 
-            background: linear-gradient(to top, var(--accent-blue), var(--accent-pink)); 
-            border-radius: 10px; 
-            animation: eq-pulse 0.6s ease-in-out infinite alternate;
-        }
-
-        .trend-title { 
-            font-size: 1.6rem; 
-            font-weight: 900; 
-            margin: 0 0 15px 0; 
-            color: var(--text); 
-            line-height: 1.2; 
-            letter-spacing: -0.5px;
-            width: 100%;
             overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2; 
-            line-clamp: 2; /* 標準プロパティ追加 */
-            -webkit-box-orient: vertical;
         }
 
-        .trend-desc { 
-            font-size: 0.95rem; 
-            color: #4A5568; 
-            margin-bottom: 25px; 
-            line-height: 1.6;
-            width: 100%;
+        .trend-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
             overflow: hidden;
+        }
+
+        .trend-desc {
+            font-size: 0.95rem;
+            color: #AAA;
+            margin-bottom: 20px;
+            flex-grow: 1;
             display: -webkit-box;
-            -webkit-line-clamp: 3; 
-            line-clamp: 3; /* 標準プロパティ追加 */
+            -webkit-line-clamp: 4;
+            line-clamp: 4;
             -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
-        /* BUTTONS */
-        .btn-group { 
-            display: flex; 
-            gap: 15px; 
-            margin-top: auto; 
-            width: 100%;
+        /* --- ボタン --- */
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
         }
 
-        .btn { 
-            padding: 15px 10px; 
-            border-radius: 18px; 
-            text-decoration: none; 
-            font-weight: 900; 
-            font-size: 0.85rem; 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 8px;
-            cursor: pointer; 
+        .btn {
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.3s;
             border: none;
-            flex: 1;
-            white-space: nowrap; 
         }
 
-        .btn-pink { 
-            background: var(--accent-pink); 
-            color: #fff; 
-            box-shadow: 0 10px 20px rgba(255,0,128,0.2); 
-        }
+        .btn-pink { background: var(--neon-pink); color: white; }
+        .btn-outline { border: 1px solid var(--neon-purple); color: var(--neon-purple); background: transparent; }
+        .btn-dark { background: rgba(255,255,255,0.1); color: white; margin-top: auto; }
+        .btn:hover { transform: translateY(-3px); opacity: 0.8; }
 
-        .btn-pink:hover { 
-            transform: translateY(-5px); 
-            box-shadow: 0 15px 30px rgba(255,0,128,0.3); 
-        }
-
-        .btn-amazon {
-            background: #FF9900;
-            color: #fff;
-            box-shadow: 0 10px 20px rgba(255,153,0,0.2);
-        }
-
-        .btn-amazon:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(255,153,0,0.3);
-        }
-
-        .btn-outline { 
-            background: #EDF2F7; 
-            color: #4A5568; 
-        }
-
-        .btn-dark {
-            background: var(--text);
-            color: #fff;
+        /* --- バックデザイン --- */
+        .ai-image-wrap {
             width: 100%;
-            margin-top: 20px;
-        }
-
-        /* ELEMENTS */
-        .ai-image-wrap { 
-            width: 100%; 
-            height: 250px; 
-            background: #000; 
-            border-radius: 25px; 
-            margin-bottom: 25px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
+            height: 180px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
-        .ai-image-wrap img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: contain; 
+        .ai-image-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .summary-box {
-            background: #FFFFFF;
-            border: 1px solid var(--border);
-            padding: 20px;
-            border-radius: 20px;
-            width: 100%;
-            text-align: left;
-            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 0.9rem;
         }
 
         .summary-label {
-            font-size: 0.65rem;
-            font-weight: 900;
-            color: var(--accent-pink);
+            color: var(--neon-purple);
+            font-weight: bold;
+            font-size: 0.7rem;
+            margin-bottom: 5px;
             text-transform: uppercase;
-            margin-bottom: 10px;
-            letter-spacing: 2px;
         }
 
         .summary-text {
-            font-size: 0.95rem;
-            color: #2D3748;
-            font-weight: 600;
-            line-height: 1.6;
+            color: #EEE;
+            line-height: 1.5;
         }
 
-        .tag-item { font-size: 0.7rem; background: #fff; border: 1px solid var(--border); padding: 6px 12px; border-radius: 12px; font-weight: 800; color: #718096; }
-        .tag-item:hover { border-color: var(--accent-pink); color: var(--accent-pink); transform: scale(1.1); }
-        
-        .dict-item { padding: 12px; margin-bottom: 10px; border-bottom: 1px solid #F1F5F9; }
-        .dict-word { display: block; color: var(--accent-pink); font-weight: 900; font-size: 0.9rem; margin-bottom: 4px; }
-
-        .grave-item { display: block; padding: 8px 0; color: #718096; text-decoration: none; font-size: 0.75rem; border-bottom: 1px solid #EDF2F7; }
-
-        /* ANIMATIONS */
-        @keyframes eq-pulse { from { height: 20%; } to { height: 100%; } }
-        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-40px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* MOBILE OPTIMIZATION */
-        @media (max-width: 1100px) { 
-            .layout { grid-template-columns: 1fr; padding: 20px; gap: 30px; } 
-            .sidebar { display: none; }
-            .hero-title { font-size: 2.8rem; }
-            .trend-card-container { min-height: 520px; }
+        footer {
+            text-align: center;
+            padding: 60px 20px;
+            color: #444;
+            font-size: 0.8rem;
         }
+
+        /* --- スクロールバー --- */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--dark); }
+        ::-webkit-scrollbar-thumb { background: var(--gray); border-radius: 10px; }
     </style>
 </head>
 <body>
-    <canvas id="connect-bg"></canvas>
 
-    <div class="layout">
-        <aside class="sidebar">
-            <div class="scroll-area">
-                <div class="glass-box">
-                    <div class="box-title">HOT_TAGS</div>
-                    <div id="word-ranking" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
-                </div>
-                <div class="glass-box">
-                    <div class="box-title">VIBES_DICT</div>
-                    <div id="vibes-dict"></div>
-                </div>
-            </div>
-        </aside>
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
 
-        <main>
-            <header>
-                <h1 class="hero-title">GAL-INTEL</h1>
-                <div class="hero-subtitle">v2 / Realtime Intelligence Feed</div>
-            </header>
-            <div class="main-feed" id="trend-list"></div>
-        </main>
+<header>
+    <div class="logo">Gal-Intel</div>
+    <div id="last-update" class="last-update">CONNECTING...</div>
+</header>
 
-        <aside class="sidebar">
-            <div class="scroll-area">
-                <div class="glass-box">
-                    <div class="box-title">SYNC_STATUS</div>
-                    <div id="sync-info" style="font-size: 0.8rem; font-weight: 900; color: var(--accent-blue);"></div>
-                    <div id="archive-links" style="margin-top:20px; display:flex; flex-direction:column; gap:8px;"></div>
-                </div>
-                <div class="glass-box">
-                    <div class="box-title">GRAVEYARD</div>
-                    <div id="grave-list"></div>
-                </div>
-            </div>
-        </aside>
+<main>
+    <div id="trend-list" class="trend-grid">
+        <div style="text-align:center; grid-column:1/-1; padding:100px;">
+            <i class="fas fa-spinner fa-spin fa-3x" style="color:var(--neon-pink)"></i>
+            <p style="margin-top:20px; letter-spacing:2px;">FETCHING VIBES...</p>
+        </div>
     </div>
+</main>
 
-    <script>
-        const canvas = document.getElementById('connect-bg');
-        const ctx = canvas.getContext('2d');
-        const DB_URL = '../intelligence_db.json';
-        let dots = [];
+<footer>
+    &copy; 2026 GAL-INTEL // NEON-INTELLIGENCE-NETWORK
+</footer>
 
-        function initBg(tags) {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            dots = (tags || []).map(t => ({
-                x: Math.random() * canvas.width, y: Math.random() * canvas.height, 
-                text: '#' + String(t), vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4, size: Math.random() * 6 + 10
-            }));
-            animate();
+<script>
+    const DB_URL = "../intelligence_db.json";
+
+    /**
+     * 【究極の防御関数】
+     * どんなに壊れたデータ(配列、オブジェクト等)が届いても
+     * 強制的に正しい文字列として抽出し、1文字化バグを防ぐ。
+     */
+    function safeStr(input, maxLen = 999) {
+        if (input === undefined || input === null) return "";
+        
+        let val = input;
+        
+        // 1. 配列なら0番目を抽出
+        if (Array.isArray(val)) {
+            val = val[0];
         }
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            dots.forEach(d => {
-                d.x += d.vx; d.y += d.vy;
-                if (d.x < 0 || d.x > canvas.width) d.vx *= -1; 
-                if (d.y < 0 || d.y > canvas.height) d.vy *= -1;
-                ctx.font = `bold ${d.size}px Arial`; ctx.fillStyle = 'rgba(121, 40, 202, 0.15)';
-                ctx.fillText(d.text, d.x, d.y);
-            });
-            requestAnimationFrame(animate);
+        
+        // 2. まだオブジェクトなら特定プロパティを探す
+        if (typeof val === 'object' && val !== null) {
+            val = val.title || val.text || val.word || JSON.stringify(val);
         }
-
-        /**
-         * 究極の文字制限関数
-         * 配列、数字、オブジェクト、null、すべてを強制的に「文字列」にフラット化してから制限をかける
-         */
-        function safeTruncate(input, max) {
-            if (input === undefined || input === null) return "";
-            
-            // もしデータが配列 [ "text" ] だったら中身を取り出す
-            let val = Array.isArray(input) ? input[0] : input;
-            
-            // 文字列に強制変換
-            const s = String(val);
-            
-            // 制限
-            return s.length <= max ? s : s.substring(0, max) + "...";
+        
+        // 3. 文字列に変換してクレンジング
+        let str = String(val).trim();
+        
+        // 4. 文字数制限
+        if (str.length > maxLen) {
+            return str.substring(0, maxLen) + "...";
         }
+        return str;
+    }
 
-        async function load() {
-            try {
-                const res = await fetch(DB_URL + '?t=' + Date.now());
-                const db = await res.json();
-                document.getElementById('sync-info').innerText = 'UPDT: ' + String(db.lastUpdate);
-                initBg(db.tags);
+    async function loadVibes() {
+        try {
+            // キャッシュ対策のクエリパラメータ
+            const response = await fetch(`${DB_URL}?t=${Date.now()}`);
+            if (!response.ok) throw new Error("Network error");
+            const db = await response.json();
 
-                document.getElementById('word-ranking').innerHTML = (db.tags || []).map(t => `<span class="tag-item">#${String(t)}</span>`).join('');
-                document.getElementById('vibes-dict').innerHTML = (db.dictionary || []).map(d => `<div class="dict-item"><span class="dict-word">${String(d.word)}</span><span style="color:#718096; font-size:0.8rem;">${String(d.mean)}</span></div>`).join('');
-                document.getElementById('grave-list').innerHTML = (db.graveyard || []).slice(0, 10).map(g => `<a href="https://www.google.com/search?q=${encodeURIComponent(String(g.title))}" target="_blank" class="grave-item">⚡️ ${safeTruncate(g.title, 20)}</a>`).join('');
-                document.getElementById('archive-links').innerHTML = (db.archiveList || []).slice(0,5).map(a => `<a href="archive/${String(a)}.html" class="btn btn-outline" style="font-size:0.75rem; padding:10px;">📅 ${String(a)} Archive</a>`).join('');
+            // ラストアップデート表示
+            document.getElementById('last-update').innerText = `LAST_SYNC: ${safeStr(db.lastUpdate)}`;
 
-                const trendContainer = document.getElementById('trend-list');
-                let htmlBuffer = "";
+            const container = document.getElementById('trend-list');
+            let html = "";
 
-                (db.current || []).forEach((t, idx) => {
-                    let eqBars = "";
-                    for (let i = 0; i < 15; i++) {
-                        const h = Math.floor(Math.random() * 70) + 20;
-                        const delay = (i * 0.05).toFixed(2);
-                        eqBars += `<div class="eq-bar" style="height: ${h}%; animation-delay: ${delay}s"></div>`;
-                    }
-
-                    // すべての項目に safeTruncate を適用し、配列であっても中身を確実に取得
-                    const sT = safeTruncate(t.title, 60);
-                    const sD = safeTruncate(t.desc, 150);
-                    const sM = safeTruncate(t.memo, 80);
-                    const sA = safeTruncate(t.aiSummary, 500); // 制限を少し緩和
-
-                    // slug, aiImage, title も安全に取得
-                    const safeSlug = String(Array.isArray(t.slug) ? t.slug[0] : t.slug);
-                    const safeImage = String(Array.isArray(t.aiImage) ? t.aiImage[0] : t.aiImage);
-                    const rawTitle = String(Array.isArray(t.title) ? t.title[0] : t.title);
-
-                    htmlBuffer += `
-                        <div class="trend-card-container" id="card-${idx}">
-                            <div class="trend-card-inner">
-                                <div class="front">
-                                    <div class="vibes-memo">“ ${sM} ”</div>
-                                    <div class="eq-container">${eqBars}</div>
-                                    <h2 class="trend-title">${sT}</h2>
-                                    <p class="trend-desc">${sD}</p>
-                                    <div class="btn-group">
-                                        <a href="archive/${safeSlug}.html" class="btn btn-pink">📖 DETAILS</a>
-                                        <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(rawTitle)}&tag=YOUR_TAG" target="_blank" class="btn btn-amazon">🛒 Amazon</a>
-                                        <div class="btn btn-outline" onclick="document.getElementById('card-${idx}').classList.add('flipped')">🔄 VIBE</div>
-                                    </div>
-                                </div>
-                                <div class="back">
-                                    <div class="ai-image-wrap"><img src="${safeImage}" onerror="this.src='https://placehold.jp/24/7928ca/ffffff/800x450.png?text=VIBE_IMAGE...'"></div>
-                                    <div class="summary-box">
-                                        <div class="summary-label">AI_INSIGHT_SUMMARY</div>
-                                        <div class="summary-text">${sA}</div>
-                                    </div>
-                                    <div class="btn btn-dark" onclick="document.getElementById('card-${idx}').classList.remove('flipped')">🔙 戻る</div>
-                                </div>
-                            </div>
-                        </div>`;
-                });
-
-                trendContainer.innerHTML = htmlBuffer;
-
-            } catch (e) { 
-                console.error("Critical Load Error:", e); 
+            if (!db.current || db.current.length === 0) {
+                container.innerHTML = "<p style='grid-column:1/-1; text-align:center;'>No Vibes Found.</p>";
+                return;
             }
+
+            db.current.forEach((t, i) => {
+                // 各データを安全に抽出
+                const title = safeStr(t.title, 60);
+                const desc = safeStr(t.desc, 150);
+                const memo = safeStr(t.memo, 100);
+                const summary = safeStr(t.aiSummary, 1000);
+                const slug = safeStr(t.slug);
+                const image = safeStr(t.aiImage);
+
+                html += `
+                <div class="trend-card-container" id="card-${i}">
+                    <div class="trend-card-inner">
+                        <div class="front">
+                            <div class="vibes-memo">“ ${memo} ”</div>
+                            <div class="trend-title">${title}</div>
+                            <p class="trend-desc">${desc}</p>
+                            <div class="btn-group">
+                                <a href="archive/${slug}.html" class="btn btn-pink">📖 DETAILS</a>
+                                <button class="btn btn-outline" onclick="flipCard(${i}, true)">🔄 VIBE</button>
+                            </div>
+                        </div>
+                        <div class="back">
+                            <div class="ai-image-wrap">
+                                <img src="${image}" alt="Trend AI Image" onerror="this.src='https://placehold.jp/40/7928ca/ffffff/800x450.png?text=IMAGE_LOADING...'">
+                            </div>
+                            <div class="summary-box">
+                                <div class="summary-label">AI_VIBE_ANALYSIS</div>
+                                <div class="summary-text">${summary}</div>
+                            </div>
+                            <button class="btn btn-dark" onclick="flipCard(${i}, false)">🔙 BACK</button>
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+
+        } catch (error) {
+            console.error("Load Error:", error);
+            document.getElementById('trend-list').innerHTML = `<p style='grid-column:1/-1; text-align:center; color:red;'>SYSTEM_ERROR: ${error.message}</p>`;
         }
-        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
-        load();
-    </script>
+    }
+
+    /**
+     * カード反転制御
+     */
+    function flipCard(index, isFlip) {
+        const card = document.getElementById(`card-${index}`);
+        if (isFlip) {
+            card.classList.add('flipped');
+        } else {
+            card.classList.remove('flipped');
+        }
+    }
+
+    // 初回読み込み
+    window.addEventListener('DOMContentLoaded', loadVibes);
+</script>
+
 </body>
 </html>
