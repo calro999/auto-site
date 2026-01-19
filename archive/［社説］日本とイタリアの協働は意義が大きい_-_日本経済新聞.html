@@ -275,18 +275,26 @@
             <script>
             (function() {
                 const isArchive = window.location.pathname.includes('/archive/');
-                const fixLinks = () => {
+                if (!isArchive) return;
+
+                const fix = () => {
                     document.querySelectorAll('a').forEach(a => {
-                        let href = a.getAttribute('href');
-                        if (href && href.startsWith('archive/') && isArchive) {
-                            // archive内にいるのに archive/ で始まるリンクがあれば、二重化を防ぐ
-                            a.setAttribute('href', href.replace('archive/', './'));
+                        const h = a.getAttribute('href');
+                        if (h && h.startsWith('archive/')) {
+                            a.setAttribute('href', h.replace('archive/', './'));
                         }
                     });
                 };
-                fixLinks();
-                // ギャラリーの動的生成後にも対応できるよう定期監視
-                setInterval(fixLinks, 1000);
+
+                // 1. 初回実行
+                fix();
+
+                // 2. DOMの変更を監視して、新しいカードが追加された瞬間に実行
+                const observer = new MutationObserver(fix);
+                observer.observe(document.body, { childList: true, subtree: true });
+                
+                // 3. 念押し（データ取得の遅延対策）
+                [500, 1000, 2000, 5000].forEach(ms => setTimeout(fix, ms));
             })();
             </script>
             </body>

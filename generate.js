@@ -1,7 +1,7 @@
 /**
- * GAL-INTEL generate.js v3.7 - RECURSIVE_404_DESTROYER
- * 修正: 404エラー（archive/archive/）を「物理的・論理的」に完全封殺。
- * 生成されるすべてのHTMLに対し、URL階層をリアルタイムで自動修正するロジックを強制注入します。
+ * GAL-INTEL generate.js v3.8 - UNBREAKABLE_LINK_SYSTEM
+ * 修正: 動的生成されるGRAVEYARDリンクの404（二重階層）を完全に封殺。
+ * ページ監視(MutationObserver)により、リンクが作成された瞬間にパスを修正します。
  */
 
 const fs = require('fs');
@@ -18,7 +18,6 @@ const MAX_DESC_LENGTH = 180;
 if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR);
 if (!fs.existsSync(IMAGE_DIR)) fs.mkdirSync(IMAGE_DIR);
 
-// 不適切ワード（火事など、ネガティブすぎるニュースを排除）
 const FORBIDDEN_WORDS = ['事故','事件','死','亡','逮捕','火災','火事','地震','不倫','容疑','被害','遺体','衝突','殺','判決','震災','訃報','黙とう','犠牲','重体','負傷','強盗','窃盗','摘発','送検','被疑','不祥事','倒産','破産','解雇','ミサイル','爆発','テロ','拉致','監禁','虐待','毒','薬物','大麻','覚醒剤','脱税','横領','汚職','墜落','転落','漂流','行方不明','捜索','津波','噴火','豪雨','土砂崩れ','浸水','竜巻','雷雨','デモ','暴動','紛争','戦争','空爆','侵攻','核','被爆'];
 
 function ultimateClean(text) {
@@ -34,7 +33,6 @@ function ultimateClean(text) {
 }
 
 function createSafeSlug(text) {
-    // 日本語もファイル名に含めるが、URL的に危険な記号だけ徹底除外
     return text.replace(/[／＼＼：＊？＂＜＞｜]/g, '').replace(/[\/:*?"<>|]/g, '').replace(/\s+/g, '_').substring(0, 80);
 }
 
@@ -66,7 +64,7 @@ const fetchRSS = (url) => new Promise((resolve, reject) => {
 });
 
 async function main() {
-    console.log("🚀 GAL-INTEL v3.7: Deploying Ultimate Path Controller...");
+    console.log("🚀 GAL-INTEL v3.8: Deploying Unbreakable Link System...");
     try {
         if (!fs.existsSync(INDEX_PATH)) throw new Error("index.htmlが見つかりません。");
         const templateHTML = fs.readFileSync(INDEX_PATH, 'utf8');
@@ -99,32 +97,34 @@ async function main() {
             const slug = createSafeSlug(t.title);
             const aiImage = await generateVibeImage(t.title, slug);
             processedCurrent.push({
-                title: t.title,
-                desc: t.desc,
-                slug: slug,
-                aiImage: aiImage,
-                memo: "バイブス最高✨",
-                aiSummary: `「${t.title}」解析完了。`
+                title: t.title, desc: t.desc, slug: slug, aiImage: aiImage, memo: "バイブス最高✨", aiSummary: `「${t.title}」解析完了。`
             });
             
-            // 【404解決の最終回答】
-            // ページがどこにあっても「正しいパス」を計算するJavaScriptをHTMLの末尾に強制的に差し込みます
-            const pathFixerScript = `
+            // 【404解決の最終回答】監視型スクリプト
+            const observerScript = `
             <script>
             (function() {
                 const isArchive = window.location.pathname.includes('/archive/');
-                const fixLinks = () => {
+                if (!isArchive) return;
+
+                const fix = () => {
                     document.querySelectorAll('a').forEach(a => {
-                        let href = a.getAttribute('href');
-                        if (href && href.startsWith('archive/') && isArchive) {
-                            // archive内にいるのに archive/ で始まるリンクがあれば、二重化を防ぐ
-                            a.setAttribute('href', href.replace('archive/', './'));
+                        const h = a.getAttribute('href');
+                        if (h && h.startsWith('archive/')) {
+                            a.setAttribute('href', h.replace('archive/', './'));
                         }
                     });
                 };
-                fixLinks();
-                // ギャラリーの動的生成後にも対応できるよう定期監視
-                setInterval(fixLinks, 1000);
+
+                // 1. 初回実行
+                fix();
+
+                // 2. DOMの変更を監視して、新しいカードが追加された瞬間に実行
+                const observer = new MutationObserver(fix);
+                observer.observe(document.body, { childList: true, subtree: true });
+                
+                // 3. 念押し（データ取得の遅延対策）
+                [500, 1000, 2000, 5000].forEach(ms => setTimeout(fix, ms));
             })();
             </script>
             </body>`;
@@ -133,7 +133,7 @@ async function main() {
                 .replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json')
                 .replace(/href=["']index.html["']/g, 'href="../index.html"')
                 .replace(/src=["']images\//g, 'src="../images/')
-                .replace('</body>', pathFixerScript);
+                .replace('</body>', observerScript);
 
             fs.writeFileSync(path.join(ARCHIVE_DIR, `${slug}.html`), specialPageHTML);
         }
@@ -141,25 +141,16 @@ async function main() {
         db.current = processedCurrent;
         db.graveyard = [...processedCurrent, ...(db.graveyard || [])].slice(0, 100);
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2), 'utf8');
-
-        // 日付アーカイブ
+        
+        // 日付アーカイブも同様
         const dateArchiveHTML = templateHTML
             .replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json')
             .replace(/href=["']index.html["']/g, 'href="../index.html"')
             .replace(/src=["']images\//g, 'src="../images/')
-            .replace('</body>', `
-            <script>
-            (function() {
-                const fix = () => document.querySelectorAll('a').forEach(a => {
-                    let h = a.getAttribute('href');
-                    if (h && h.startsWith('archive/')) a.setAttribute('href', h.replace('archive/', './'));
-                });
-                fix(); setInterval(fix, 1000);
-            })();
-            </script></body>`);
+            .replace('</body>', observerScript);
         fs.writeFileSync(path.join(ARCHIVE_DIR, `${dateKey}.html`), dateArchiveHTML);
 
-        console.log(`✅ Success: 404 issue physically blocked by script injection.`);
+        console.log("✅ Build Complete: Unbreakable Observer Injected.");
     } catch (e) { console.error(e); }
 }
 
