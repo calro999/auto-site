@@ -6,7 +6,7 @@
     <title>GAL-INTEL // Realtime Intelligence Feed</title>
     <style>
         :root {
-            --bg-black: #000000;
+            --bg-black: #050505; /* 真っ黒すぎない深みのある黒 */
             --accent-pink: #ff007a;
             --accent-blue: #00f0ff;
             --accent-purple: #7928ca;
@@ -39,7 +39,13 @@
         .box-title { font-size: 0.75rem; font-weight: 900; letter-spacing: 0.2em; color: var(--accent-pink); margin-bottom: 15px; border-left: 3px solid var(--accent-pink); padding-left: 10px; }
 
         header { text-align: center; margin-bottom: 40px; }
-        .hero-title { font-size: 4rem; font-weight: 900; letter-spacing: -0.05em; background: linear-gradient(to bottom, #fff, #666); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-title { 
+            font-size: 4rem; font-weight: 900; letter-spacing: -0.05em; 
+            background: linear-gradient(to bottom, #fff, #666); 
+            -webkit-background-clip: text; 
+            background-clip: text; /* 標準プロパティを追加してエラー解消 */
+            -webkit-text-fill-color: transparent; 
+        }
         .hero-subtitle { color: var(--accent-blue); font-family: monospace; letter-spacing: 0.3em; }
 
         .main-feed { display: flex; flex-direction: column; gap: 30px; }
@@ -55,10 +61,21 @@
             display: flex; flex-direction: column; overflow: hidden;
         }
 
-        .front { background: rgba(10, 10, 10, 0.8); }
+        .front { background: rgba(15, 15, 15, 0.9); }
         .back { background: linear-gradient(135deg, #1a0b2e 0%, #000 100%); transform: rotateY(180deg); }
 
-        .vibes-memo { font-style: italic; color: var(--accent-blue); font-size: 1.1rem; margin-bottom: 20px; }
+        /* 復活したバイブスメモ背景 */
+        .vibes-memo { 
+            font-style: italic; 
+            color: #fff; 
+            font-size: 1.1rem; 
+            margin-bottom: 20px; 
+            background: linear-gradient(90deg, rgba(255,0,122,0.3), transparent); 
+            padding: 10px 15px; 
+            border-radius: 8px; 
+            border-left: 4px solid var(--accent-pink);
+        }
+
         .trend-title { font-size: 2.5rem; font-weight: 900; margin-bottom: 10px; line-height: 1.1; }
         .trend-desc { color: #94a3b8; line-height: 1.6; margin-bottom: 20px; flex-grow: 1; }
 
