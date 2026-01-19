@@ -3,387 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAL-INTEL // ギャルの熱狂インテリジェンス</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>GAL-INTEL // Realtime Intelligence Feed</title>
     <style>
-        /* --- 変数設定：本来の明るいトーン --- */
         :root {
-            --primary: #FF0080;
-            --secondary: #7928CA;
-            --bg: #f5f7fa;
-            --sidebar-bg: #ffffff;
-            --card-bg: #ffffff;
-            --text-main: #2d3436;
-            --text-sub: #636e72;
-            --neon: #FF0080;
+            --bg-black: #000000;
+            --accent-pink: #ff007a;
+            --accent-blue: #00f0ff;
+            --accent-purple: #7928ca;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #e2e8f0;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-black); color: var(--text-main); overflow-x: hidden; }
+
+        #connect-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; opacity: 0.6;
         }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            font-family: "Hiragino Sans", "Meiryo", sans-serif;
-            display: flex; /* サイドバーのためのフレックスボックス */
-            min-height: 100vh;
+        .layout { display: grid; grid-template-columns: 320px 1fr 320px; gap: 20px; padding: 20px; max-width: 1800px; margin: 0 auto; }
+
+        .sidebar { height: calc(100vh - 40px); position: sticky; top: 20px; }
+        .scroll-area { height: 100%; overflow-y: auto; padding-right: 10px; }
+        .scroll-area::-webkit-scrollbar { width: 4px; }
+        .scroll-area::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
+
+        .glass-box {
+            background: var(--glass); backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border); border-radius: 16px;
+            padding: 20px; margin-bottom: 20px;
         }
 
-        /* --- サイドバー：復元 --- */
-        nav.sidebar {
-            width: 280px;
-            background-color: var(--sidebar-bg);
-            border-right: 1px solid rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            height: 100vh;
-            z-index: 1000;
-            padding: 30px 20px;
-            transition: all 0.3s ease;
-        }
+        .box-title { font-size: 0.75rem; font-weight: 900; letter-spacing: 0.2em; color: var(--accent-pink); margin-bottom: 15px; border-left: 3px solid var(--accent-pink); padding-left: 10px; }
 
-        .sidebar-logo {
-            font-size: 1.8rem;
-            font-weight: 900;
-            margin-bottom: 40px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text; /* 警告修正 */
-            -webkit-text-fill-color: transparent;
-            text-align: center;
-        }
+        header { text-align: center; margin-bottom: 40px; }
+        .hero-title { font-size: 4rem; font-weight: 900; letter-spacing: -0.05em; background: linear-gradient(to bottom, #fff, #666); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-subtitle { color: var(--accent-blue); font-family: monospace; letter-spacing: 0.3em; }
 
-        .nav-menu {
-            list-style: none;
-            flex-grow: 1;
-        }
+        .main-feed { display: flex; flex-direction: column; gap: 30px; }
 
-        .nav-item {
-            margin-bottom: 10px;
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            text-decoration: none;
-            color: var(--text-sub);
-            border-radius: 12px;
-            font-weight: 600;
-            transition: 0.2s;
-        }
-
-        .nav-link i {
-            margin-right: 15px;
-            font-size: 1.2rem;
-            width: 25px;
-            text-align: center;
-        }
-
-        .nav-link:hover, .nav-link.active {
-            background: #fff0f6;
-            color: var(--primary);
-        }
-
-        /* --- メインコンテンツエリア --- */
-        .main-wrapper {
-            margin-left: 280px; /* サイドバーの幅分空ける */
-            flex-grow: 1;
-            padding: 40px;
-            max-width: calc(100% - 280px);
-        }
-
-        header.top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-        }
-
-        .update-badge {
-            background: #ffffff;
-            padding: 8px 15px;
-            border-radius: 30px;
-            font-size: 0.8rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            color: var(--text-sub);
-            border: 1px solid #eee;
-        }
-
-        /* --- トレンドグリッド --- */
-        .trend-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 25px;
-        }
-
-        /* --- カードデザイン：復元 --- */
-        .card-container {
-            perspective: 1000px;
-            height: 460px;
-        }
-
-        .card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-style: preserve-3d;
-        }
-
-        .card-container.flipped .card-inner {
-            transform: rotateY(180deg);
-        }
+        /* Card System */
+        .trend-card-container { perspective: 1500px; height: 500px; }
+        .trend-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
+        .trend-card-container.flipped .trend-card-inner { transform: rotateY(180deg); }
 
         .front, .back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 20px;
-            padding: 25px;
-            background: var(--card-bg);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-            border: 1px solid rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+            border-radius: 24px; border: 1px solid var(--glass-border); padding: 30px;
+            display: flex; flex-direction: column; overflow: hidden;
         }
 
-        .back {
-            transform: rotateY(180deg);
-            background: #fff;
-            overflow-y: auto;
-        }
+        .front { background: rgba(10, 10, 10, 0.8); }
+        .back { background: linear-gradient(135deg, #1a0b2e 0%, #000 100%); transform: rotateY(180deg); }
 
-        .vibe-tag {
-            color: var(--primary);
-            font-size: 0.75rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
+        .vibes-memo { font-style: italic; color: var(--accent-blue); font-size: 1.1rem; margin-bottom: 20px; }
+        .trend-title { font-size: 2.5rem; font-weight: 900; margin-bottom: 10px; line-height: 1.1; }
+        .trend-desc { color: #94a3b8; line-height: 1.6; margin-bottom: 20px; flex-grow: 1; }
 
-        .vibe-tag::before {
-            content: "";
-            width: 6px;
-            height: 6px;
-            background: var(--primary);
-            border-radius: 50%;
-            margin-right: 8px;
-        }
+        /* EQ Visualization */
+        .eq-container { display: flex; align-items: flex-end; gap: 3px; height: 60px; margin-bottom: 30px; }
+        .eq-bar { flex: 1; background: var(--accent-purple); animation: eq 0.6s infinite alternate ease-in-out; }
+        @keyframes eq { from { height: 10%; opacity: 0.3; } to { height: 100%; opacity: 1; } }
 
-        .trend-title {
-            font-size: 1.4rem;
-            font-weight: 800;
-            line-height: 1.3;
-            margin-bottom: 15px;
-            color: #1a1a1a;
-            /* 警告修正 */
-            background: inherit;
-            -webkit-background-clip: padding-box;
-            background-clip: padding-box;
-        }
+        /* AI Back View */
+        .ai-image-wrap { width: 100%; height: 220px; border-radius: 12px; overflow: hidden; margin-bottom: 20px; border: 1px solid var(--accent-purple); }
+        .ai-image-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        .summary-box { background: rgba(0,0,0,0.4); border-radius: 12px; padding: 20px; flex-grow: 1; border-left: 2px solid var(--accent-blue); }
+        .summary-label { font-size: 0.7rem; color: var(--accent-blue); margin-bottom: 8px; font-weight: 800; }
+        .summary-text { font-size: 0.95rem; line-height: 1.7; color: #cbd5e1; }
 
-        .trend-desc {
-            font-size: 0.95rem;
-            color: var(--text-sub);
-            line-height: 1.6;
-            flex-grow: 1;
-        }
+        /* Buttons */
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; text-decoration: none; display: inline-block; text-align: center; }
+        .btn-pink { background: var(--accent-pink); color: white; }
+        .btn-amazon { background: #ff9900; color: black; }
+        .btn-outline { border: 1px solid var(--glass-border); color: white; }
+        .btn-dark { background: #000; color: white; border: 1px solid var(--accent-purple); }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
 
-        .btn-wrap {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
+        /* Utils */
+        .tag-item { background: rgba(255,0,122,0.1); color: var(--accent-pink); padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; }
+        .dict-item { margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; }
+        .dict-word { display: block; color: var(--accent-blue); font-weight: 900; font-size: 1.1rem; }
+        .grave-item { display: block; padding: 10px; color: #718096; text-decoration: none; font-size: 0.85rem; border-radius: 8px; transition: 0.2s; }
+        .grave-item:hover { background: rgba(255,255,255,0.05); color: white; }
 
-        .btn {
-            flex: 1;
-            padding: 12px;
-            border-radius: 12px;
-            border: none;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.3s;
-            text-align: center;
-            text-decoration: none;
-            font-size: 0.85rem;
-        }
-
-        .btn-main { background: var(--primary); color: white; }
-        .btn-flip { background: #f0f2f5; color: var(--text-sub); }
-        .btn:hover { transform: translateY(-3px); filter: brightness(1.1); }
-
-        /* --- 裏面詳細 --- */
-        .ai-thumb {
-            width: 100%;
-            height: 160px;
-            border-radius: 12px;
-            object-fit: cover;
-            margin-bottom: 15px;
-        }
-
-        .insight-box {
-            background: #fdf2f8;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-        }
-
-        .insight-label {
-            color: var(--primary);
-            font-size: 0.7rem;
-            font-weight: 900;
-            margin-bottom: 5px;
-        }
-
-        .insight-text {
-            font-size: 0.9rem;
-            color: #444;
-            line-height: 1.5;
-        }
-
-        .btn-close {
-            background: #eee;
-            width: 100%;
-            margin-top: auto;
-        }
-
-        /* --- ローディング --- */
-        #loader {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 100px;
-            color: var(--primary);
-        }
-
-        /* --- モバイル対応 --- */
-        @media (max-width: 768px) {
-            nav.sidebar { transform: translateX(-100%); }
-            .main-wrapper { margin-left: 0; max-width: 100%; padding: 20px; }
+        @media (max-width: 1200px) {
+            .layout { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
         }
     </style>
 </head>
 <body>
 
-<nav class="sidebar">
-    <div class="sidebar-logo">Gal-Intel</div>
-    <ul class="nav-menu">
-        <li class="nav-item">
-            <a href="#" class="nav-link active"><i class="fas fa-bolt"></i> TRENDS</a>
-        </li>
-        <li class="nav-item">
-            <a href="#" class="nav-link"><i class="fas fa-archive"></i> ARCHIVE</a>
-        </li>
-        <li class="nav-item">
-            <a href="#" class="nav-link"><i class="fas fa-tags"></i> TAGS</a>
-        </li>
-        <li class="nav-item">
-            <a href="#" class="nav-link"><i class="fas fa-book"></i> DICTIONARY</a>
-        </li>
-    </ul>
-    <div style="margin-top: auto; font-size: 10px; color: #ccc; text-align: center;">
-        v2.5_STABLE_EDITION
+    <canvas id="connect-bg"></canvas>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="scroll-area">
+                <div class="glass-box">
+                    <div class="box-title">HOT_TAGS</div>
+                    <div id="word-ranking" style="display:flex; flex-wrap:wrap; gap:12px;"></div>
+                </div>
+                <div class="glass-box">
+                    <div class="box-title">VIBES_DICT</div>
+                    <div id="vibes-dict"></div>
+                </div>
+            </div>
+        </aside>
+
+        <main>
+            <header>
+                <h1 class="hero-title">GAL-INTEL</h1>
+                <div class="hero-subtitle">v2 / Realtime Intelligence Feed</div>
+            </header>
+            <div class="main-feed" id="trend-list"></div>
+        </main>
+
+        <aside class="sidebar">
+            <div class="scroll-area">
+                <div class="glass-box">
+                    <div class="box-title">SYNC_STATUS</div>
+                    <div id="sync-info" style="font-weight: 900; color: var(--accent-blue);"></div>
+                    <div id="archive-links" style="margin-top:25px; display:flex; flex-direction:column; gap:12px;"></div>
+                </div>
+                <div class="glass-box">
+                    <div class="box-title">GRAVEYARD</div>
+                    <div id="grave-list"></div>
+                </div>
+            </div>
+        </aside>
     </div>
-</nav>
 
-<div class="main-wrapper">
-    <header class="top-bar">
-        <h2 style="font-weight: 900;">Hot Vibes Right Now</h2>
-        <div id="last-update" class="update-badge">SYNCING...</div>
-    </header>
+    <script>
+        const canvas = document.getElementById('connect-bg');
+        const ctx = canvas.getContext('2d');
+        const DB_URL = 'https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json';
+        let dots = [];
 
-    <main id="trend-list" class="trend-grid">
-        <div id="loader">
-            <i class="fas fa-spinner fa-spin fa-2x"></i>
-            <p style="margin-top:10px;">GENERATING VIBES...</p>
-        </div>
-    </main>
-</div>
-
-<script>
-    const DB_URL = "https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json";
-
-    /**
-     * 【1文字バグ対策：絶対防御】
-     * 配列だろうがオブジェクトだろうが、確実に中身の文字列を取り出す。
-     */
-    function safeGet(val, maxLen = 1000) {
-        if (val === undefined || val === null) return "";
-        let result = val;
-        if (Array.isArray(result)) result = result[0];
-        if (typeof result === 'object') {
-            result = result.title || result.text || JSON.stringify(result);
+        function initBg(tags) {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            dots = (tags || []).map(t => ({
+                x: Math.random() * canvas.width, y: Math.random() * canvas.height, 
+                text: '#' + t, vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4, size: Math.random() * 8 + 12
+            }));
+            animate();
         }
-        let str = String(result).trim();
-        return str.length > maxLen ? str.substring(0, maxLen) + "..." : str;
-    }
 
-    async function load() {
-        try {
-            const res = await fetch(`${DB_URL}?t=${Date.now()}`);
-            if (!res.ok) throw new Error();
-            const db = await res.json();
-
-            document.getElementById('last-update').innerText = "LAST_SYNC: " + safeGet(db.lastUpdate);
-            const list = document.getElementById('trend-list');
-            let html = "";
-
-            if (!db.current || db.current.length === 0) {
-                list.innerHTML = "<p>No Trends Today.</p>";
-                return;
-            }
-
-            db.current.forEach((t, i) => {
-                const title = safeGet(t.title, 80);
-                const desc = safeGet(t.desc, 150);
-                const memo = safeGet(t.memo, 40);
-                const summary = safeGet(t.aiSummary, 1000);
-                const img = safeGet(t.aiImage);
-                const slug = safeGet(t.slug);
-
-                html += `
-                <div class="card-container" id="card-${i}">
-                    <div class="card-inner">
-                        <div class="front">
-                            <div class="vibe-tag">${memo}</div>
-                            <div class="trend-title">${title}</div>
-                            <div class="trend-desc">${desc}</div>
-                            <div class="btn-wrap">
-                                <a href="archive/${slug}.html" class="btn btn-main">DETAILS</a>
-                                <button class="btn btn-flip" onclick="flip(${i}, true)">VIBE</button>
-                            </div>
-                        </div>
-                        <div class="back">
-                            <img src="${img}" class="ai-thumb" onerror="this.src='https://placehold.jp/24/eeeeee/ff0080/400x200.png?text=NO_IMAGE'">
-                            <div class="insight-box">
-                                <div class="insight-label"><i class="fas fa-robot"></i> AI INSIGHT</div>
-                                <div class="insight-text">${summary}</div>
-                            </div>
-                            <button class="btn btn-close" onclick="flip(${i}, false)">BACK</button>
-                        </div>
-                    </div>
-                </div>`;
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            dots.forEach(d => {
+                d.x += d.vx; d.y += d.vy;
+                if (d.x < 0 || d.x > canvas.width) d.vx *= -1; 
+                if (d.y < 0 || d.y > canvas.height) d.vy *= -1;
+                ctx.font = `bold ${d.size}px Arial`; ctx.fillStyle = 'rgba(121, 40, 202, 0.2)';
+                ctx.fillText(d.text, d.x, d.y);
             });
-            list.innerHTML = html;
-        } catch (e) {
-            document.getElementById('trend-list').innerHTML = "SYSTEM ERROR";
+            requestAnimationFrame(animate);
         }
-    }
 
-    function flip(i, state) {
-        const card = document.getElementById(`card-${i}`);
-        if(state) card.classList.add('flipped');
-        else card.classList.remove('flipped');
-    }
+        async function load() {
+            try {
+                const res = await fetch(DB_URL + '?t=' + Date.now());
+                const db = await res.json();
+                document.getElementById('sync-info').innerText = 'UPDT: ' + db.lastUpdate;
+                initBg(db.tags);
 
-    window.onload = load;
-</script>
+                document.getElementById('word-ranking').innerHTML = (db.tags || []).map(t => `<span class="tag-item">#${t}</span>`).join('');
+                document.getElementById('vibes-dict').innerHTML = (db.dictionary || []).map(d => `<div class="dict-item"><span class="dict-word">${d.word}</span><span style="color:#718096; font-size:0.9rem;">${d.mean}</span></div>`).join('');
+                document.getElementById('grave-list').innerHTML = (db.graveyard || []).slice(0, 10).map(g => `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">⚡️ ${g.title.substring(0,30)}...</a>`).join('');
+                document.getElementById('archive-links').innerHTML = (db.archiveList || []).slice(0,5).map(a => `<a href="archive/${a}.html" class="btn btn-outline" style="font-size:0.85rem; padding:12px;">📅 ${a} Archive</a>`).join('');
+
+                document.getElementById('trend-list').innerHTML = (db.current || []).map((t, idx) => {
+                    let bars = '';
+                    for(let i=0; i<15; i++) {
+                        bars += `<div class="eq-bar" style="animation-delay: ${i * 0.05}s; height: ${Math.random() * 80 + 20}%"></div>`;
+                    }
+                    return `
+                        <div class="trend-card-container" id="card-${idx}">
+                            <div class="trend-card-inner">
+                                <div class="front">
+                                    <div class="vibes-memo">“ ${t.memo} ”</div>
+                                    <div class="eq-container">
+                                        ${bars}
+                                    </div>
+                                    <h2 class="trend-title">${t.title}</h2>
+                                    <p class="trend-desc">${t.desc}</p>
+                                    <div class="btn-group">
+                                        <a href="archive/${t.slug}.html" class="btn btn-pink">📖 DETAILS (特設)</a>
+                                        <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(t.title)}&tag=YOUR_TAG" target="_blank" class="btn btn-amazon">🛒 Amazon</a>
+                                        <div class="btn btn-outline" onclick="document.getElementById('card-${idx}').classList.toggle('flipped')">🔄 AI_VIBE</div>
+                                    </div>
+                                </div>
+                                <div class="back">
+                                    <div class="ai-image-wrap"><img src="${t.aiImage}" onerror="this.src='https://placehold.jp/24/7928ca/ffffff/800x450.png?text=VIBE_IMAGE...'"></div>
+                                    <div class="summary-box">
+                                        <div class="summary-label">AI_INSIGHT_SUMMARY</div>
+                                        <div class="summary-text">${t.aiSummary}</div>
+                                    </div>
+                                    <div class="btn-group">
+                                        <div class="btn btn-dark" onclick="document.getElementById('card-${idx}').classList.toggle('flipped')">🔙 戻る</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                }).join('');
+            } catch (e) { console.error(e); }
+        }
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+        load();
+    </script>
 </body>
 </html>
