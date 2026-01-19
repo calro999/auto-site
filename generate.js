@@ -24,32 +24,42 @@ const VIBES_MEMOS = {
     FLASH: ["待って、速報すぎて思考停止したんだがｗ🚨", "今すぐチェックしないと置いてかれるよ！", "爆速すぎてバイブス追いつかないｗ"]
 };
 
+// 【強化版】HTMLタグを徹底的に除去する関数
 function cleanText(text) {
     if (!text) return "";
-    return text.replace(/&amp;nbsp;/g, ' ').replace(/&nbsp;/g, ' ').replace(/<.*?>/g, '').replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+    let cleaned = text.replace(/<[^>]*>?/gm, ''); // タグを削除
+    cleaned = cleaned.replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+    cleaned = cleaned.replace(/[\r\n]+/g, ' '); // 改行をスペースに
+    return cleaned.replace(/\s+/g, ' ').trim(); // 余分な空白を削除
 }
 
 function createSlug(text) {
-    // 英語と数字のみを抽出してスラッグ化
-    return text.replace(/[^\w\s]/gi, '').split(/\s+/).filter(w => w.length > 0).slice(0, 5).join('-').toLowerCase() || Date.now().toString();
+    // 英語・数字のみのスラッグ
+    let slug = text.replace(/[^\w\s]/gi, '').split(/\s+/).filter(w => w.length > 0).slice(0, 5).join('-').toLowerCase();
+    return slug || Date.now().toString();
 }
 
 async function generateVibeImage(title, slug) {
-    const canvas = createCanvas(1200, 630);
-    const ctx = canvas.getContext('2d');
-    const grad = ctx.createLinearGradient(0, 0, 1200, 630);
-    grad.addColorStop(0, '#FF0080'); grad.addColorStop(1, '#7928CA');
-    ctx.fillStyle = grad; ctx.fillRect(0, 0, 1200, 630);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 50px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(title.substring(0, 20), 600, 300);
-    ctx.font = 'bold 30px sans-serif';
-    ctx.fillText('GAL-INTEL v2 VERIFIED', 600, 550);
-    const buffer = canvas.toBuffer('image/png');
-    const fileName = `${slug}.png`;
-    fs.writeFileSync(path.join(IMAGE_DIR, fileName), buffer);
-    return `https://raw.githubusercontent.com/calro999/auto-site/main/images/${fileName}`;
+    try {
+        const canvas = createCanvas(1200, 630);
+        const ctx = canvas.getContext('2d');
+        const grad = ctx.createLinearGradient(0, 0, 1200, 630);
+        grad.addColorStop(0, '#FF0080'); grad.addColorStop(1, '#7928CA');
+        ctx.fillStyle = grad; ctx.fillRect(0, 0, 1200, 630);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 50px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(title.substring(0, 20), 600, 315);
+        ctx.font = 'bold 25px sans-serif';
+        ctx.fillText('GAL-INTEL v2 VERIFIED VIBE', 600, 560);
+        const buffer = canvas.toBuffer('image/png');
+        const fileName = `${slug}.png`;
+        fs.writeFileSync(path.join(IMAGE_DIR, fileName), buffer);
+        return `https://raw.githubusercontent.com/calro999/auto-site/main/images/${fileName}`;
+    } catch (e) {
+        console.error("Image gen error:", e);
+        return "";
+    }
 }
 
 async function main() {
@@ -76,8 +86,10 @@ async function main() {
                 const rss = await rssFetch(s.url);
                 const items = rss.split('<item>').slice(1, 15);
                 for (const item of items) {
-                    let title = cleanText(item.split('<title>')[1]?.split('</title>')[0] || "");
-                    let desc = cleanText(item.split('<description>')[1]?.split('</description>')[0] || "");
+                    let rawTitle = item.split('<title>')[1]?.split('</title>')[0] || "";
+                    let rawDesc = item.split('<description>')[1]?.split('</description>')[0] || "";
+                    let title = cleanText(rawTitle);
+                    let desc = cleanText(rawDesc);
                     if (!title || FORBIDDEN_WORDS.some(w => title.includes(w))) continue;
                     allTrends.push({ title, desc, genre: s.genre });
                 }
@@ -95,21 +107,19 @@ async function main() {
             processed.push({
                 ...t, slug, aiImage,
                 memo: memos[Math.floor(Math.random() * memos.length)],
-                aiSummary: `${t.title}についての爆速まとめ。AI的にも要注目案件。`,
-                context: `この話題は現在${t.genre}カテゴリでバイブス上昇中。`
+                aiSummary: `${t.title}についてのまとめ。今の時代に絶対知っておきたいアツい話題だよ✨`,
             });
         }
 
         const db = {
             current: processed,
-            graveyard: (oldDb.current || []).concat(oldDb.graveyard || []).slice(0, 30),
+            graveyard: (oldDb.current || []).concat(oldDb.graveyard || []).slice(0, 40),
             tags: Array.from(new Set(processed.map(p => p.title.split(/[ 　]/)[0]))).slice(0, 15),
-            dictionary: processed.slice(0, 5).map(p => ({ word: p.title.split(/[ 　]/)[0], mean: "今アツいトレンドワード。" })),
+            dictionary: processed.slice(0, 6).map(p => ({ word: p.title.split(/[ 　]/)[0], mean: "今注目されてるアツいキーワード。" })),
             archiveList: oldDb.archiveList || [],
             lastUpdate: now.toLocaleString('ja-JP')
         };
 
-        // 1日1回のアーカイブ物理生成（JST 23時台に実行された場合）
         if (now.getHours() === 23) {
             const template = fs.readFileSync(INDEX_PATH, 'utf8');
             fs.writeFileSync(path.join(ARCHIVE_DIR, `${dateKey}.html`), template);
@@ -117,7 +127,7 @@ async function main() {
         }
 
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2), 'utf8');
-        console.log("v2 DB & Images Updated.");
+        console.log("v2 DB & Images Updated Successfully.");
     } catch (e) { console.error(e); }
 }
 main();
