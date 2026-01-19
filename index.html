@@ -184,14 +184,16 @@
             align-items: center; 
             text-align: center;
             overflow: hidden; 
+            min-height: 520px; /* 裏面も高さを維持 */
         }
 
         .back { 
             transform: rotateY(180deg); 
             background: #FAFAFA; 
             overflow-y: auto; 
-            align-items: center; /* 裏面も中央揃えで崩れ防止 */
-            text-align: center;
+            align-items: flex-start;
+            text-align: left;
+            padding: 30px;
         }
 
         .vibes-memo { 
@@ -340,6 +342,7 @@
             border-radius: 20px;
             width: 100%;
             text-align: left;
+            margin-bottom: 20px;
         }
 
         .summary-label {
@@ -446,10 +449,10 @@
             requestAnimationFrame(animate);
         }
 
-        // 文字数制限用ヘルパー関数（安全に緩和）
-        function truncate(str, len) {
-            if (!str) return "";
-            return str.length <= len ? str : str.substr(0, len) + "...";
+        // ヘルパー関数: 引数の順番を修正 (text, limit)
+        function truncate(text, limit) {
+            if (!text) return "";
+            return text.length <= limit ? text : text.substring(0, limit) + "...";
         }
 
         async function load() {
@@ -468,7 +471,6 @@
                 let htmlBuffer = "";
 
                 (db.current || []).forEach((t, idx) => {
-                    // 各記事ごとにイコライザーバーを生成
                     let eqBars = "";
                     for (let i = 0; i < 15; i++) {
                         const h = Math.floor(Math.random() * 70) + 20;
@@ -476,11 +478,11 @@
                         eqBars += `<div class="eq-bar" style="height: ${h}%; animation-delay: ${delay}s"></div>`;
                     }
 
-                    // 文字数制限を適切に設定（はみ出し防止）
+                    // 正しい引数順でtruncateを適用
                     const safeTitle = truncate(t.title, 60);
                     const safeDesc = truncate(t.desc, 150);
-                    const safeMemo = truncate(t.memo, 100);
-                    const safeSummary = truncate(t.aiSummary, 250);
+                    const safeMemo = truncate(t.memo, 80);
+                    const safeSummary = truncate(t.aiSummary, 300);
 
                     htmlBuffer += `
                         <div class="trend-card-container" id="card-${idx}">
