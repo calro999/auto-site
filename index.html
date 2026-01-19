@@ -6,19 +6,19 @@
     <title>GAL-INTEL // Realtime Intelligence Feed</title>
     <style>
         :root {
-            /* 背景色を「黒」から「深みのあるグラデーション用ネイビー」へ変更 */
-            --bg-black: #0a0a1a; 
-            --accent-pink: #ff007a;
+            /* 深みのあるサイバーパンク・ネイビー */
+            --bg-black: #ffffff; 
+            --accent-pink: #ff8fc5;
             --accent-blue: #00f0ff;
-            --accent-purple: #7928ca;
+            --accent-purple: #c994ff;
             --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text-main: #e2e8f0;
+            --glass-border: rgba(0, 0, 0, 0.1);
+            --text-main: #000000;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         
-        /* 背景にグラデーションを適用して「黒一色」を回避 */
+        /* 真っ黒を回避し、奥行きのあるグラデーションを固定 */
         body { 
             background: radial-gradient(circle at 50% 50%, #1a0b2e 0%, #050505 100%);
             background-attachment: fixed;
@@ -51,7 +51,7 @@
             font-size: 4rem; font-weight: 900; letter-spacing: -0.05em; 
             background: linear-gradient(to bottom, #fff, #666); 
             -webkit-background-clip: text; 
-            background-clip: text; /* 標準プロパティでエラー回避 */
+            background-clip: text; /* 標準プロパティを追加しエラー解消 */
             -webkit-text-fill-color: transparent; 
         }
         .hero-subtitle { color: var(--accent-blue); font-family: monospace; letter-spacing: 0.3em; }
@@ -72,7 +72,7 @@
         .front { background: rgba(10, 10, 20, 0.85); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .back { background: linear-gradient(135deg, #1a0b2e 0%, #000 100%); transform: rotateY(180deg); }
 
-        /* バイブスメモ背景：ネオン感のあるグラデーション */
+        /* 復活したバイブスメモ：ネオン背景と左ボーダー */
         .vibes-memo { 
             font-style: italic; 
             color: #fff; 
@@ -109,7 +109,7 @@
         .btn-dark { background: #000; color: white; border: 1px solid var(--accent-purple); }
         .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
 
-        /* Utils */
+        /* サイドバーパーツ */
         .tag-item { background: rgba(255,0,122,0.1); color: var(--accent-pink); padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; }
         .dict-item { margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; }
         .dict-word { display: block; color: var(--accent-blue); font-weight: 900; font-size: 1.1rem; }
