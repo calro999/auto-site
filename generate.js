@@ -1,7 +1,7 @@
 /**
- * GAL-INTEL generate.js v3.2 - FINAL_SYNC_EDITION
- * 修正: 特設ページの消失を解決。
- * index.html の全機能を保持したまま、各記事の個別URLを archive 内に物理生成します。
+ * GAL-INTEL generate.js v3.3 - PATH_SMART_SYNC
+ * 修正: 特設ページからさらに特設ページを開いた際の404エラーを解消。
+ * リンクの階層構造を動的に書き換え、無限ループ移動を可能にします。
  */
 
 const fs = require('fs');
@@ -25,26 +25,20 @@ const VIBES_MEMOS = {
     SUB_CULTURE: ["これ界隈で絶対バズるやつじゃん！💖", "センス良すぎてバイブス伝わるわ〜", "推し活捗りすぎて幸せ案件", "世界観強すぎて語彙力失ったｗ", "エモすぎて無理。語彙力死んだ。"]
 };
 
-// 強力なクレンジング（タグ破壊）
 function ultimateClean(text) {
     if (!text) return "";
     let cleaned = String(text);
     cleaned = cleaned.replace(/<!\[CDATA\[/g, '').replace(/\]\]>/g, '');
     cleaned = cleaned.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&nbsp;/g, ' ');
-    cleaned = cleaned.replace(/<[^>]*>?/gm, ' '); // タグを消す
-    cleaned = cleaned.replace(/https?:\/\/[\x21-\x7e]+/gi, ''); // URLを消す
+    cleaned = cleaned.replace(/<[^>]*>?/gm, ' ');
+    cleaned = cleaned.replace(/https?:\/\/[\x21-\x7e]+/gi, ''); 
     cleaned = cleaned.replace(/\s+/g, ' ').trim();
     if (cleaned.length > MAX_DESC_LENGTH) cleaned = cleaned.substring(0, MAX_DESC_LENGTH) + '...';
     return cleaned;
 }
 
-// ファイル名として安全な文字列を作る（日本語を排除せず、記号だけ消す）
 function createSafeSlug(text) {
-    return text
-        .replace(/[／＼＼：＊？＂＜＞｜]/g, '') // 全角記号
-        .replace(/[\/:*?"<>|]/g, '')           // 半角記号
-        .replace(/\s+/g, '_')                  // 空白をアンダースコアに
-        .substring(0, 50);                     // 長すぎ防止
+    return text.replace(/[／＼＼：＊？＂＜＞｜]/g, '').replace(/[\/:*?"<>|]/g, '').replace(/\s+/g, '_').substring(0, 50);
 }
 
 async function generateVibeImage(title, slug) {
@@ -75,7 +69,7 @@ const fetchRSS = (url) => new Promise((resolve, reject) => {
 });
 
 async function main() {
-    console.log("🚀 GAL-INTEL v3.2: Special Page Recovery...");
+    console.log("🚀 GAL-INTEL v3.3: Fixing Recursive Path Error...");
     try {
         if (!fs.existsSync(INDEX_PATH)) throw new Error("index.htmlが見つかりません。");
         const templateHTML = fs.readFileSync(INDEX_PATH, 'utf8');
@@ -112,19 +106,25 @@ async function main() {
             processedCurrent.push({
                 title: t.title,
                 desc: t.desc,
-                slug: slug, // これがURL（xxxx.html）になる
+                slug: slug,
                 aiImage: aiImage,
                 memo: memos[Math.floor(Math.random() * memos.length)],
-                aiSummary: `「${t.title}」バイブス解析完了。`
+                aiSummary: `「${t.title}」解析完了。`
             });
             
-            // 【解決策】個別HTMLの生成
-            // archive内のページも、ルートの intelligence_db.json を見に行くように調整
-            const finalSpecialHTML = templateHTML.replace(
-                'https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json',
-                '../intelligence_db.json'
-            );
-            fs.writeFileSync(path.join(ARCHIVE_DIR, `${slug}.html`), finalSpecialHTML);
+            // 【404解決の核心】
+            // archive内のページ用に、リンクパスを動的に書き換える
+            let specialPageHTML = templateHTML
+                // 1. データベース参照を上の階層へ
+                .replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json')
+                // 2. archive/ 内にあるリンクが archive/archive/ にならないよう、スクリプト側で調整
+                // index.html内のリンク生成部分が 'archive/' + slug となっている箇所を、
+                // archiveフォルダ内では './' + slug になるように強制置換（または相対パスを補正）
+                .replace(/href=["']archive\//g, 'href="./') // archive/archiveを回避
+                .replace(/src=["']images\//g, 'src="../images/') // 画像パスを補正
+                .replace(/href=["']index.html["']/g, 'href="../index.html"'); // トップに戻るリンクを補正
+
+            fs.writeFileSync(path.join(ARCHIVE_DIR, `${slug}.html`), specialPageHTML);
         }
 
         db.current = processedCurrent;
@@ -133,10 +133,15 @@ async function main() {
 
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2), 'utf8');
         
-        // 日付アーカイブページも生成
-        fs.writeFileSync(path.join(ARCHIVE_DIR, `${dateKey}.html`), templateHTML.replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json'));
+        // 日付アーカイブ
+        const dateArchiveHTML = templateHTML
+            .replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json')
+            .replace(/href=["']archive\//g, 'href="./')
+            .replace(/src=["']images\//g, 'src="../images/')
+            .replace(/href=["']index.html["']/g, 'href="../index.html"');
+        fs.writeFileSync(path.join(ARCHIVE_DIR, `${dateKey}.html`), dateArchiveHTML);
 
-        console.log(`✅ Success: ${processedCurrent.length} pages created in /archive/`);
+        console.log(`✅ Fixed: ${processedCurrent.length} clean pages generated with path correction.`);
     } catch (e) { console.error(e); }
 }
 

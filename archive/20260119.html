@@ -230,7 +230,7 @@
                     return `<a href="${link}" class="grave-item">⚡️ ${g.title.substring(0,30)}...</a>`;
                 }).join('');
 
-                document.getElementById('archive-links').innerHTML = (db.archiveList || []).slice(0,5).map(a => `<a href="archive/${a}.html" class="btn btn-outline" style="font-size:1rem; padding:14px;">📅 ${a} Archive</a>`).join('');
+                document.getElementById('archive-links').innerHTML = (db.archiveList || []).slice(0,5).map(a => `<a href="./${a}.html" class="btn btn-outline" style="font-size:1rem; padding:14px;">📅 ${a} Archive</a>`).join('');
 
                 document.getElementById('trend-list').innerHTML = (db.current || []).map((t, idx) => {
                     let bars = '';
@@ -248,7 +248,7 @@
                                     <h2 class="trend-title">${t.title}</h2>
                                     <p class="trend-desc">${t.desc}</p>
                                     <div class="btn-group">
-                                        <a href="archive/${t.slug}.html" class="btn btn-pink">📖 DETAILS (特設)</a>
+                                        <a href="./${t.slug}.html" class="btn btn-pink">📖 DETAILS (特設)</a>
                                         <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(t.title)}&tag=mattan0290c-22" target="_blank" class="btn btn-amazon">🛒 Amazon</a>
                                         <div class="btn btn-outline" onclick="document.getElementById('card-${idx}').classList.toggle('flipped')">🔄 AI_VIBE</div>
                                     </div>
