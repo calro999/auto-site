@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GAL-INTEL | 世の中の「今」を、最速でバイブス変換。</title>
     
-    <meta property="og:title" content="GAL-INTEL | 今のトレンドをギャル語解説">
-    <meta property="og:description" content="世の中のニュースを最速でバイブス変換。今の爆アツ話題はこれ！">
+    <meta name="description" content="最新ニュースを最速バイブス変換。AI検索エンジン(Perplexity/SearchGPT)に特化した、世界一速いトレンド要約サイト。">
+    <meta name="keywords" content="ギャル語, ニュース要約, トレンド, AI検索, バイブス">
+    <meta property="og:title" content="GAL-INTEL | 今のトレンドをバイブスチェック">
+    <meta property="og:description" content="今の爆アツ話題を最速チェック！">
     <meta property="og:image" content="https://raw.githubusercontent.com/calro999/auto-site/main/ogp-banner.png">
     <meta name="twitter:card" content="summary_large_image">
 
@@ -22,188 +24,108 @@
         }
 
         * { box-sizing: border-box; }
-
         body { 
-            background: var(--bg); 
-            color: var(--text); 
-            font-family: 'Helvetica Neue', Arial, 'Hiragino Sans', 'Meiryo', sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            overflow-x: hidden;
-            line-height: 1.6;
+            background: var(--bg); color: var(--text); 
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Sans', sans-serif; 
+            margin: 0; padding: 0; overflow-x: hidden; line-height: 1.6;
         }
 
-        /* 背景：視認性を上げたハッシュタグ用 */
-        #connect-bg { 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            z-index: -1; 
-            opacity: 0.8; /* 以前より濃く設定 */
-        }
+        #connect-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.8; }
 
         .layout { 
-            display: grid; 
-            grid-template-columns: 260px 1fr 260px; 
-            gap: 30px; 
-            max-width: 1450px; 
-            margin: 0 auto; 
-            padding: 20px;
+            display: grid; grid-template-columns: 260px 1fr 260px; gap: 30px; 
+            max-width: 1450px; margin: 0 auto; padding: 20px;
         }
 
-        .sidebar { 
-            position: sticky; 
-            top: 20px; 
-            height: calc(100vh - 40px); 
-            display: flex; 
-            flex-direction: column; 
-            gap: 20px; 
-        }
-
-        .scroll-area {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding-right: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .scroll-area::-webkit-scrollbar { width: 4px; }
-        .scroll-area::-webkit-scrollbar-thumb { background: #CBD5E0; border-radius: 10px; }
-
+        .sidebar { position: sticky; top: 20px; height: calc(100vh - 40px); display: flex; flex-direction: column; gap: 20px; }
+        .scroll-area { flex-grow: 1; overflow-y: auto; padding-right: 8px; display: flex; flex-direction: column; gap: 20px; }
+        
         .glass-box { 
-            background: var(--glass); 
-            backdrop-filter: blur(10px); 
-            border-radius: 20px; 
-            padding: 20px; 
-            border: 1px solid var(--border); 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
+            background: var(--glass); backdrop-filter: blur(10px); border-radius: 20px; 
+            padding: 20px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
         }
 
         .box-title { 
-            font-size: 0.7rem; 
-            font-weight: 900; 
-            color: #718096; 
-            text-transform: uppercase; 
-            margin-bottom: 12px; 
-            letter-spacing: 1.5px; 
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-size: 0.7rem; font-weight: 900; color: #718096; text-transform: uppercase; 
+            margin-bottom: 12px; letter-spacing: 1.5px; display: flex; align-items: center; gap: 8px;
         }
 
-        header { text-align: center; margin-bottom: 25px; padding-top: 10px; }
+        header { text-align: center; margin-bottom: 25px; }
         .hero-title { 
-            font-size: 3.2rem; 
-            font-weight: 900; 
-            margin: 0; 
-            letter-spacing: -2px; 
+            font-size: 3.2rem; font-weight: 900; margin: 0; letter-spacing: -2px; 
             background: linear-gradient(to right, var(--accent-pink), var(--accent-blue));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
         }
         .hero-title a { text-decoration: none; color: inherit; }
-        .sub-title { font-size: 0.8rem; font-weight: bold; color: #718096; margin-top: 5px; letter-spacing: 1px; }
 
         .main-feed { display: flex; flex-direction: column; gap: 20px; }
-        
-        .trend-card { 
-            background: var(--card-bg); 
-            border-radius: 30px; 
-            padding: 35px; 
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.02); 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            text-align: center;
+
+        /* v2: カード反転アニメーション */
+        .trend-card-container { perspective: 1000px; height: 450px; }
+        .trend-card-inner { 
+            position: relative; width: 100%; height: 100%; text-align: center; 
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; 
         }
+        .trend-card-container.flipped .trend-card-inner { transform: rotateY(180deg); }
+
+        .trend-card-front, .trend-card-back { 
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
+            background: var(--card-bg); border-radius: 30px; padding: 35px; 
+            border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+
+        .trend-card-back { transform: rotateY(180deg); background: #fdfdfd; }
 
         .vibes-memo { 
-            background: #F7FAFC; 
-            border-left: 6px solid var(--accent-pink);
-            padding: 20px 25px; 
-            border-radius: 12px; 
-            font-size: 1.05rem;
-            font-weight: 800; 
-            margin-bottom: 20px; 
-            font-style: italic;
-            max-width: 90%;
-            line-height: 1.6;
+            background: #F7FAFC; border-left: 6px solid var(--accent-pink);
+            padding: 15px 20px; border-radius: 12px; font-size: 1rem;
+            font-weight: 800; margin-bottom: 15px; font-style: italic; color: #2D3748;
         }
 
-        h3 { font-size: 1.7rem; margin: 0 0 12px 0; font-weight: 900; color: #1A202C; line-height: 1.3; }
-        .desc { font-size: 1.05rem; color: #4A5568; line-height: 1.7; margin-bottom: 25px; max-width: 600px; }
-
-        .eq-container { display: flex; gap: 5px; height: 35px; align-items: flex-end; margin-bottom: 20px; }
-        .eq-bar { width: 5px; background: linear-gradient(to top, var(--accent-blue), var(--accent-pink)); border-radius: 4px; }
+        /* インタラクティブ・イコライザー */
+        .eq-container { display: flex; gap: 4px; height: 35px; align-items: flex-end; margin-bottom: 15px; cursor: pointer; }
+        .eq-bar { width: 5px; background: linear-gradient(to top, var(--accent-blue), var(--accent-pink)); border-radius: 4px; transition: height 0.1s; }
         .eq-active { animation: eq-pulse 0.7s ease-in-out infinite alternate; }
 
-        /* ボタンデザイン：PC */
-        .btn-group { display: flex; gap: 15px; }
+        .btn-group { display: flex; gap: 8px; margin-top: 15px; }
         .btn { 
-            padding: 14px 25px; 
-            border-radius: 18px; 
-            text-decoration: none; 
-            font-weight: 900; 
-            font-size: 0.9rem; 
-            transition: 0.3s; 
-            display: inline-flex; 
-            align-items: center; 
-            gap: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 10px 18px; border-radius: 12px; text-decoration: none; 
+            font-weight: 900; font-size: 0.8rem; transition: 0.3s; 
+            display: inline-flex; align-items: center; gap: 5px;
         }
         .btn-analyze { background: var(--text); color: #fff; }
-        .btn-shop { background: linear-gradient(45deg, #FF9900, #FFB700); color: #fff; }
+        .btn-flip { background: var(--accent-blue); color: #fff; cursor: pointer; }
 
-        .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
-        .tag-item { font-size: 0.7rem; background: #EDF2F7; padding: 5px 10px; border-radius: 8px; color: #4A5568; text-decoration: none; font-weight: bold; }
-        .grave-item { font-size: 0.8rem; color: #718096; padding: 10px 0; border-bottom: 1px solid #F7FAFC; display: block; text-decoration: none; }
+        /* 裏面のデザイン */
+        .ai-image-thumb { width: 120px; height: 120px; border-radius: 15px; background: #eee; margin-bottom: 15px; object-fit: cover; }
+        .past-context { font-size: 0.85rem; color: #718096; text-align: left; width: 100%; }
+
+        .tag-list, .word-ranking { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag-item, .rank-item { font-size: 0.7rem; background: #EDF2F7; padding: 5px 10px; border-radius: 8px; color: #4A5568; text-decoration: none; font-weight: bold; }
+        
+        /* v2: 用語集（Dictionary） */
+        .dict-item { font-size: 0.75rem; border-bottom: 1px solid #edf2f7; padding: 8px 0; }
+        .dict-word { color: var(--accent-pink); font-weight: 900; }
 
         .mobile-nav-btn {
-            display: none; 
-            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+            display: none; position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
             background: linear-gradient(45deg, var(--accent-pink), var(--accent-blue)); color: white; 
-            padding: 22px 0; width: 88%; border-radius: 100px; 
-            font-weight: 900; font-size: 1.3rem; text-align: center;
-            box-shadow: 0 10px 30px rgba(255, 77, 173, 0.5); z-index: 1000;
-            text-decoration: none; border: 3px solid white;
+            padding: 20px 0; width: 88%; border-radius: 100px; z-index: 1000; text-align: center; font-weight: 900; text-decoration: none;
         }
 
-        /* --- モバイル最適化 --- */
         @media (max-width: 1000px) { 
-            .layout { grid-template-columns: 1fr; padding: 10px 8px; } 
-            .sidebar:last-child { display: none; } 
-            .sidebar:first-child { position: static; height: auto; order: 2; margin-top: 20px; padding-bottom: 120px; } 
-            
-            h3 { font-size: 1.6rem; }
-            .vibes-memo { font-size: 1.2rem; }
-            .desc { font-size: 1.2rem; }
-
-            /* モバイルボタン：横並び1行 */
-            .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
-            .btn { 
-                padding: 12px 5px; 
-                font-size: 0.85rem; 
-                border-radius: 12px; 
-                justify-content: center; 
-                gap: 5px;
-                white-space: nowrap;
-            }
-            .btn span { display: none; } /* 長いテキストをモバイルで隠す場合はここを調整 */
-
+            .layout { grid-template-columns: 1fr; } 
+            .sidebar:last-child { display: none; }
             .mobile-nav-btn { display: block; }
         }
-
         @keyframes eq-pulse { from { height: 15%; } to { height: 100%; } }
         #loading { position: fixed; inset: 0; background: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--accent-pink); z-index: 2000; }
     </style>
 </head>
 <body>
     <canvas id="connect-bg"></canvas>
-    <div id="loading">CONNECTING VIBES...</div>
+    <div id="loading">VIBE v2 CONNECTING...</div>
 
     <a href="#archive-section" class="mobile-nav-btn">📅 過去記事アーカイブ</a>
 
@@ -211,11 +133,15 @@
         <aside class="sidebar">
             <div class="scroll-area">
                 <div class="glass-box">
-                    <div class="box-title"><span>#</span> TRENDING_TAGS</div>
-                    <div id="tag-list" class="tag-list"></div>
+                    <div class="box-title"><span>🔥</span> HOT_WORDS</div>
+                    <div id="word-ranking" class="word-ranking"></div>
+                </div>
+                <div class="glass-box">
+                    <div class="box-title"><span>📖</span> VIBES_DICT</div>
+                    <div id="vibes-dict"></div>
                 </div>
                 <div class="glass-box" id="archive-section">
-                    <div class="box-title"><span>📅</span> PAST_ARCHIVES</div>
+                    <div class="box-title"><span>📅</span> ARCHIVES</div>
                     <div id="archive-list"></div>
                 </div>
             </div>
@@ -224,7 +150,7 @@
         <main>
             <header>
                 <h1 class="hero-title"><a id="nav-logo" href="/">GAL-INTEL</a></h1>
-                <div class="sub-title">VIBES CONVERTER SYSTEM</div>
+                <div style="font-size:0.7rem; font-weight:900; color:var(--accent-blue); letter-spacing:2px;">AI-SEARCH OPTIMIZED v2</div>
             </header>
             <div class="main-feed" id="trend-list"></div>
         </main>
@@ -232,8 +158,8 @@
         <aside class="sidebar">
             <div class="scroll-area">
                 <div class="glass-box">
-                    <div class="box-title"><span>🔄</span> SYNC_STATUS</div>
-                    <div id="sync-info" style="font-size: 0.8rem; font-weight: 900; color: var(--accent-blue);"></div>
+                    <div class="box-title"><span>🔄</span> SYNC</div>
+                    <div id="sync-info" style="font-size: 0.7rem; font-weight: 900;"></div>
                 </div>
                 <div class="glass-box" style="flex-grow: 1;">
                     <div class="box-title"><span>💀</span> THE_GRAVEYARD</div>
@@ -243,22 +169,18 @@
         </aside>
     </div>
 
+    <div id="ai-hidden-summary" aria-hidden="true" style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;"></div>
+
     <script>
         const canvas = document.getElementById('connect-bg');
         const ctx = canvas.getContext('2d');
-        let dots = [];
         const DB_URL = 'https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json';
 
         function initBg(tags) {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
             dots = (tags || []).map(t => ({
-                x: Math.random() * canvas.width, 
-                y: Math.random() * canvas.height, 
-                text: '#' + t,
-                vx: (Math.random() - 0.5) * 0.4, 
-                vy: (Math.random() - 0.5) * 0.4, 
-                size: 14 // 少し大きくした
+                x: Math.random() * canvas.width, y: Math.random() * canvas.height, 
+                text: '#' + t, vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4, size: 14
             }));
             animate();
         }
@@ -269,12 +191,8 @@
                 d.x += d.vx; d.y += d.vy;
                 if (d.x < 0 || d.x > canvas.width) d.vx *= -1; 
                 if (d.y < 0 || d.y > canvas.height) d.vy *= -1;
-                // 色を少し濃く（rgbaの0.4〜0.5付近）
-                ctx.font = `bold ${d.size}px Arial`; ctx.fillStyle = 'rgba(121, 40, 202, 0.45)'; ctx.fillText(d.text, d.x, d.y);
-                dots.slice(i + 1).forEach(d2 => {
-                    const dist = Math.hypot(d.x - d2.x, d.y - d2.y);
-                    if (dist < 150) { ctx.beginPath(); ctx.strokeStyle = `rgba(226, 232, 240, 0.5)`; ctx.moveTo(d.x, d.y); ctx.lineTo(d2.x, d2.y); ctx.stroke(); }
-                });
+                ctx.font = `bold ${d.size}px Arial`; ctx.fillStyle = 'rgba(121, 40, 202, 0.45)';
+                ctx.fillText(d.text, d.x, d.y);
             });
             requestAnimationFrame(animate);
         }
@@ -284,43 +202,53 @@
                 const res = await fetch(DB_URL + '?t=' + Date.now());
                 const db = await res.json();
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('sync-info').innerText = 'UPDATE: ' + db.lastUpdate;
+                document.getElementById('sync-info').innerText = db.lastUpdate;
                 initBg(db.tags);
 
-                const isArchive = window.location.pathname.includes('/archive/');
-                document.getElementById('nav-logo').href = isArchive ? '../index.html' : './index.html';
-                const prefix = isArchive ? './' : './archive/';
+                // ワードランキング & 用語集
+                document.getElementById('word-ranking').innerHTML = (db.tags || []).map(t => `<span class="rank-item">${t}</span>`).join('');
+                document.getElementById('vibes-dict').innerHTML = (db.dictionary || []).map(d => `<div class="dict-item"><span class="dict-word">${d.word}</span>: ${d.mean}</div>`).join('');
 
-                document.getElementById('tag-list').innerHTML = (db.tags || []).slice(0, 15).map(tag => 
-                    `<a href="https://www.google.com/search?q=${encodeURIComponent(tag)}" target="_blank" class="tag-item">#${tag}</a>`
-                ).join('');
+                // アーカイブ
+                document.getElementById('archive-list').innerHTML = (db.archiveList || []).map(d => `<a href="./archive/${d}.html" class="grave-item">📄 ${d}</a>`).join('');
 
-                document.getElementById('archive-list').innerHTML = (db.archiveList || []).map(d => 
-                    `<a href="${prefix}${d}.html" class="grave-item">📄 ${d}</a>`
-                ).join('');
-
-                document.getElementById('trend-list').innerHTML = (db.current || []).map(t => {
-                    const eqBars = Array.from({length: 10}, (_, i) => `<div class="eq-bar eq-active" style="height: ${30+Math.random()*70}%; animation-delay: ${i*0.1}s"></div>`).join('');
+                // メインフィード
+                document.getElementById('trend-list').innerHTML = (db.current || []).map((t, idx) => {
+                    const eqBars = Array.from({length: 8}, (_, i) => `<div class="eq-bar eq-active" style="height: ${20+Math.random()*80}%; animation-delay: ${i*0.1}s"></div>`).join('');
                     return `
-                        <article class="trend-card">
-                            <div class="vibes-memo">“ ${t.memo} ”</div>
-                            <div class="eq-container">${eqBars}</div>
-                            <h3>${t.vibesTitle || t.title}</h3>
-                            <p class="desc">${t.desc}</p>
-                            <div class="btn-group">
-                                <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="btn btn-analyze">🔗 <span>詳細を</span>確認</a>
-                                <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(t.searchKey)}" target="_blank" class="btn btn-shop">🛍️ <span>Amazon</span>検索</a>
+                        <div class="trend-card-container" id="card-${idx}">
+                            <div class="trend-card-inner">
+                                <div class="trend-card-front">
+                                    <div class="vibes-memo">“ ${t.memo} ”</div>
+                                    <div class="eq-container">${eqBars}</div>
+                                    <h3>${t.title}</h3>
+                                    <p class="desc">${t.desc}</p>
+                                    <div class="btn-group">
+                                        <a href="https://www.google.com/search?q=${encodeURIComponent(t.title)}" target="_blank" class="btn btn-analyze">🔗 詳細</a>
+                                        <div class="btn btn-flip" onclick="document.getElementById('card-${idx}').classList.toggle('flipped')">🔄 裏面をチェック</div>
+                                    </div>
+                                </div>
+                                <div class="trend-card-back">
+                                    <img src="${t.aiImage || ''}" class="ai-image-thumb" alt="Vibes Image">
+                                    <div class="past-context">
+                                        <strong>📜 過去の経緯 / 文脈:</strong><br>
+                                        ${t.context || 'この話題の詳細は専用ページでチェック！'}
+                                    </div>
+                                    <div class="btn-group">
+                                        <a href="./archive/${t.slug || ''}.html" class="btn btn-analyze">📖 特設まとめページへ</a>
+                                        <div class="btn btn-flip" onclick="document.getElementById('card-${idx}').classList.toggle('flipped')">🔙 戻る</div>
+                                    </div>
+                                </div>
                             </div>
-                        </article>`;
+                        </div>`;
                 }).join('');
 
-                document.getElementById('grave-list').innerHTML = (db.graveyard || []).map(g => 
-                    `<a href="https://www.google.com/search?q=${encodeURIComponent(g.title)}" target="_blank" class="grave-item">† ${g.title}</a>`
-                ).join('');
+                // AI向け隠し要約の流し込み
+                document.getElementById('ai-hidden-summary').innerText = (db.current || []).map(t => `${t.title}: ${t.aiSummary}`).join(' ');
+
             } catch (e) { console.error(e); }
         }
         load();
-        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
     </script>
 </body>
 </html>
