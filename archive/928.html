@@ -206,6 +206,7 @@
             width: 100%;
         }
 
+        /* EQ DEFINITION */
         .eq-container { 
             display: flex; 
             gap: 8px; 
@@ -443,13 +444,20 @@
                 document.getElementById('archive-links').innerHTML = (db.archiveList || []).slice(0,5).map(a => `<a href="archive/${a}.html" class="btn btn-outline" style="font-size:0.85rem; padding:12px;">📅 ${a} Archive</a>`).join('');
 
                 document.getElementById('trend-list').innerHTML = (db.current || []).map((t, idx) => {
-                    const eqBars = Array.from({length: 15}, (_, i) => `<div class="eq-bar" style="height: ${20 + Math.random() * 80}%; animation-delay: ${i * 0.08}s"></div>`).join('');
+                    // イコライザーバーのHTMLを確実に作成
+                    let barsHtml = '';
+                    for (let i = 0; i < 15; i++) {
+                        const randomDelay = (i * 0.05).toFixed(2);
+                        const randomHeight = Math.floor(Math.random() * 60) + 20;
+                        barsHtml += `<div class="eq-bar" style="animation-delay: ${randomDelay}s; height: ${randomHeight}%"></div>`;
+                    }
+
                     return `
                         <div class="trend-card-container" id="card-${idx}">
                             <div class="trend-card-inner">
                                 <div class="front">
                                     <div class="vibes-memo">“ ${t.memo} ”</div>
-                                    <div class="eq-container">${eqBars}</div>
+                                    <div class="eq-container">${barsHtml}</div>
                                     <h2 class="trend-title">${t.title}</h2>
                                     <p class="trend-desc">${t.desc}</p>
                                     <div class="btn-group">
