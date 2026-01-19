@@ -8,8 +8,8 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "canvas": "^3.2.1"
-  }
+  },
+  "description": ""
 }
