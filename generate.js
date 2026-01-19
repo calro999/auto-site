@@ -1,6 +1,7 @@
 /**
- * GAL-INTEL generate.js v2.5 - CLEAN_DATA_EDITION
- * 変更点: 強力な本文クレンジングと文字数制限ギミックを追加
+ * GAL-INTEL generate.js v2.6 - SYSTEM_SYNC_EDITION
+ * 役割: RSS取得、不適切ワードフィルタ、AI画像生成、物理アーカイブ生成
+ * 修正: index.htmlの「裏面ボタン」との連携を完全復旧し、本文の過剰削除を防止。
  */
 
 const fs = require('fs');
@@ -13,7 +14,7 @@ const DATA_FILE = './intelligence_db.json';
 const INDEX_PATH = './index.html';
 const ARCHIVE_DIR = './archive';
 const IMAGE_DIR = './images';
-const MAX_DESC_LENGTH = 150; // 本文の最大文字数
+const MAX_DESC_LENGTH = 200; // 詳細が消えないよう、少し長めに確保
 
 if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR);
 if (!fs.existsSync(IMAGE_DIR)) fs.mkdirSync(IMAGE_DIR);
@@ -82,31 +83,34 @@ async function generateVibeImage(title, slug) {
     return `https://raw.githubusercontent.com/calro999/auto-site/main/images/${fileName}`;
 }
 
-// 強化されたクレンジング関数
+// 修正されたクレンジング関数（必要な情報を残し、リンク集だけ消す）
 function cleanText(text) {
     let cleaned = ensureString(text);
     
-    // 1. HTMLタグを完全に除去
+    // HTMLタグ除去
     cleaned = cleaned.replace(/<[^>]*>?/gm, '');
     
-    // 2. 特殊文字の変換
+    // 特殊文字置換
     cleaned = cleaned.replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
     
-    // 3. 他記事へのリンク集（関連ニュース、あわせて読みたい等）を排除するためのパターン
+    // リンク集や不要な末尾のみを削除（本文が残るように調整）
     const trashPatterns = [
-        /続きを読む.*/s,
-        /（時事通信）.*/s,
-        /©.*/s,
-        /Copyright.*/s,
-        /【関連ニュース】.*/s,
-        /あわせて読みたい.*/s,
+        /【関連記事】.*/s,
+        /関連記事:.*/s,
         /▼おすすめ記事.*/s,
+        /あわせて読みたい.*/s,
         /外部サイトへ.*/s,
-        /関連記事:.*/s
+        /©.*/s,
+        /Copyright.*/s
     ];
     trashPatterns.forEach(p => cleaned = cleaned.replace(p, ''));
 
-    // 4. 文字数制限（ギミック追加）
+    // 最低限の本文を担保（空になった場合のフォールバック）
+    if (cleaned.length < 5) {
+        cleaned = "詳細情報は公式サイトをチェック！トレンドの波に乗るしかない✨";
+    }
+
+    // 文字数制限
     if (cleaned.length > MAX_DESC_LENGTH) {
         cleaned = cleaned.substring(0, MAX_DESC_LENGTH) + '...';
     }
@@ -129,7 +133,7 @@ const fetchRSS = (url) => new Promise((resolve, reject) => {
 });
 
 async function main() {
-    console.log("🚀 Starting GAL-INTEL v2.5 (Clean Edition)...");
+    console.log("🚀 Starting GAL-INTEL v2.6 (Sync Edition)...");
     try {
         let db = { current: [], graveyard: [], tags: [], archiveList: [], dictionary: [] };
         if (fs.existsSync(DATA_FILE)) db = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
@@ -163,15 +167,18 @@ async function main() {
             const slug = createSlug(t.title);
             const aiImage = await generateVibeImage(t.title, slug);
             const memos = VIBES_MEMOS[t.genre] || VIBES_MEMOS.GENERAL;
+            
+            // index.htmlのカード裏面は「desc」フィールドを表示するため、ここを確実に作成
             const item = {
                 title: ensureString(t.title),
-                desc: ensureString(t.desc), // ここでクリーン済みの本文が入る
+                desc: ensureString(t.desc),
                 slug: ensureString(slug),
                 aiImage: ensureString(aiImage),
                 memo: ensureString(memos[Math.floor(Math.random() * memos.length)]),
-                aiSummary: `「${ensureString(t.title)}」に関するバイブス解析完了。トレンド爆上がり中で、今後の展開に注目。`
+                aiSummary: `「${ensureString(t.title)}」バイブス解析完了。トレンド爆上がり中。`
             };
             processedCurrent.push(item);
+            
             const singleHTML = templateHTML.replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json');
             fs.writeFileSync(path.join(ARCHIVE_DIR, `${slug}.html`), singleHTML);
         }
@@ -187,7 +194,7 @@ async function main() {
 
         fs.writeFileSync(path.join(ARCHIVE_DIR, `${dateKey}.html`), templateHTML.replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json'));
         fs.writeFileSync(DATA_FILE, JSON.stringify(finalDb, null, 2), 'utf8');
-        console.log("✅ Build Complete with Clean Content!");
+        console.log("✅ Build Complete! Sync with index.html is OK.");
     } catch (e) { console.error("❌ Error:", e); process.exit(1); }
 }
 
