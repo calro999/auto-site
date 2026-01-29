@@ -100,7 +100,7 @@ async function main() {
                 title: t.title, desc: t.desc, slug: slug, aiImage: aiImage, memo: "バイブス最高✨", aiSummary: `「${t.title}」解析完了。`
             });
             
-            // 【404解決の最終回答】監視型スクリプト
+            // 【404解決の最終回答】監視型スクリプト + Vercel Analytics
             const observerScript = `
             <script>
             (function() {
@@ -127,6 +127,12 @@ async function main() {
                 [500, 1000, 2000, 5000].forEach(ms => setTimeout(fix, ms));
             })();
             </script>
+
+            <!-- Vercel Web Analytics -->
+            <script>
+                window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+            </script>
+            <script defer src="/_vercel/insights/script.js"></script>
             </body>`;
             
             let specialPageHTML = templateHTML
