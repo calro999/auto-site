@@ -127,6 +127,10 @@ async function main() {
                 [500, 1000, 2000, 5000].forEach(ms => setTimeout(fix, ms));
             })();
             </script>
+            <script>
+                window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+            </script>
+            <script defer src="/_vercel/insights/script.js"></script>
             </body>`;
             
             let specialPageHTML = templateHTML
@@ -147,7 +151,32 @@ async function main() {
             .replace('https://raw.githubusercontent.com/calro999/auto-site/main/intelligence_db.json', '../intelligence_db.json')
             .replace(/href=["']index.html["']/g, 'href="../index.html"')
             .replace(/src=["']images\//g, 'src="../images/')
-            .replace('</body>', observerScript);
+            .replace('</body>', `
+            <script>
+            (function() {
+                const isArchive = window.location.pathname.includes('/archive/');
+                if (!isArchive) return;
+
+                const fix = () => {
+                    document.querySelectorAll('a').forEach(a => {
+                        const h = a.getAttribute('href');
+                        if (h && h.startsWith('archive/')) {
+                            a.setAttribute('href', h.replace('archive/', './'));
+                        }
+                    });
+                };
+
+                fix();
+                const observer = new MutationObserver(fix);
+                observer.observe(document.body, { childList: true, subtree: true });
+                [500, 1000, 2000, 5000].forEach(ms => setTimeout(fix, ms));
+            })();
+            </script>
+            <script>
+                window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+            </script>
+            <script defer src="/_vercel/insights/script.js"></script>
+            </body>`);
         fs.writeFileSync(path.join(ARCHIVE_DIR, `${dateKey}.html`), dateArchiveHTML);
 
         console.log("✅ Build Complete: Unbreakable Observer Injected.");
