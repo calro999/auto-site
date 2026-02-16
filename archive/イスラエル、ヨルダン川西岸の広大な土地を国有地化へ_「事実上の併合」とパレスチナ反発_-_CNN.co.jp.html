@@ -287,6 +287,12 @@
         load();
     </script>
 
+    <!-- Vercel Web Analytics -->
+    <script>
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+
             <script>
             (function() {
                 const isArchive = window.location.pathname.includes('/archive/');
@@ -312,5 +318,11 @@
                 [500, 1000, 2000, 5000].forEach(ms => setTimeout(fix, ms));
             })();
             </script>
+
+            <!-- Vercel Web Analytics -->
+            <script>
+                window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+            </script>
+            <script defer src="/_vercel/insights/script.js"></script>
             </body>
 </html>
